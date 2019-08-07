@@ -1,0 +1,19 @@
+Package: flying
+Type: Package
+Title: Simulation of bird flight ranges
+Version: 0.1.0
+Author: Brian Masinde
+Maintainer: The package maintainer <masindeb@live.com>
+Description: Based on Pennycuick's book, aim of the package is to estimate the flight range of birds. Pennycuick,
+    provides the Flight program but it requires manual entry of birds which can be tedious when there are thousands
+    of birds to estimate. This package implements methods 1 and 2 of the Breguet's equation (described in the book)
+    to estimate flight range.
+License: Apache License
+Encoding: UTF-8
+LazyData: true
+Suggests: testthat,
+    knitr,
+    rmarkdown
+RoxygenNote: 6.1.0
+Depends: R (>= 2.10)
+VignetteBuilder: knitr
