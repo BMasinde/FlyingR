@@ -11,11 +11,11 @@
 #' @param ctrl
 #'
 #' @return List with range (in km), constants used and fat fraction
-#'
+#' @include misc_functions.R
 #'
 
 
-breguet <- function(body_mass, wing_span, fat_mass, Order, aspect_ratio, ctrl) {
+breguet <- function(body_mass, wing_span, fat_mass, Order, wing_area, ctrl) {
   # ctrl list of user defined constants
   if (missing(ctrl) == F &&
       is.list(ctrl) == FALSE) {
@@ -118,7 +118,7 @@ breguet <- function(body_mass, wing_span, fat_mass, Order, aspect_ratio, ctrl) {
   # fat fraction------------------------------------------------------------------------
   fat_frac <- fat_mass/body_mass
 
-  x2 <- met_pow_ratio(cons, body_mass)
+  x2 <- met_pow_ratio(cons, body_mass, wing_span)
 
   # x1:ppcons/Aspect ratio + x2:mpratio check for D ----------------------------------
   # Aspect ratio = wing_span^2 / wing_area
@@ -126,7 +126,7 @@ breguet <- function(body_mass, wing_span, fat_mass, Order, aspect_ratio, ctrl) {
   # add ppratio to x2 and interpolate
   # round off to 2 digits
 
-  D <- sapply(round((ppr(ws = wing_span, wa = wing_area) + x2), 2),
+  D <- sapply(round((prof_pow_ratio(ws = wing_span, wa = wing_area, cons) + x2), 2),
               function(x)
                 table2$D[which(table2$x1plusx2 >= x)[1]])
 
@@ -165,6 +165,6 @@ breguet <- function(body_mass, wing_span, fat_mass, Order, aspect_ratio, ctrl) {
 #   )
 # })
 breguet(body_mass = body_mass, wing_span = wing_span,
-        fat_mass = fat_mass, Order = Order, aspect_ratio = aspect_ratio
+        fat_mass = fat_mass, Order = Order, wing_area = wing_area
         )
 
