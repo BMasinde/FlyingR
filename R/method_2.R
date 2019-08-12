@@ -13,9 +13,9 @@
 #' @param consumption Percentage of fuel to be consumed by end of flight. Between 0-1.
 #' @param ctrl If need be to redefine constants such as air density
 #'
-#'
+#' @include misc_functions.R
 
-breguet_adj <- function(body_mass, wing_span, fat_mass, Order, aspect_ratio,  consumption, ctrl) {
+breguet_adj <- function(body_mass, wing_span, fat_mass, Order, wing_area,  consumption, ctrl) {
   # ctrl list of user defined constants
   if (missing(ctrl) == F &&
       is.list(ctrl) == FALSE) {
@@ -160,6 +160,6 @@ breguet_adj <- function(body_mass, wing_span, fat_mass, Order, aspect_ratio,  co
 }
 
 breguet_adj(body_mass = body_mass, wing_span = wing_span,
-        fat_mass = fat_mass, Order = Order, aspect_ratio = aspect_ratio, ctrl = list(air_dens = 1.11)
+        fat_mass = fat_mass, Order = Order, wing_area = wing_area, ctrl = list(air_dens = 1.11)
 )
 
