@@ -37,19 +37,13 @@ met_pow_ratio <- function(cons, m, ws) {
 #' @param ws wing span
 #' @return Vmp (minimum power speed)
 
-min_pow_speed <- function(m, ws) {
+min_pow_speed <- function(m, ws, cons) {
   Vmp <- ((0.807 * cons$k ^ 0.25 * m ^ 0.5 * cons$g ^ 0.5) /
-            (cons$air_dens ^ 0.5 * ws ^ 0.5 * bfa(m) ^ 0.25 * cons$bdc ^
+            (cons$air_dens ^ 0.5 * ws ^ 0.5 * body_front_area(m) ^ 0.25 * cons$bdc ^
                0.25)
   )
 
-  # start at a slighlty lower speed
-  Vmp <- sapply(Vmp, function(x)
-    if (x > 1) {
-      x <-  x - 0.95
-    } else if (x > 0.1 && x < 1) {
-      x <- x - 0.05
-    })
+  Vmp <- Vmp - (Vmp * 0.1)
 
   return(Vmp)
 }
@@ -65,7 +59,29 @@ body_front_area <- function(m) {
   return(Sb)
 }
 
+#' disk_area
+#'
+#' @param ws wing span
+#'
+disk_area <- function(ws) {
+  Sd <- (pi*(ws^2))/4
+}
 
+#' maximum range speed
+#'
+#' @author Brian Masinde
+#' @param m all up mass
+#' @param ws wing span
+
+max_range_speed <- function(m, ws, cons) {
+  num <- cons$k^0.25 * m^0.5 * cons$g^0.5
+
+  den <- cons$air_dens^0.5 * (cons$bdc * body_front_area(m))^0.25 * disk_area(ws)^0.25
+
+  Vmr <- num/den
+
+  return(Vmr)
+}
 
 #' induced power in horizontal flight
 #'
@@ -104,7 +120,7 @@ induced_pow <- function(m, ws, Vt) {
 #' @return ppar
 
 parasite_pow <- function(m, Vt) {
-  ppar <- (cons$air_dens * Vt * bfa(m) * cons$bdc) / 2
+  ppar <- (cons$air_dens * Vt * body_front_area(m) * cons$bdc) / 2
 
   return(ppar)
 }
@@ -120,7 +136,7 @@ parasite_pow <- function(m, Vt) {
 
 abs_min_pow <- function(m, ws) {
   pam <-
-    (1.05 * cons$k ^ 0.75 * m ^ 1.5 * cons$g ^ 1.5 * bfa(m) ^ 0.25 * cons$bdc) /
+    (1.05 * cons$k ^ 0.75 * m ^ 1.5 * cons$g ^ 1.5 * body_front_area(m) ^ 0.25 * cons$bdc) /
     (cons$air_dens ^ 0.5 * ws ^ 1.5)
 
   return(pam)
@@ -135,7 +151,7 @@ abs_min_pow <- function(m, ws) {
 #' @param wa wing area
 #' @return profile power ratio
 
-prof_pow_ratio <- function(ws, wa) {
+prof_pow_ratio <- function(ws, wa, cons) {
   # ws = wing span
   # wa = wing area
   X1 <- cons$ppcons / (ws ^ 2 / wa)
@@ -178,14 +194,14 @@ pc_proc <- function(m, ws, wa, Vmp) {
   ppar <- parasite_pow(m, Vt = Vmp)
 
   # profile power
-  x1 <- prof_pow_ratio(ws, wa)
+  x1 <- prof_pow_ratio(ws, wa, cons)
   amp <- abs_min_pow(m, ws)
   ppr <- prof_pow(x1, amp)
 
-  # mechanical power
-  pmech <- pind + ppar + ppr
+  # total power
+  tpow <- pind + ppar + ppr
 
-  return(pmech)
+  return(tpow)
 }
 
 
@@ -201,15 +217,47 @@ pc_proc <- function(m, ws, wa, Vmp) {
 #' @inheritParams body_front_area
 #' @inheritParams min_pow_speed
 
-pow_curve <- function(m, ws){
+pow_curve <- function(m, ws, wa) {
   # minimum power speed for birds
-  Vmp <- min_pow_speed(m = body_mass, ws = wing_span)
+  m <- body_mass
+  ws <- wing_span
+  wa <- wing_area
 
-  # induced power
+  Vmp <- min_pow_speed(m, ws, cons)
 
+  for (i in 1:length(Vmp)) {
+    init_pow <- ceiling(pc_proc(m[i], ws[i], wa[i], Vmp[i]))
 
+    nxt_pow <- ceiling(pc_proc(m[i], ws[i], wa[i], Vmp[i] + 0.1))
 
-  pow_curve_l <- lapply(Vmp, function(x) )
+    j <- 2
+    while (init_pow > nxt_pow) {
+      init_pow <- nxt_pow
+      nxt_pow <-
+        ceiling(pc_proc(m[i], ws[i], wa[i], Vmp[i] + (0.1 * j)))
+      j <- j + 1
+    }
+
+    # lowest rate of muscular exertion required to fly
+    Vmp[i] <- Vmp[i] + (0.1 * j)
+  }
+
+  # maximum range speed
+  Vmr <- max_range_speed(m, ws, cons)
+
+  # # mechanical power btwn Vmp and Vmr
+  #
+  # mech_power <- list()
+  # chem_power <- list()
+  # for (i in length(Vmp)) {
+  #   while (Vmp[i] < Vmr) {
+  #     # mech power
+  #    mech_power[[i]] <-  pc_proc(m[i], ws[i], wa[i], Vmp[i])
+  #    chem_power[[i]] <- mech_power[[i]]/cons$n
+  #    Vmp[i] <- Vmp[i] + 0.1
+  #   }
+  # }
+
 
 }
 
