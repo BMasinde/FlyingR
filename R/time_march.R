@@ -43,6 +43,8 @@ time_march <- function(body_mass, wing_span, wing_area) {
   # flight calculates mechanical power first then estimates chemical power (pg 47, 53)
 
   # Estimating the minimum power speed pg 66------------------------------------------------
+
+
   # Sb = bfa = body frontal area
   min_pow_speed <-
     ((0.807 * cons$k ^ 0.25 * body_mass ^ 0.5 * cons$g ^ 0.5) /
