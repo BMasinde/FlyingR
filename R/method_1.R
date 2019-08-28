@@ -1,38 +1,41 @@
 #' Method 1 on practical range calculation based on Breguets equations
 #' Author: Brian Masinde
 #'
-#' @name breguet
+#' @name breguet practical range calculation using breguet fixed wing method
 #'
-#' @param body_mass
-#' @param wing_span
-#' @param fat_mass
-#' @param Order
-#' @param aspect_ratio
-#' @param ctrl
+#' @param bodyMass all up mass
+#' @param wingSpan wing span of bird in
+#' @param fatMass fat mass of bird
+#' @param ordo Passerine (1) or non-passerine (2)
+#' @param wingArea area of wing
+#' @param ctrl control for parameters
 #'
 #' @return List with range (in km), constants used and fat fraction
-#' @include misc_functions.R
+#' @include misc_functions.R lookup_table2.R
 #'
 
 
-breguet <- function(body_mass, wing_span, fat_mass, Order, wing_area, ctrl) {
+.breguet <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl) {
+
+  #############################################################################
   # ctrl list of user defined constants
   if (missing(ctrl) == F &&
       is.list(ctrl) == FALSE) {
     stop("ctrl must be a list")
   }
 
+  #############################################################################
   # default constants
   cons <- list(
     # profile power constant
     ppcons = 8.4,
 
-    # eneryg content of fuel per kg
+    # energy content of fuel per kg
     energy = 4 * 10 ^ 7,
 
     # accelaration due to gravity
     g = 9.81,
-    # mechanical efficiency  [0,1]
+    # mechanical conversion efficiency  [0,1]
     n = 0.23,
 
     # induced power factor
@@ -42,7 +45,7 @@ breguet <- function(body_mass, wing_span, fat_mass, Order, wing_area, ctrl) {
     R =  1.10,
 
     # air density at fligh height
-    air_dens = 1.00,
+    airDensity = 1.00,
 
     # body drag coefficient
     bdc = 0.10,
@@ -52,119 +55,84 @@ breguet <- function(body_mass, wing_span, fat_mass, Order, wing_area, ctrl) {
     delta = c(0.724, 0.723)
   )
 
-  # check ctrl ---------------------------------------------------------------------
+  ###############################################################################
+  # check ctrl
   if (missing(ctrl)) {
-    cat("ctrl not defined. Using default constants.\nDefault air_dens = 1.00 kg m^3 \n")
+    message("## ctrl not defined. Using default constants.\nDefault air_dens = 1.00 kg m^3 \n")
 
   } else {
-    ext_args <- c(
+    extArgs <- c(
       "ppcons",
       "energy",
       "g",
       "n",
       "k",
       "R",
-      "air_dens",
-      "flight_height",
+      "airDensity",
       "alpha",
       "delta",
       "bdc"
     )
-    # match ext_args to user provided
-    given <- which(ext_args %in% names(ctrl) == TRUE)
+    # match extArgs to user provided
+    given <- which(extArgs %in% names(ctrl) == TRUE)
 
     # extract names
-    cons_giv <- ext_args[given]
-    for (i in 1:length(cons_giv)) {
-      cons[cons_giv[i]] <- ctrl[cons_giv[i]]
+    consGive <- extArgs[given]
+    for (i in 1:length(consGive)) {
+      cons[consGive[i]] <- ctrl[consGive[i]]
     }
   }
 
+  ########################################################################################
+  # fat fraction
+  fatFrac <- fatMass/bodyMass
 
+  # metabolic power ratio x2
+  x2 <- .met.pow.ratio(cons, bodyMass, wingSpan, ordo)
 
-  # # check user defined constants------------------------------------------------------
-  # ext_args <- c("ppcons", "energy", "g", "n", "k",
-  #               "R", "air_density", "flight_height",
-  #               "alpha", "delta", "bdc" )
-  # # default constants
-  # cons <- list(ppcons = 8.4, # profile power constant
-  #              energy = 4 * 10^7, # eneryg content of fuel per kg
-  #              g = 9.81, # accelaration due to gravity
-  #              n = 0.23, # mechanical efficiency  [0,1]
-  #              k = 1.20, # induced power factor
-  #              R =  1.10, # ventilation and circulation power (Tucker's data)
-  #              air_dens = air_dens,
-  #              bdc = 0.10, # body drag coefficient
-  #              #flight_height = flight_height,
-  #              alpha = c(6.25, 3.79), # constant varies btw passerines and non-passerines
-  #              delta = c(0.724, 0.723) # constant varies btw passerines and non-passerines
-  # )
-
-  # if (is.null(ctrl) == F) {
-  #   # match ext_args to user provided
-  #   given <- which(ext_args %in% names(ctrl) == TRUE)
-  #
-  #   # extract names
-  #   cons_giv <- ext_args[given]
-  #
-  #   # update constants in a loop
-  #     for (i in 1:length(cons_giv)) {
-  #       cons[cons_giv[i]] <- ctrl[cons_giv[i]]
-  #     }
-  #
-  # }
-
-
-  # fat fraction------------------------------------------------------------------------
-  fat_frac <- fat_mass/body_mass
-
-  x2 <- met_pow_ratio(cons, body_mass, wing_span)
-
-  # x1:ppcons/Aspect ratio + x2:mpratio check for D ----------------------------------
-  # Aspect ratio = wing_span^2 / wing_area
-  # D is the effective drag force found by interpolation (table 2)
+  # x1:ppcons/Aspect ratio + x2:mpratio check for Drag
+  # Aspect ratio = wingSpan^2 / wingArea
+  # drag is the effective drag force found by interpolation (table 2)
   # add ppratio to x2 and interpolate
   # round off to 2 digits
 
-  D <- sapply(round((prof_pow_ratio(ws = wing_span, wa = wing_area, cons) + x2), 2),
+  drag <- sapply(round((.prof.pow.ratio(ws = wingSpan, wa = wingArea, cons) + x2), 2),
               function(x)
                 table2$D[which(table2$x1plusx2 >= x)[1]])
 
-  ### Ask if we should round off when interpolating
 
-  # Effective lift:drag ratio---------------------------------------------------------
-  # Disk area Sd
-  Sd <- 0.25 * pi * (wing_span ^ 2)
+  #######################################################################################
+  # Effective lift:drag ratio
+  # Disk area diskArea
+  diskArea <- 0.25 * pi * (wingSpan ^ 2)
 
   # flat-plate area
-  A <- 0.00813 * (body_mass ^ 0.666) * cons$bdc
+  flatPlateArea <- 0.00813 * (bodyMass ^ 0.666) * cons$bdc
 
   # lift drag ratio at begining of flight
-  eldr1 <- (D / ((cons$k ^ 0.5) * cons$R)) * ((Sd / A) ^ 0.5)
+  liftDragRatio <- (drag / ((cons$k ^ 0.5) * cons$R)) * ((diskArea / flatPlateArea) ^ 0.5)
 
   # increase by 10F%
-  corr_change <- eldr1 + (eldr1 * (10 * fat_frac) / 100)
+  liftDragRatio <- liftDragRatio + (liftDragRatio * (10 * fatFrac) / 100)
 
-  # range Y ------------------------------------------------------------------------
-  Y <-
-    ((cons$energy * cons$n) / cons$g) * corr_change * log(1 / (1 - fat_frac))/1000
+  # range in kilometres
+  kmRange <-
+    ((cons$energy * cons$n) / cons$g) * liftDragRatio * log(1 / (1 - fatFrac))/1000
 
-  # return list of objects ---------------------------------------------------------
+  ######################################################################################
+  # power curve
+  pc <- .pow.curve(bodyMass, wingSpan, wingArea, cons)
 
-  obj <- list("Range" = Y,
+  # return list of objects
+
+  results <- list("Range" = kmRange,
               "constants" = cons,
-              "fuel" = fat_frac)
+              "fuel" = fatFrac,
+              "Vmp" = pc[[1]],
+              "Vmr" = pc[[2]])
 
-  return(obj)
+  return(results)
 }
 
-# # test function
-# system.time({
-#   breguet(body_mass = body_mass, wing_span = wing_span,
-#           fat_mass = fat_mass, Order = Order, aspect_ratio = aspect_ratio, ctrl = list(air_dens = 1.11)
-#   )
-# })
-breguet(body_mass = body_mass, wing_span = wing_span,
-        fat_mass = fat_mass, Order = Order, wing_area = wing_area
-        )
+##########################################################################################
 
