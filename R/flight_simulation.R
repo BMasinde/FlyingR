@@ -10,7 +10,7 @@
 #' end of flight. Between 0-1.
 #' @param ctrl
 #'
-#' @include misc_functions.R method_1.R method_2.R
+#' @include misc_functions.R lookup_table2.R method_1.R method_2.R
 #' @return S3 class object with range estimates based on methods defined and constants
 #'
 #' @export
@@ -48,7 +48,7 @@ flysim <- function(data, method, ctrl, ...) {
 
   # missing method
   if (missing(method) == TRUE) {
-    cat("breguet as default method \n")
+    message("## Default method = 'breguet' \n \n")
     method <- "breguet"
   }
 
@@ -56,34 +56,34 @@ flysim <- function(data, method, ctrl, ...) {
   # data extract structure ----------------------------------------
   if (is.data.frame(data)  == TRUE) {
     name <- as.vector(data[ ,1])
-    body_mass <- data[, 2]
-    wing_span <- data[, 3]
-    fat_mass <- data[, 4]
-    Order <- data[, 5]
-    wing_area <- data[, 6]
+    bodyMass <- data[, 2]
+    wingSpan <- data[, 3]
+    fatMass <- data[, 4]
+    ordo <- data[, 5]
+    wingArea <- data[, 6]
   } else {
     name <- data[[1]]
-    body_mass <- data[[2]]
-    wing_span <- data[[3]]
-    fat_mass <- data[[4]]
-    Order <- data[[5]]
-    wing_area <- data[[6]]
+    bodyMass <- data[[2]]
+    wingSpan <- data[[3]]
+    fatMass <- data[[4]]
+    ordo <- data[[5]]
+    wingArea <- data[[6]]
   }
 
   # Breguet method 1
   if (method == "breguet" &&
       missing(ctrl) == TRUE) {
     estimates <-
-      breguet(body_mass, wing_span, fat_mass, Order, wing_area)
+      .breguet(bodyMass, wingSpan, fatMass, ordo, wingArea)
   } else if (method == "breguet" && missing(ctrl) == FALSE) {
     estimates <-
-      breguet(body_mass, wing_span, fat_mass, Order, wing_area, ctrl)
+      .breguet(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl)
   } else if (method == "breguet_adj" && missing(ctrl) == TRUE) {
     estimates <-
-      breguet_adj(body_mass, wing_span, fat_mass, Order, wing_area, consumption)
+      .breguet_adj(bodyMass, wingSpan, fatMass, ordo, wingArea, consumption)
   } else if (method == "breguet_adj" && missing(ctrl) == FALSE) {
     estimates <-
-      breguet_adj(body_mass, wing_span, fat_mass, Order, wing_area, consumption)
+      .breguet_adj(bodyMass, wingSpan, fatMass, ordo, wingArea, consumption)
   }
 
   # class -----------------------------------------------------------
