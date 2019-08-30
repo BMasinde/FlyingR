@@ -87,16 +87,16 @@
   # fat fraction
   fatFrac <- fatMass/bodyMass
 
-  # metabolic power ratio x2
-  x2 <- .met.pow.ratio(cons, bodyMass, wingSpan, ordo)
+  # metabolic power ratio metPowRatio
+  metPowRatio <- .met.pow.ratio(cons, bodyMass, wingSpan, ordo)
 
-  # x1:ppcons/Aspect ratio + x2:mpratio check for Drag
+  # x1:ppcons/Aspect ratio + metPowRatio:mpratio check for Drag
   # Aspect ratio = wingSpan^2 / wingArea
   # drag is the effective drag force found by interpolation (table 2)
-  # add ppratio to x2 and interpolate
+  # add ppratio to metPowRatio and interpolate
   # round off to 2 digits
 
-  drag <- sapply(round((.prof.pow.ratio(ws = wingSpan, wa = wingArea, cons) + x2), 2),
+  drag <- sapply(round((.prof.pow.ratio(ws = wingSpan, wa = wingArea, cons) + metPowRatio), 2),
               function(x)
                 table2$D[which(table2$x1plusx2 >= x)[1]])
 
