@@ -111,10 +111,9 @@
   # D is the effective drag force found by interpolation (table 2)
   # add ppratio to x2 and interpolate
   # round off to 2 digits
-
-  dragEnd <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) + metPowRatioEnd, 2),
-              function(x)
-                table2$D[which(table2$x1plusx2 >= x)[1]])
+  table2 <- gen.table2()
+  dFactorEnd <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) + metPowRatioEnd, 2),
+              interpolate)
 
   ### Ask if we should round off when interpolating
 
@@ -126,20 +125,19 @@
   flatPlateAreaEnd <- 0.00813 * (bodyMassEnd ^ 0.666) * cons$bdc
 
   # lift drag ratio at begining of flight
-  liftDragEnd <- (dragEnd / ((cons$k ^ 0.5) * cons$R)) * ((diskArea / flatPlateAreaEnd) ^ 0.5)
+  liftDragEnd <- (dFactorEnd / ((cons$k ^ 0.5) * cons$R)) * ((diskArea / flatPlateAreaEnd) ^ 0.5)
 
 
   # repeat begining of flight ------------------------------------------------------
   # why not calculate metPowRatioStart using the funciton but with bodymass at start
   metPowRatioStart <- metPowRatioEnd / ((1 / (1 - fatFrac)) ^ 1.75)
 
-  dragStart <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) + metPowRatioStart, 2),
-                  function(x)
-                    table2$D[which(table2$x1plusx2 >= x)[1]])
+  dFactorStart <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) + metPowRatioStart, 2),
+                  interpolate)
 
 
   liftDragStart <-
-    (dragStart / ((cons$k ^ 0.5) * cons$R)) * (((diskArea / flatPlateAreaEnd) ^ 0.5) / ((bodyMass /
+    (dFactorStart / ((cons$k ^ 0.5) * cons$R)) * (((diskArea / flatPlateAreaEnd) ^ 0.5) / ((bodyMass /
                                                                         bodyMassEnd) ^ 0.5))
 
 

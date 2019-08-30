@@ -95,10 +95,9 @@
   # drag is the effective drag force found by interpolation (table 2)
   # add ppratio to metPowRatio and interpolate
   # round off to 2 digits
-
-  drag <- sapply(round((.prof.pow.ratio(ws = wingSpan, wa = wingArea, cons) + metPowRatio), 2),
-              function(x)
-                table2$D[which(table2$x1plusx2 >= x)[1]])
+  table2 <- .gen.table2()
+  dFactor <- sapply(round((.prof.pow.ratio(ws = wingSpan, wa = wingArea, cons) + metPowRatio), 2),
+              interpolate)
 
 
   #######################################################################################
@@ -110,7 +109,7 @@
   flatPlateArea <- 0.00813 * (bodyMass ^ 0.666) * cons$bdc
 
   # lift drag ratio at begining of flight
-  liftDragRatio <- (drag / ((cons$k ^ 0.5) * cons$R)) * ((diskArea / flatPlateArea) ^ 0.5)
+  liftDragRatio <- (dFactor / ((cons$k ^ 0.5) * cons$R)) * ((diskArea / flatPlateArea) ^ 0.5)
 
   # increase by 10F%
   liftDragRatio <- liftDragRatio + (liftDragRatio * (10 * fatFrac) / 100)
