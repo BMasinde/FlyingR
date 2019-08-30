@@ -1,0 +1,227 @@
+---
+title: "Range Estimation in Migratory Birds"
+output: rmarkdown::html_vignette
+author: Brian Masinde
+vignette: >
+  %\VignetteIndexEntry{documentation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# 1. Introduction
+Basically in estimating the flight range of a bird, five variables are necessary.
+
+*  All up mass: The body mass (Kg.) including contents of the crop, fuel (fat mass), and any other equitpment the bird has to carry for the duration of the flight. 
+
+* Wing span: In metres measured from tip to tip of the fully outstretched wings.
+
+* Fat mass: Mass of fat that is consumable as fuel.
+
+* Order: Passerine vs non-passerine.
+
+* Wing area: Area of both wings projected on a flat surface, including the body part in-between the wings.
+
+
+## Outline method 1 based on Brequet equations.
+
+Defined constants:
+
+*  Profile power constant (ppcons = 8.4). This can also be adjusted.
+
+*  Energy content of fuel per kg (energy = 4 * 10 ^ 7)
+
+*  Acceleration due to gravity (g =  9.81)
+
+*  Conversion efficiency (n= 0.23).
+
+*  Induced power factor (k= 1.20)
+
+*  Ventilation and circulation power (R = 1.10)
+
+*  Air density at flight height (default air_dens = 1.00). This can be changed at will.
+
+*  Body drag coefficient (bdc = 0.10)
+
+*  Basal metabolic rate (power) emprical constants
+
+    *  alpha passerines = 6.25, alpha non-passerines = 3.79
+    
+    *  delta passerines = 0.724, delta non-passerines = 0.723
+    
+
+
+* Step1:
+With all-up mass and fat mass defined, the first step is to derive the fuel ratio.
+
+$$
+ fuel \ ratio = \frac{fat \ mass}{all-up \ mass}
+$$
+
+Next calculate *profile power ratio* alternative to defining it as 1.20 for each bird. In this case the equation below provides a better individual estimate to the profile power ratio. (*Function: .prof_pow_ratio()*).
+
+$$
+X1 = \frac{profile \ power \ constant}{Aspect \ ratio}
+$$
+
+Where the $profile \ power \ constant = 8.4$
+$$
+Aspect \ ratio = \frac{wing \ span^2}{wing \ area}
+$$
+
+The boxplot below shows the distribution of profile power ratio of the preset birds.
+
+```{r X1, echo=FALSE}
+boxplot(.prof_pow_ratio(birds$Wing.span, birds$Wing.area, cons),
+        main = "Profile power distribution among preset birds",
+        col = "#58CCED")
+```
+
+In Pennycuik's earlier version, a table is provided for interpolation of metabolic power ratio based on body mass (at start of flight) and the wing span. However, in this implementation, the metabolic power ratio is calculated using the formulas provided in the book. (*Funciton: .met_pow_ratio()*).
+
+$$
+X2 = \frac{6.03 \ \alpha \ \eta \ \rho^{0.5} \ b^{3/2} M ^{\delta - 5/3}}{k^{3/4}g^{5/3}}
+$$
+
+Where $\alpha \ \text{and} \ \delta$ are constants from basal metabolism (see equation below), $\rho$ as air density,  b as wing span, and M as body mass.
+
+*  Basal metabolism for passerines:
+
+$$
+  \Pi_m = \alpha M^{\delta} \\
+  \alpha = 6.25 \\
+  \delta = 0.724
+  
+$$
+
+*  Basal metabolism for non-passerines:
+
+$$
+  \Pi_m = \alpha M^{\delta} \\
+  \alpha = 3.79 \\
+  \delta = 0.723
+$$
+
+With both metabolism power ratio and profile power ration defined, enables interpolation of the drag (D) from the table below.
+
+```{r , code = readLines("lookup_table2.R")}
+table2
+```
+
+In calculating the lift:drag ratio, the disk and equivalent flat-plate areas of a bird are important. The disc area ($S_d$) is the area of complete circle under which the wing span is the diameter, while the equivalent flat-plate area is a product of the frontal area and drag coefficient of a bird.
+
+$$
+  S_d = \frac{\pi B^2}{4}
+$$
+
+$$
+  A = S_bC_{Db} \\
+  S_b = 0.00813m^{0.666} \\
+  C_{Db} = 0.1
+$$
+
+*Note that there is a difference here between the two books.* In the earlier version the equivalent flat-plate area is defined as:
+
+$$
+  A = (2.85 \times 10^{-3})M^{2/3}
+$$
+
+Next step calculate effective lift:drag ratio from the formula:
+
+$$
+  \bigg( \frac{L}{D}\bigg)' = \frac{D}{k^{0.5}R} \bigg( \frac{S_d}{A}\bigg)^{0.5}
+$$
+
+This method corrects for change in effective lift:drag ratio during flight by increasing the lift:drag ratio by $10 \times F$ expressed as a percentage.
+
+
+Finally, the range (in metres) is estimated using:
+
+$$
+  Y = \frac{e \eta}{g} \bigg( \frac{L}{D}\bigg)' ln \frac{1}{1 - F}
+$$
+
+In addition, the minimum power speed and the maximum range speed, are calculated and returned as output. The idea of including these, is for the construction of the power curve.
+However, the minimum power speed is estimated numerically other than analytically. This gives a better estimate.
+
+$$
+  Vmr = \frac{k^{1/4} m ^{1/2}g^{1/2}}{\rho^{1/2} A^{1/4}S_d^{1/4}}
+$$
+## Outline method 2 based on Brequet equations.
+
+In this method, lift:drag ratio is calculated at the begining and at the end of the flight. Lift:drag ratio at the start of flight is calculated using the all-up mass at start, while at end of flight the mass of fuel to be used during the flight it is subtracted from the all up mass. In the function, the user can specify percentage of fuel mass to be used during mass. This method, uses the constants defined in method 1. 
+
+*Step 1*
+Fat fraction is computed as before (as a ratio of fat mass and all-up body mass). 
+
+*Step 2*
+An estimate of the body mass at end of flight is attained by subtracting fuel mass to be consumed during flight from the all-up body mass.
+
+*Step 3*
+Calculate *metabolic power ratio* but this time using body mass at end of flight.
+
+$$
+X2_{end} = \frac{6.03 \ \alpha \ \eta \ \rho^{0.5} \ b^{3/2} M_2 ^{\delta - 5/3}}{k^{3/4}g^{5/3}} \\
+\\
+\text{where } M_2 = \ \text{body mass at end of flight}    
+$$
+
+*Profile power constant* calculation remains the same as in method 1.
+
+$$
+X1  = \frac{profile \ power \ constant}{Aspect \ ratio}
+$$
+
+*Step 4*
+To find drag at end of flight, metabolic power ratio and the profile power constant are summed and intepolation is done on *table 2* as defined in Pennycuick.
+
+*Step 5*
+Disk area and flat plate area are components that contribute to lift. While disk area is independent of body mass, flat-plate area is not. Therefore, flat-plate area is computed using body mass at end of flight.
+
+$$
+  S_d = \frac{\pi B^2}{4}
+$$
+
+$$
+A_{end} = S_bC_{Db} \\
+  S_b = 0.00813 \times \ m_2^{0.666} \\
+  C_{Db} = 0.1
+$$
+
+Where $m_2$ is body mass at end of flight.
+
+*Step 6*
+Proceed to calculate effective lift:drag ratio at end of flight.
+
+$$
+\bigg( \frac{L}{D}\bigg)'_{end} = \frac{D_{end}}{k^{0.5}R} \bigg( \frac{S_d}{A_{end}}\bigg)^{0.5}
+$$
+
+*Step 7*
+To avoid repetition, Pennycuick demonstrates how to estimate metabolic power constant at start by divind the estimate at end of flight by some factor.
+
+$$
+X2_{start} = \frac{X2_{end}}{\bigg(\frac{1}{1 - F}\bigg)^{7/4}}
+$$
+
+Followed by intepolation on *table 2* to get drag at start of flight.
+
+*Step 8*
+Get square root of ratio between disk area and flat-plate area at begining of flight as:
+
+$$
+\bigg(\frac{S_d}{A}\bigg)^{0.5}_{start} = \frac{\bigg(\frac{S_d}{A}\bigg)^{0.5}_{end}}{\bigg(\frac{M_1}{M_2} \bigg)^{0.5}}
+$$
+
+
+Where $M_1$ and $M_2$ are all-up mass at begining and body mass at end of flight respectively.
+
+
+*Step 9*
+Calculate lift:drag ratio using the start of flight estimates then get the average of the two lift:drag ratio.
+
+*Step 10*
+Get range using the mean of the lift:drag ratio.
+
+$$
+ Y = \frac{e \eta}{g} \bigg( \frac{L}{D}\bigg)'_{avg} ln \frac{1}{1 - F}
+$$
