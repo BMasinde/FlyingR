@@ -1,21 +1,27 @@
 
-####################################################################################
-#' Metabolic power ratio function
-#'
+################################################################################
+#' @name .met.pow.ratio
 #' @author Brian Masinde
 #' @param cons Constants defined
 #' @param m body mass at start/end of flight
 #' @param ws wing span
 #' @param ord Order (passerine or non-passerine)
 #' @return x2 (metabolic power ratio)
+#' @description Metabolic power ratio is a ratio between mechanical power and
+#'              the absolute minimum power. The mechanical power is a factor of
+#'              basal metabolic rate, which differs between passerines and
+#'              non-passerines, and the mechanical conversion efficiency $\etta$.
+#'              Basal metabolism is assumed to be needed at all times irrespective
+#'              of what the bird is doing.
 
-.met.pow.ratio <- function(cons, m, ws, ord) {
+
+.met.pow.ratio <- function(cons, m, ws, ordo) {
   # passerines index
-  pind <- which(ord == 1)
+  pind <- which(ordo == 1)
 
-  a <- rep(cons$alpha[[1]], length(ord))
+  a <- rep(cons$alpha[[1]], length(ordo))
 
-  d <- rep(cons$delta[[1]], length(ord))
+  d <- rep(cons$delta[[1]], length(ordo))
 
   # reassign non-passerines
   a[-pind] <- cons$alpha[[2]]
@@ -32,20 +38,23 @@
   return(x2)
 }
 
-######################################################################################
-#' minimum power speed
-#'
-#' @author Brian Masinde
+################################################################################
 #' @name .min.pow.speed
+#' @author Brian Masinde
 #' @param m all bofy mass
 #' @param ws wing span
 #' @param cons constants
 #' @return Vmp (minimum power speed)
+#' @description Minimum power speed is the minimum speed required for a bird to
+#'              maintain horizontal flight. This formula estimates a starting
+#'              value but the actual value is estimated by simulation.
 
 .min.pow.speed <- function(m, ws, cons) {
   Vmp <- ((0.807 * cons$k ^ 0.25 * m ^ 0.5 * cons$g ^ 0.5) /
-            (cons$airDensity ^ 0.5 * ws ^ 0.5 * .body.front.area(m) ^ 0.25 * cons$bdc ^
-               0.25)
+            (
+              cons$airDensity ^ 0.5 * ws ^ 0.5 * .body.front.area(m) ^ 0.25 *
+                cons$bdc ^ 0.25
+            )
   )
 
   Vmp <- Vmp - (Vmp * 0.1)
@@ -53,52 +62,70 @@
   return(Vmp)
 }
 
-######################################################################################
-#' body frontal area
+################################################################################
+#' @name .body.front.area
 #' @author Brian Masinde
 #' @param  m body mass
 #' @return body frontal area
-#'
+#' @description Body frontal area is cross-sectional area of the widest point.
+#'              Used in calculating parasite power of a bird (power required)
+#'              to overcome drag by multiplying it by body drag coefficient.
+#'              Pennycuick provides a formula that estimates this other than
+#'              repetitive measurements. Formula solely depends on body mass.
+
 .body.front.area <- function(m) {
   Sb <- 0.00813 * m ^ 0.666
 
   return(Sb)
 }
 
-######################################################################################
-#' disk.area
+################################################################################
+#' @name .disc.area
 #' @author Brian Masinde
 #' @param ws wing span
+#' @return disk area of a bird
+#' @description Area of circle whose diameter is the wing span.
 #'
-.disk.area <- function(ws) {
+.disc.area <- function(ws) {
   Sd <- (pi*(ws^2))/4
 }
 
-######################################################################################
-#' maximum range speed
-#'
+################################################################################
+#' @name .max.range.speed
 #' @author Brian Masinde
 #' @param m all up mass
 #' @param ws wing span
+#' @param cons constants
+#' @description Speed at which the bird covers the most range. However, it is not
+#'              necessarily the optimal speed because it requires more power to
+#'              maintain this speed. This function gives a lower estimate of the
+#'              speed. In flight this speed is identified when effective lift drag
+#'              ratio ceases to increases.
 
 .max.range.speed <- function(m, ws, cons) {
-  num <- cons$k^0.25 * m^0.5 * cons$g^0.5
+  num <- cons$k ^ 0.25 * m ^ 0.5 * cons$g ^ 0.5
 
-  den <- cons$airDensity^0.5 * (cons$bdc * .body.front.area(m))^0.25 * .disk.area(ws)^0.25
+  den <-
+    cons$airDensity ^ 0.5 * (cons$bdc * .body.front.area(m)) ^ 0.25 *
+    .disc.area(ws) ^ 0.25
 
-  Vmr <- num/den
+  Vmr <- num / den
 
   return(Vmr)
 }
 
-#########################################################################################
-#' induced power in horizontal flight
+################################################################################
+#' @name .induced.pow
 #' @author Brian Masinde
 #' @param m all up mass
 #' @param ws wing span
 #' @param Vt true airspeed
 #' @param cons constants
 #' @return induced power in horizontal flight
+#' @description Induced power is rate at which flight muscles have to provide work.
+#'              In the this case, induced power is not considered during hovering
+#'              (true airspeed = 0). Instead the minimum power speed is used as
+#'              a starting point.
 
 
 .induced.pow <- function(m, ws, Vt, cons) {
@@ -113,14 +140,16 @@
   return(pind)
 }
 
-######################################################################################
-#' parasite power
-#' @name parasite.pow
+################################################################################
+#' @name .parasite.pow
 #' @author Brian Masinde
 #' @param Vt true airspeed
 #' @param m all up mass
 #' @param cons constants
-#' @return ppar
+#' @return ppar parasite power
+#' @description Parasite power is the rate at which work must be done in order
+#'              to overcome drag of the body. Found by multiplying the speed and
+#'              the body drag coefficient.
 
 .parasite.pow <- function(m, Vt, cons) {
   ppar <- (cons$airDensity * Vt * .body.front.area(m) * cons$bdc) / 2
@@ -128,32 +157,34 @@
   return(ppar)
 }
 
-#########################################################################################
-#' absolute minimum power
-#'
+################################################################################
 #' @name abs.min.pow
+#' @author Brian Masinde
 #' @param m all up mass
 #' @param ws wing span
 #' @param cons constants
 #' @return  pam (absolute minimum power for an ideal bird to fly at Vmp)
-
+#' @description Power required for a bird to fly at minimum power speed.
 
 .abs.min.pow <- function(m, ws, cons) {
   pam <-
-    (1.05 * cons$k ^ 0.75 * m ^ 1.5 * cons$g ^ 1.5 * .body.front.area(m) ^ 0.25 * cons$bdc) /
-    (cons$airDensity ^ 0.5 * ws ^ 1.5)
+    (1.05 * cons$k ^ 0.75 * m ^ 1.5 * cons$g ^ 1.5 * .body.front.area(m) ^ 0.25 *
+       cons$bdc) / (cons$airDensity ^ 0.5 * ws ^ 1.5)
 
   return(pam)
 }
 
-##############################################################################################
-#' profile power ratio
-#'
-#' @name prof.pow.ratio
+################################################################################
+#' @name .prof.pow.ratio
 #' @author Brian Masinde
 #' @param ws wing span
 #' @param wa wing area
 #' @return profile power ratio
+#' @description A ratio of profile power to absolute minimum power. Initially,
+#'              assigned a value of 1.2 in earlier values but then later noted
+#'              that profile power would be proportional to wing area, other
+#'              things being constant. Therefore, it calculated as profile power
+#'              constant (8.4) divided by the aspect ratio.
 
 .prof.pow.ratio <- function(ws, wa, cons) {
   # ws = wing span
@@ -163,34 +194,36 @@
   return(X1)
 }
 
-##############################################################################################
-#' profile power
-#'
+################################################################################
+#' @name .prof.pow
 #' @author Brian Masinde
-#' @name prof.pow
 #' @param x1 profile power ratio
 #' @param amp absolute minimum power
-#' @return ppro
-#'
+#' @return profile power
+#' @description Power needed to overcome the drag of the wings.
 
 .prof.pow <- function(x1, amp) {
   # x1 = profile power ratio
   # amp = results of absolute minimum power
-  ppro <- x1 * amp
+  profilePower <- x1 * amp
 
-  return(ppro)
+  return(profilePower)
 }
 
-##############################################################################################
-#' power curve loop procedure
-#'
+################################################################################
+#' @name .total.power
+#' @author Brian Masinde
 #' @inheritParams induced.pow
 #' @inheritParams parasite.pow
 #' @inheritParams prof.pow
-#'
+#' @return total power
+#' @description This is a procedure for calculating the total power of a bird.
+#'              Induced, parasite, and profile power are summed to get the total
+#'              power at a certain speed. Usually starts from minimum power
+#'               speed.
 
 
-.pc.proc <- function(m, ws, wa, Vmp, cons) {
+.total.power <- function(m, ws, wa, Vmp, cons) {
 
   # induced power at starting speed
   pind <- .induced.pow(m, ws, Vt = Vmp, cons)
@@ -209,11 +242,9 @@
   return(tpow)
 }
 
-##############################################################################################
-#' power curve
-#'
+################################################################################
+#' @name .pow.curve
 #' @author Brian Masinde
-#' @name pow.curve
 #' @inheritParams prof.pow
 #' @inheritParams prof.pow.ratio
 #' @inheritParams abs.min.pow
@@ -221,6 +252,14 @@
 #' @inheritParams .induced.pow
 #' @inheritParams .body.front.area
 #' @inheritParams .min.pow.speed
+#' @return Total power from minimum power speed to maximum range speed.
+#' @description In calculating the power curve, the minimum power speed is
+#'              estimated where total power is stable. Calculation ends slightly
+#'              after maximum range speed is achieved. According to Pennycuick
+#'              this should be when N (Effective lift:drag ratio from fuel
+#'              consumption ceases to increase). Therefore, N is calculated at
+#'              each speed step.
+#'
 
 .pow.curve <- function(m, ws, wa, cons) {
   # minimum power speed for birds
@@ -231,15 +270,15 @@
   Vmp <- .min.pow.speed(m, ws, cons)
 
   for (i in 1:length(Vmp)) {
-    init_pow <- ceiling(.pc.proc(m[i], ws[i], wa[i], Vmp[i], cons))
+    init_pow <- ceiling(.total.power(m[i], ws[i], wa[i], Vmp[i], cons))
 
-    nxt_pow <- ceiling(.pc.proc(m[i], ws[i], wa[i], Vmp[i] + 0.1, cons))
+    nxt_pow <- ceiling(.total.power(m[i], ws[i], wa[i], Vmp[i] + 0.1, cons))
 
     j <- 2
     while (init_pow > nxt_pow) {
       init_pow <- nxt_pow
       nxt_pow <-
-        ceiling(.pc.proc(m[i], ws[i], wa[i], Vmp[i] + (0.1 * j), cons))
+        ceiling(.total.power(m[i], ws[i], wa[i], Vmp[i] + (0.1 * j), cons))
       j <- j + 1
     }
 
@@ -268,7 +307,7 @@
   return(list(Vmp, Vmr))
 }
 
-###############################################################################################
+################################################################################
 
 
 
