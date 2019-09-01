@@ -10,31 +10,29 @@
 #' @param fatMass Fat mass in kg (fuel)
 #' @param ordo Passerine (1) or non-passerine (2)
 #' @param wingArea Wing area
-#' @param consumption Percentage of fuel to be consumed by end of flight. Between 0-1.
-#' @param ctrl If need be to redefine constants such as air density
-#'
+#' @param ctrl Re-define constants if better estimates exist. (*airDensity*,
+#'             *consume*, *enegry e*, *mechanical efficiency n*).
 #' @include misc_functions.R lookup_table2.R
+#' @description Practical range estimation using Breguet equation for fixed wing
+#'              with crude adjustments. Mean lift:drag ratio between start and
+#'              end of flight is used as proxy for engine burn.
 
-.breguet_adj <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, consumption, ctrl) {
+
+.breguet_adj <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl) {
   # ctrl list of user defined constants
   if (missing(ctrl) == F &&
       is.list(ctrl) == FALSE) {
     stop("ctrl must be a list")
   }
 
-  if (missing(consumption) == T) {
+  if (is.null(ctrl[["consume"]]) == T) {
     # use all fuel
-    consumption <- 1
-  } else if (consumption < 0 ||
-             consumption > 1) {
-    stop("Consumption value between 0 and 1")
+    consume  <- 1
+    message("## 100% fuel consumption during flight ## \n")
+  } else if (ctrl$consume  < 0 ||
+             ctrl$consume  > 1) {
+    stop("consume value between 0 and 1")
   }
-
-  # if (consumption < 0 ||
-  #     consumption > 1) {
-  #   stop("Consumption value between 0 and 1")
-  # }
-
 
 
   # default constants
@@ -67,9 +65,10 @@
     delta = c(0.724, 0.723)
   )
 
-  # check ctrl ---------------------------------------------------------------------
+  # check ctrl -----------------------------------------------------------------
   if (missing(ctrl)) {
-    cat("ctrl not defined. \nUsing default constants.\nDefault air_dens = 1.00 kg m^3")
+    message("ctrl not defined. \nUsing default constants.
+            \nDefault air_dens = 1.00 kg m^3")
 
   } else {
     extArgs <- c(
@@ -80,10 +79,10 @@
       "k",
       "R",
       "air_dens",
-      "flight_height",
       "alpha",
       "delta",
       "bdc"
+
     )
     # match extArgs to user provided
     given <- which(extArgs %in% names(ctrl) == TRUE)
@@ -101,7 +100,7 @@
   fatFrac <- fatMass/bodyMass
 
   # m2 mass end of flight
-  bodyMassEnd <- bodyMass - (fatMass * consumption)
+  bodyMassEnd <- bodyMass - (fatMass * consume )
 
   # x2
   metPowRatioEnd <- .met.pow.ratio(cons, bodyMassEnd)
