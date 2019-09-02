@@ -19,23 +19,7 @@
 
 
 .breguet_adj <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl) {
-  # ctrl list of user defined constants
-  if (missing(ctrl) == F &&
-      is.list(ctrl) == FALSE) {
-    stop("ctrl must be a list")
-  }
-
-  if (is.null(ctrl[["consume"]]) == T) {
-    # use all fuel
-    consume  <- 1
-    message("## 100% fuel consumption during flight ## \n")
-  } else if (ctrl$consume  < 0 ||
-             ctrl$consume  > 1) {
-    stop("consume value between 0 and 1")
-  }
-
-
-  # default constants
+  ##############################################################################
   cons <- list(
     # profile power constant
     ppcons = 8.4,
@@ -55,7 +39,7 @@
     R =  1.10,
 
     # air density at fligh height
-    air_dens = 1.00,
+    airDensity = 1.00,
 
     # body drag coefficient
     bdc = 0.10,
@@ -65,12 +49,22 @@
     delta = c(0.724, 0.723)
   )
 
-  # check ctrl -----------------------------------------------------------------
-  if (missing(ctrl)) {
-    message("ctrl not defined. \nUsing default constants.
-            \nDefault air_dens = 1.00 kg m^3")
+  ##############################################################################
+  if (missing(ctrl) == T)  {
+    message("## ctrl not defined. Using default constants. ## \n")
+    # use all fuel
+    consume <- 1
 
-  } else {
+  } else if (missing(ctrl) == F &&
+      is.list(ctrl) == FALSE) {
+    stop("ctrl must be a list")
+  } else if(!missing(ctrl) && is.null(ctrl[["consume"]]) == T) {
+    # use all fuel
+    consume  <- 1
+    message("## 100% fuel consumption during flight ## \n")
+  } else if(!missing(ctrl) && ctrl$consume < 0 || ctrl$consume > 1){
+    stop("In ctrl, consume adhere [0,1]")
+  } else if(!missing(ctrl)) {
     extArgs <- c(
       "ppcons",
       "energy",
@@ -78,12 +72,13 @@
       "n",
       "k",
       "R",
-      "air_dens",
+      "airDensity",
       "alpha",
       "delta",
       "bdc"
 
     )
+
     # match extArgs to user provided
     given <- which(extArgs %in% names(ctrl) == TRUE)
 
@@ -94,59 +89,106 @@
     }
   }
 
+  # if (is.null(ctrl[["consume"]]) == T) {
+  #   # use all fuel
+  #   consume  <- 1
+  #   message("## 100% fuel consumption during flight ## \n")
+  # } else if (ctrl$consume  < 0 ||
+  #            ctrl$consume  > 1) {
+  #   stop("consume value between 0 and 1")
+  # }
+
+
+  # default constants
+
+
+  # # check ctrl -----------------------------------------------------------------
+  # if (missing(ctrl)) {
+  #   message("ctrl not defined. \nUsing default constants.
+  #           \nDefault air_dens = 1.00 kg m^3")
+  #
+  # } else {
+  #   extArgs <- c(
+  #     "ppcons",
+  #     "energy",
+  #     "g",
+  #     "n",
+  #     "k",
+  #     "R",
+  #     "air_dens",
+  #     "alpha",
+  #     "delta",
+  #     "bdc"
+  #
+  #   )
+  #   # match extArgs to user provided
+  #   given <- which(extArgs %in% names(ctrl) == TRUE)
+  #
+  #   # extract names
+  #   consGive <- extArgs[given]
+  #   for (i in 1:length(consGive)) {
+  #     cons[consGive[i]] <- ctrl[consGive[i]]
+  #   }
+  # }
+
 
 
   # fat fraction
   fatFrac <- fatMass/bodyMass
 
+  ## lift:drag end of flight ###################################################
   # m2 mass end of flight
   bodyMassEnd <- bodyMass - (fatMass * consume )
 
   # x2
-  metPowRatioEnd <- .met.pow.ratio(cons, bodyMassEnd)
+  metPowRatioEnd <- .met.pow.ratio(cons, bodyMassEnd, wingSpan, ordo)
 
-  # x1:ppcons/Aspect ratio + x2:mpratio check for D ----------------------------------
+  # x1:ppcons/Aspect ratio + x2:mpratio check for D ----------------------------
   # Aspect ratio = wingSpan^2 / wingArea
   # D is the effective drag force found by interpolation (table 2)
   # add ppratio to x2 and interpolate
   # round off to 2 digits
-  table2 <- gen.table2()
-  dFactorEnd <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) + metPowRatioEnd, 2),
-              interpolate)
+  table2 <<- .gen.table2()
+
+  dFactorEnd <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) +
+                               metPowRatioEnd, 2), .interpolate)
 
   ### Ask if we should round off when interpolating
 
-  # Effective lift:drag ratio---------------------------------------------------------
-  # Disk area diskArea
+  # disk area
   diskArea <- 0.25 * pi * (wingSpan ^ 2)
 
   # flat-plate area
   flatPlateAreaEnd <- 0.00813 * (bodyMassEnd ^ 0.666) * cons$bdc
 
   # lift drag ratio at begining of flight
-  liftDragEnd <- (dFactorEnd / ((cons$k ^ 0.5) * cons$R)) * ((diskArea / flatPlateAreaEnd) ^ 0.5)
+  liftDragEnd <- dFactorEnd / (cons$k ^ 0.5 * cons$R) * ((diskArea / flatPlateAreaEnd) ^ 0.5)
 
 
-  # repeat begining of flight ------------------------------------------------------
-  # why not calculate metPowRatioStart using the funciton but with bodymass at start
+  ## lift:drag ratio start of flight ###########################################
+  # why not calculate metPowRatioStart using the funciton but with bodymass at
+  # start
   metPowRatioStart <- metPowRatioEnd / ((1 / (1 - fatFrac)) ^ 1.75)
 
-  dFactorStart <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) + metPowRatioStart, 2),
-                  interpolate)
+  dFactorStart <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) +
+                                 metPowRatioStart, 2), .interpolate)
 
 
   liftDragStart <-
-    (dFactorStart / ((cons$k ^ 0.5) * cons$R)) * (((diskArea / flatPlateAreaEnd) ^ 0.5) / ((bodyMass /
-                                                                        bodyMassEnd) ^ 0.5))
+    (dFactorStart / ((cons$k ^ 0.5) * cons$R)) *
+    (((diskArea / flatPlateAreaEnd) ^ 0.5) / ((bodyMass / bodyMassEnd) ^ 0.5))
 
 
-  # range in kilometres ------------------------------------------------------------------------
+  ## Range in km ###############################################################
   kmRange <-
-    ((cons$energy * cons$n) / cons$g) * apply(cbind(liftDragStart, liftDragEnd), 1, mean) *
+    ((cons$energy * cons$n) / cons$g) *
+    apply(cbind(liftDragStart, liftDragEnd), 1, mean) *
     log(1 / (1 - fatFrac)) / 1000
-  # power curve --------------------------------------------------------------------
-  pc <- .pow.curve(bodyMass, wingSpan, wingArea)
-  # return list of objects ---------------------------------------------------------
+
+  # Power curve
+  pc <- .pow.curve(bodyMass, wingSpan, wingArea, cons)
+
+  ## Results ###################################################################
 
   results <- list("Range" = kmRange,
               "constants" = cons,
