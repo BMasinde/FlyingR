@@ -1,7 +1,6 @@
 #' load table 2 generate. Description in Pennycuick earlier version
-#'
-#' @author Brian Masinde
 #' @name .gen.table2
+#' @author Brian Masinde
 #' @return table2
 #' @description Pennycuick's table II aids in calculation of D factor for finding
 #'              lift:drag ratio. C factor for finding power required at maximum
@@ -32,16 +31,18 @@
 #' @author Brian Masinde
 #' @name .interpolate
 #' @param x1plusx2 sum of metabolic power profile power ratio
+#' @param table2 interpolation table II for B, C D factors based on sum of
+#'               metabolic power ratio and profile power ratio
 #' @return D factor
 
 
-.interpolate <- function(x1plusx2) {
+.interpolate <- function(x1plusx2, table2) {
   if (length(which(table2$x1Plusx2 == x1plusx2)) == 0) {
     upId <- which(table2$x1Plusx2 > x1plusx2)[1]
     lowId <- tail(which(table2$x1Plusx2 < x1plusx2), 1)
 
-    if (abs(x1plusx2 - table2$x1Plusx2[upId]) >=
-        abs(x1plusx2 - table2$x1Plusx2[lowId])) {
+    if ((abs(x1plusx2 - table2$x1Plusx2[upId])) >=
+        (abs(x1plusx2 - table2$x1Plusx2[lowId]))) {
       D <- table2$D[lowId]
     } else {
       D <- table2$D[upId]
