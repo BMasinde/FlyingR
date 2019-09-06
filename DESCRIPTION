@@ -1,6 +1,6 @@
 Package: flying
 Type: Package
-Title: Simulation of bird flight range.
+Title: Simulation of bird flight range
 Version: 0.1.0
 Author: Brian Masinde
 Maintainer: The package maintainer <masindeb@live.com>
@@ -11,6 +11,7 @@ Description: Based on Pennycuick's book, aim of the package is to estimate the f
 License: Apache License
 Encoding: UTF-8
 LazyData: true
+Imports: utils
 Suggests: testthat,
     knitr,
     rmarkdown
@@ -23,5 +24,4 @@ Collate:
     'method_2.R'
     'method_1.R'
     'flight_simulation.R'
-    'tables.R'
     'time_march.R'
