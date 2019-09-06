@@ -1,10 +1,7 @@
 #' Method 2 practical range calculation based on Breguets equations with mean
 #'  of effective lift: drag ratio
-#'
+#' @name .breguet_adj
 #' @author Brian Masinde
-#'
-#' @name breguet_adj
-#'
 #' @param bodyMass All up mass. Including fuel, crop contents and equipment in Kg
 #' @param wingSpan Wing span in metres
 #' @param fatMass Fat mass in kg (fuel)
@@ -19,7 +16,26 @@
 
 
 .breguet_adj <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl) {
+
   ##############################################################################
+  if (missing(ctrl) == T)  {
+    message("## ctrl not defined. Using default constants. ## \n")
+    # use all fuel
+    consume <- 1
+
+  } else if (missing(ctrl) == F &&
+      is.list(ctrl) == FALSE) {
+    stop("ctrl must be a list")
+  } else if(!missing(ctrl) && is.null(ctrl[["consume"]]) == T) {
+    # use all fuel
+    consume  <- 1
+    message("## 100% fuel consumption during flight ## \n")
+  } else if(!missing(ctrl) && ctrl$consume < 0 || ctrl$consume > 1){
+    stop("In ctrl, consume adhere [0,1]")
+  }
+
+  ##############################################################################
+  # Assumptions
   cons <- list(
     # profile power constant
     ppcons = 8.4,
@@ -49,22 +65,8 @@
     delta = c(0.724, 0.723)
   )
 
-  ##############################################################################
-  if (missing(ctrl) == T)  {
-    message("## ctrl not defined. Using default constants. ## \n")
-    # use all fuel
-    consume <- 1
-
-  } else if (missing(ctrl) == F &&
-      is.list(ctrl) == FALSE) {
-    stop("ctrl must be a list")
-  } else if(!missing(ctrl) && is.null(ctrl[["consume"]]) == T) {
-    # use all fuel
-    consume  <- 1
-    message("## 100% fuel consumption during flight ## \n")
-  } else if(!missing(ctrl) && ctrl$consume < 0 || ctrl$consume > 1){
-    stop("In ctrl, consume adhere [0,1]")
-  } else if(!missing(ctrl)) {
+  # user defined
+  if (missing(ctrl) == F) {
     extArgs <- c(
       "ppcons",
       "energy",
@@ -76,7 +78,6 @@
       "alpha",
       "delta",
       "bdc"
-
     )
 
     # match extArgs to user provided
@@ -87,52 +88,11 @@
     for (i in 1:length(consGive)) {
       cons[consGive[i]] <- ctrl[consGive[i]]
     }
+
   }
 
-  # if (is.null(ctrl[["consume"]]) == T) {
-  #   # use all fuel
-  #   consume  <- 1
-  #   message("## 100% fuel consumption during flight ## \n")
-  # } else if (ctrl$consume  < 0 ||
-  #            ctrl$consume  > 1) {
-  #   stop("consume value between 0 and 1")
-  # }
 
-
-  # default constants
-
-
-  # # check ctrl -----------------------------------------------------------------
-  # if (missing(ctrl)) {
-  #   message("ctrl not defined. \nUsing default constants.
-  #           \nDefault air_dens = 1.00 kg m^3")
-  #
-  # } else {
-  #   extArgs <- c(
-  #     "ppcons",
-  #     "energy",
-  #     "g",
-  #     "n",
-  #     "k",
-  #     "R",
-  #     "air_dens",
-  #     "alpha",
-  #     "delta",
-  #     "bdc"
-  #
-  #   )
-  #   # match extArgs to user provided
-  #   given <- which(extArgs %in% names(ctrl) == TRUE)
-  #
-  #   # extract names
-  #   consGive <- extArgs[given]
-  #   for (i in 1:length(consGive)) {
-  #     cons[consGive[i]] <- ctrl[consGive[i]]
-  #   }
-  # }
-
-
-
+  ##############################################################################
   # fat fraction
   fatFrac <- fatMass/bodyMass
 
