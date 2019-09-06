@@ -1,15 +1,15 @@
 #' Method 1 on practical range calculation based on Breguets equations
-#' Author: Brian Masinde
 #'
-#' @name breguet practical range calculation using breguet fixed wing method
-#'
+#' @name .breguet
+#' @author Brian Masinde
 #' @param bodyMass all up mass
 #' @param wingSpan wing span of bird in
 #' @param fatMass fat mass of bird
 #' @param ordo Passerine (1) or non-passerine (2)
 #' @param wingArea area of wing
-#' @param ctrl control for parameters
-#'
+#' @param ctrl A list of re-definition of constants (i.e *airDensity*,
+#'             *consume*, *enegry e*, *mechanical efficiency n*).
+#' @importFrom utils tail
 #' @return List with range (in km), constants used and fat fraction
 #' @include misc_functions.R lookup_table2.R
 #'

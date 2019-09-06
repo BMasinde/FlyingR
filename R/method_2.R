@@ -7,8 +7,9 @@
 #' @param fatMass Fat mass in kg (fuel)
 #' @param ordo Passerine (1) or non-passerine (2)
 #' @param wingArea Wing area
-#' @param ctrl Re-define constants if better estimates exist. (*airDensity*,
+#' @param ctrl A list of re-definition of constants (i.e *airDensity*,
 #'             *consume*, *enegry e*, *mechanical efficiency n*).
+#' @importFrom utils tail
 #' @include misc_functions.R lookup_table2.R
 #' @description Practical range estimation using Breguet equation for fixed wing
 #'              with crude adjustments. Mean lift:drag ratio between start and
