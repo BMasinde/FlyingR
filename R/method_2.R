@@ -109,10 +109,10 @@
   # D is the effective drag force found by interpolation (table 2)
   # add ppratio to x2 and interpolate
   # round off to 2 digits
-  table2 <<- .gen.table2()
+  table2 <- .gen.table2()
 
   dFactorEnd <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) +
-                               metPowRatioEnd, 2), .interpolate)
+                               metPowRatioEnd, 2), .interpolate, table2)
 
   ### Ask if we should round off when interpolating
 
@@ -132,7 +132,7 @@
   metPowRatioStart <- metPowRatioEnd / ((1 / (1 - fatFrac)) ^ 1.75)
 
   dFactorStart <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) +
-                                 metPowRatioStart, 2), .interpolate)
+                                 metPowRatioStart, 2), .interpolate, table2)
 
 
   liftDragStart <-

@@ -17,7 +17,7 @@
 
 .breguet <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl) {
 
-  #############################################################################
+  ##############################################################################
   # ctrl list of user defined constants
   if (missing(ctrl) == F &&
       is.list(ctrl) == FALSE) {
@@ -96,13 +96,13 @@
   # drag is the effective drag force found by interpolation (table 2)
   # add ppratio to metPowRatio and interpolate
   # round off to 2 digits
-  table2 <<- .gen.table2()
+  table2 <- .gen.table2()
 
   dFactor <-
     sapply(round((
       .prof.pow.ratio(ws = wingSpan, wa = wingArea, cons) + metPowRatio
     ),
-    2), .interpolate)
+    2), .interpolate, table2)
 
 
   ##############################################################################
