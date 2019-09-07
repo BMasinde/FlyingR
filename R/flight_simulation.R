@@ -39,7 +39,8 @@ flysim <- function(data, method, ctrl) {
     stop("data list should have at least 4 fields")
   }
 
-  if (is.data.frame(data) == TRUE && levels(data[, 5]) != c("1", "2")) {
+  if (is.data.frame(data) == TRUE &&
+      sum(levels(data[ ,5]) == levels(factor(c(1, 2)))) != 2) {
     stop("Order column should be a factor with levels 1 or 2")
   }
 
