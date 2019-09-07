@@ -79,7 +79,8 @@ $$
 The box-plot below shows the distribution of profile power ratio of the preset birds.
 
 ```{r X1, echo=FALSE}
-load("~/Documents/R projects/Flight project/flying/data/birds.rda")
+#load("~/Documents/R projects/Flight project/flying/data/birds.rda")
+data("birds", package = "flying")
 prof.pow.ratio <- function(ws, wa, cons) {
   # ws = wing span
   # wa = wing area
