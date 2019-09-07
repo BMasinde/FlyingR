@@ -6,9 +6,17 @@ vignette: >
   %\VignetteIndexEntry{documentation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+bibliography: references.bib
 ---
 
 # 1. Introduction
+Bird migration is influenced by seasonal patterns. Primarily it is for food and 
+breeding purposes. Estimation of flight range in migrating birds aids in 
+estimating number of stops for feeding and resting before final destination 
+(hot-spots). These hot-spots should be protected from human interference such as
+pollution. It is suspected with climate change birds will have to migrate for
+longer distances therefore more stops and more flight time.
+
 Basically in estimating the flight range of a bird, five variables are necessary.
 
 *  All up mass: The body mass (Kg.) including contents of the crop, fuel (fat mass), and any other equipment the bird has to carry for the duration of the flight. 
@@ -71,7 +79,8 @@ $$
 The box-plot below shows the distribution of profile power ratio of the preset birds.
 
 ```{r X1, echo=FALSE}
-.prof.pow.ratio <- function(ws, wa, cons) {
+load("~/Documents/R projects/Flight project/flying/data/birds.rda")
+prof.pow.ratio <- function(ws, wa, cons) {
   # ws = wing span
   # wa = wing area
   X1 <- cons$ppcons / (ws ^ 2 / wa)
@@ -79,7 +88,36 @@ The box-plot below shows the distribution of profile power ratio of the preset b
   return(X1)
 }
 
-boxplot(.prof.pow.ratio(birds$Wing.span, birds$Wing.area, cons),
+cons <- list(
+    # profile power constant
+    ppcons = 8.4,
+
+    # eneryg content of fuel per kg
+    energy = 4 * 10 ^ 7,
+
+    # accelaration due to gravity
+    g = 9.81,
+    # mechanical efficiency  [0,1]
+    n = 0.23,
+
+    # induced power factor
+    k = 1.20,
+
+    # ventilation and circulation power (Tucker's data)
+    R =  1.10,
+
+    # air density at fligh height
+    airDensity = 1.00,
+
+    # body drag coefficient
+    bdc = 0.10,
+
+    # constant varies btw passerines and non-passerines
+    alpha = c(6.25, 3.79),
+    delta = c(0.724, 0.723)
+  )
+
+boxplot(prof.pow.ratio(birds$Wing.span, birds$Wing.area, cons),
         main = "Profile power distribution among preset birds",
         col = "#58CCED")
 ```
@@ -111,8 +149,26 @@ $$
 
 With both metabolism power ratio and profile power ration defined, enables interpolation of the drag (D) from the table below.
 
-```{r , code = readLines("lookup_table2.R")}
-table2
+```{r table2, echo=FALSE}
+gen.table2 <- function() {
+  x1Plusx2 <- c(0.00, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00,
+                2.25, 2.50, 2.75, 3.00, 3.25, 3.50, 3.75, 4.00, 4.25,
+                4.50, 4.75, 5.00)
+  B <- c(1.360, 1.386, 1.452, 1.515, 1.574, 1.631, 1.684, 1.735, 1.784, 1.830,
+         1.875, 1.918, 1.959, 1.999, 2.038, 2.075, 2.111, 2.146, 2.180, 2.213,
+         2.246)
+  C <- c(1.140, 1.458, 1.783, 2.115, 2.453, 2.795, 3.141, 3.490, 3.841, 4.195,
+         4.550, 4.907, 5.266, 5.625, 5.986, 6.348, 6.711, 7.074, 7.438,
+         7.803, 8.168)
+  D <- c(1.000, 0.824, 0.706, 0.621, 0.556, 0.506, 0.465, 0.431, 0.402, 0.378,
+         0.357, 0.339, 0.322, 0.308, 0.295, 0.283, 0.273, 0.263, 0.254, 0.246,
+         0.238)
+  table2 <- as.data.frame(cbind(x1Plusx2, B, C, D))
+
+  return(table2)
+}
+
+gen.table2()
 ```
 
 In calculating the lift:drag ratio, the disk and equivalent flat-plate areas of a bird are important. The disc area ($S_d$) is the area of complete circle under which the wing span is the diameter, while the equivalent flat-plate area is a product of the frontal area and drag coefficient of a bird.
@@ -233,9 +289,32 @@ Get range using the mean of the lift:drag ratio.
 $$
  Y = \frac{e \eta}{g} \bigg( \frac{L}{D}\bigg)'_{avg} ln \frac{1}{1 - F}
 $$
+
 ## Time-marching computation
-Breguet equations assume that lift:drag ratio remains constant through out the flight. This becomes appropriate for fixed wing aircraft. However, birds are known to consume part of the engine (convert protein in flight muscles to fuel). This leads to an increase in lift:drag ratio during the flight and thus, an increase in flight range. In the methods discussed above, compensation for this is done by adding 10% of fuel to the lift:drag ratio (method 1) or averaging lift:drag ratio before start of flight and at the end of flight (method 2) Pennycuick cites studies which found that protein is replenished faster during short stop-overs compared to fat mass.
+Breguet equations assume that lift:drag ratio remains constant through out the flight. This is appropriate for fixed wing aircraft. However, birds are known to consume part of the engine (use protein in flight muscles and air-frame as supplementary fuel). This leads to an increase in lift:drag ratio during the flight as result of the reduce in body mass and thus, an increase in flight range
+[@penny03]. In the methods discussed above, compensation for this is done by adding 10% of fuel to the lift:drag ratio (method 1) or averaging lift:drag ratio before start of flight and at the end of flight (method 2). @penny03 cites studies which found that protein is replenished faster during short stop-overs compared to fat mass. Furthermore, the constant ($e$) cannot be assumed to be constant because of two different sources of fuel. Protein and fat have different energy content.
 
-Also, initial climb, and all other flight styles other than continous wing flapping are not accounted for. 
+@penny03 describes time-marching as calculating amounts of fat and protein consumed during a short period (6 minutes) during which all variables including power and speed are assumed constant. After every 6 minute interval, the birds mass composition is revised taking into account the small changes in fat and protein consumed during the interval. This is repeated until the bird covers the 
+required distance or it runs out of fat mass. This procedure places no restriction
+on speed. @penny03 points out that the remaining fat and mass at the end of the flight can be compared with field observations. 
 
+### Protein withdrawal criterion.
+@penny03 find that holding specific work constant is most realistic criteria for
+determining how  much fuel and protein to be withdrawn during 6 minute intervals
+of flight. Specific work is defined in as work done by unit mass of contractile
+tissue muscle. Further, @penny03, states that flight muscles contain myofibrils 
+and mitochondria, which are treated separately in the simulation. To be exact enough
+mass of myofibrils is reduced by an amount sufficient to restore specific work
+to the value it had at beginning of flight. In addition, fuel energy corresponding
+to mass of dry protein consumed is deducted from energy that would otherwise
+come from fuel/fat consumption.
+
+ 
+
+
+
+
+Also, initial climb, and all other flight styles other than continuous wing flapping are not accounted for. 
+
+# References
 
