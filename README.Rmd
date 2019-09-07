@@ -57,7 +57,7 @@ Note order of columns and definition in *birds*. Data passed to the function
 *flysim* agree with this order.
 
 ```{r }
-?birds
+birds
 ```
 
 
