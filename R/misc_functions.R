@@ -29,8 +29,7 @@
   d[-pind] <- cons$delta[[2]]
 
   num <-
-    6.023 * a * cons$n * cons$airDensity ^ 0.5 * ws ^ 1.5 * m ^
-    (d - (5 / 3))
+    6.023 * a * cons$n * cons$airDensity ^ 0.5 * ws ^ 1.5 * m ^(d - (5 / 3))
   den <-  cons$k ^ (3 / 4) * cons$g ^ (5 / 3)
 
   x2 <- num / den
@@ -158,7 +157,7 @@
 }
 
 ################################################################################
-#' @name abs.min.pow
+#' @name .abs.min.pow
 #' @author Brian Masinde
 #' @param m all up mass
 #' @param ws wing span
@@ -213,9 +212,9 @@
 ################################################################################
 #' @name .total.power
 #' @author Brian Masinde
-#' @inheritParams induced.pow
-#' @inheritParams parasite.pow
-#' @inheritParams prof.pow
+#' @inheritParams .induced.pow
+#' @inheritParams .parasite.pow
+#' @inheritParams .prof.pow
 #' @return total power
 #' @description This is a procedure for calculating the total power of a bird.
 #'              Induced, parasite, and profile power are summed to get the total
@@ -245,10 +244,10 @@
 ################################################################################
 #' @name .pow.curve
 #' @author Brian Masinde
-#' @inheritParams prof.pow
-#' @inheritParams prof.pow.ratio
-#' @inheritParams abs.min.pow
-#' @inheritParams parasite.pow
+#' @inheritParams .prof.pow
+#' @inheritParams .prof.pow.ratio
+#' @inheritParams .abs.min.pow
+#' @inheritParams .parasite.pow
 #' @inheritParams .induced.pow
 #' @inheritParams .body.front.area
 #' @inheritParams .min.pow.speed
