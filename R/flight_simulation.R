@@ -43,11 +43,11 @@ flysim <- function(data, method, ctrl) {
     stop("Order column should be a factor with levels 1 or 2")
   }
 
-  # missing method
+  # check method
   if (missing(method) == TRUE) {
     message("## Default method = 'breguet' \n \n")
     method <- "breguet"
-  } else if (method != "breguet" || method != "breguet_adj") {
+  } else if (method != "breguet" & method != "breguet_adj") {
     stop("method = 'breguet' or 'breguet_adj' ")
   }
 
