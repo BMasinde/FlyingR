@@ -3,7 +3,7 @@
 #' @name .breguet
 #' @author Brian Masinde
 #' @param bodyMass all up mass
-#' @param wingSpan wing span of bird in
+#' @param wingSpan wing span of bird in metres
 #' @param fatMass fat mass of bird
 #' @param ordo Passerine (1) or non-passerine (2)
 #' @param wingArea area of wing
@@ -22,6 +22,11 @@
   if (missing(ctrl) == F &&
       is.list(ctrl) == FALSE) {
     stop("ctrl must be a list")
+  }
+
+  # non-zero fat mass
+  if (length(which(fatMass == 0)) != 0) {
+    stop("In Method breguet, empty fat mass.")
   }
 
   #############################################################################

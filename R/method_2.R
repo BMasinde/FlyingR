@@ -35,6 +35,11 @@
     stop("In ctrl, consume adhere [0,1]")
   }
 
+  # non-zero fat mass
+  if (length(which(fatMass == 0)) != 0) {
+    stop("In Method breguet, empty fat mass.")
+  }
+
   ##############################################################################
   # Assumptions
   cons <- list(
