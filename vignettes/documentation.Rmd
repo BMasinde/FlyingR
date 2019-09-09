@@ -9,26 +9,47 @@ vignette: >
 bibliography: references.bib
 ---
 
-# 1. Introduction
-Bird migration is influenced by seasonal patterns. Primarily it is for food and 
-breeding purposes. Estimation of flight range in migrating birds aids in 
-estimating number of stops for feeding and resting before final destination 
-(hot-spots). These hot-spots should be protected from human interference such as
-pollution. It is suspected with climate change birds will have to migrate for
-longer distances therefore more stops and more flight time.
+# Introduction
 
-Basically in estimating the flight range of a bird, five variables are necessary.
+## Mechanics of Flight
+Mechanics of flight in birds requires more than a set of wings. For example 
+penguins have wings but yet they do not fly. @penny08 using Flight program shows 
+that for a penguin to fly it requires a wingbeat frequency equivalent to a 
+hummingbird's. The wingbeat frequency is proportional to the all-up body mass, 
+wing span, wing area, accelaration due to gravity and air density. Therefore, in
+the penguin example, this implies comparing these physiological variables 
+between penguins and hummingbirds (gravity and air density as constants). 
 
-*  All up mass: The body mass (Kg.) including contents of the crop, fuel (fat mass), and any other equipment the bird has to carry for the duration of the flight. 
+@penny75 determinde that five variables are necessary in estimating the flight 
+range of birds. These are:
 
-* Wing span: In meters measured from tip to tip of the fully outstretched wings.
+*   __All up mass__: The body mass (Kg.) including contents of the crop, 
+fuel (fat mass), and any other equipment the bird has to carry for the duration 
+of the flight.
 
-* Fat mass: Mass of fat that is consumable as fuel.
+*   __Wing span__: In meters measured from tip to tip of the fully outstretched 
+wings.
 
-* Order: Passerine vs non-passerine.
+*   __Fat mass__: Mass of fat that is consumable as fuel.
 
-* Wing area: Area of both wings projected on a flat surface, including the body part in-between the wings.
+*   __Order__: Passerine vs non-passerine.
 
+*   __Wing area__: Area of both wings projected on a flat surface, including the 
+body part in-between the wings.
+
+## Migration
+Bird migration is influenced by seasonal patterns, primarily for food and breeding. Studying bird migration takes more into account than general flight. The distance
+covered during migration varies widely between species, and therofore it is of
+interest to understand physiological components that explain differences in
+range. Estimation of flight range in migrating birds aids in estimating flight 
+time therefore number of stops for feeding and resting before final destination (hot-spots). In ornithology, flight range is important because it gives insight 
+into fuel consumption, energy requirements, feeding habits, resting time duration.
+While this can be achieved by geo-tagging birds before migration, it is neither 
+possible for all species (example in the case of extinct species or rare bird
+species) nor economical. In addition, a good number will be victims of 
+predation, diseases, weather and collisions. What are the consequences if birds
+have to migrate longer distances due to interference with hot-spots, either due 
+to human activity or climate change.
 
 ## Outline method 1 based on Brequet equations.
 
