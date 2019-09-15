@@ -11,12 +11,16 @@ Description: Based on Pennycuick's book, aim of the package is to estimate the f
 License: Apache License
 Encoding: UTF-8
 LazyData: true
-Imports: utils
+Imports: 
+    utils,
+    dplyr
 Suggests: 
     testthat,
     knitr,
     rmarkdown,
-    covr
+    covr,
+    kableExtra,
+    captioner
 RoxygenNote: 6.1.1
 Depends: R (>= 2.10)
 VignetteBuilder: knitr
