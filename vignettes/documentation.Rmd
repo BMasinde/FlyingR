@@ -8,7 +8,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 bibliography: references.bib
 ---
-```{r packs, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r packs, echo=FALSE, eval = FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(knitr)
 library(kableExtra)
 library(dplyr)
@@ -213,7 +213,7 @@ gen.table2 <- function() {
   return(table2)
 }
 
-kable(gen.table2())
+knitr::kable(gen.table2())
 
 ```
 
@@ -353,7 +353,7 @@ therefore uniformly random percentages (between 18 and 35) of all the all-up mas
 
 ```{r data, echo = FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 data("birds")
-kable(birds, caption = "Preset birds from Flight program")
+knitr::kable(birds, caption = "Preset birds from Flight program")
 ```
 
 In the simulation in Flight program, air density was set to 1 (Altitude 2063 
@@ -395,8 +395,8 @@ flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_
 
 comparison <- as.data.frame(cbind(range_sim1, "Flight" = flight))
 
-sp <- kable(comparison, caption = "Small Passerines range comparison (10% protein)")
-add_footnote(sp, 
+sp <- knitr::kable(comparison, caption = "Small Passerines range comparison (10% protein)")
+kableExtra::add_footnote(sp, 
              c("Flight.constant speed = hold speed constant",
              "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
              "Minimum 10% of protein is used as fuel"),
@@ -413,8 +413,8 @@ flight <- cbind("constant speed" = std_option_5, "V:Vmp constant" = v_vmp_cons_5
 
 comparison <- as.data.frame(cbind(range_sim1, "Flight" = flight))
 
-sp <- kable(comparison, caption = "Small Passerines range comparison (5% protein)")
-add_footnote(sp, 
+sp <- knitr::kable(comparison, caption = "Small Passerines range comparison (5% protein)")
+kableExtra::add_footnote(sp, 
              c("Flight.constant speed = hold speed constant",
              "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
              "Minimum 5% of protein is used as fuel"),
@@ -435,8 +435,8 @@ flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_
 
 comparison <- as.data.frame(cbind(range_sim2, "Flight" = flight))
 
-sp <- kable(comparison, caption = "Other birds, range comparison (10% protein)")
-add_footnote(sp, 
+sp <- knitr::kable(comparison, caption = "Other birds, range comparison (10% protein)")
+kableExtra::add_footnote(sp, 
              c("Birds with bodymass > 50 grams (both passerines and non-passerines)",
                "Flight.constant speed = hold speed constant",
              "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
@@ -456,8 +456,8 @@ flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_
 
 comparison <- as.data.frame(cbind(range_sim2, "Flight" = flight))
 
-sp <- kable(comparison, caption = "Other birds, range comparison (5% protein)")
-add_footnote(sp, 
+sp <- knitr::kable(comparison, caption = "Other birds, range comparison (5% protein)")
+kableExtra::add_footnote(sp, 
              c("Birds with bodymass > 50 grams (both passerines and non-passerines)",
                "Flight.constant speed = hold speed constant",
              "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
