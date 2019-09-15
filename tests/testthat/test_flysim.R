@@ -3,7 +3,7 @@ context("data input in flysim")
 
 data("birds")
 
-vec_data <- c(5,4,7,8,9,10)
+vec_data <- c(5, 4, 7, 8, 9, 10)
 
 test_that("vector input is not allowed", {
   expect_error(flysim(vec_data))

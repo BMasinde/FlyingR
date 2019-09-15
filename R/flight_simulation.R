@@ -40,7 +40,7 @@ flysim <- function(data, method, ctrl) {
   }
 
   if (is.data.frame(data) == TRUE &&
-      sum(levels(data[ ,5]) == levels(factor(c(1, 2)))) != 2) {
+      sum(levels(data[, 5]) == levels(factor(c(1, 2)))) != 2) {
     stop("Order column should be a factor with levels 1 or 2")
   }
 

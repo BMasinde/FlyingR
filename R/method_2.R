@@ -1,6 +1,5 @@
 #' Method 2 practical range calculation based on Breguets equations with mean
 #'  of effective lift: drag ratio
-#' @name .breguet_adj
 #' @author Brian Masinde
 #' @param bodyMass All up mass. Including fuel, crop contents and equipment in Kg
 #' @param wingSpan Wing span in metres

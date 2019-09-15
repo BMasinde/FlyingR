@@ -1,6 +1,5 @@
 #' Method 1 on practical range calculation based on Breguets equations
 #'
-#' @name .breguet
 #' @author Brian Masinde
 #' @param bodyMass all up mass
 #' @param wingSpan wing span of bird in metres
