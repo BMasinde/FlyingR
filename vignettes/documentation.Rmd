@@ -8,6 +8,24 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 bibliography: references.bib
 ---
+```{r packs, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(captioner)
+```
+
+```{r tbs, echo=FALSE}
+# table references
+table_nums <- captioner::captioner(prefix = "Table", levels = 1)
+
+tab.1_cap <- table_nums(name = "tab_1", 
+                        caption = "Usefull constants")
+tab.2_cap <- table_nums(name = "tab_2", 
+                        caption = "German Bundesliga: Final Table 2015/16, Position 12-18")
+
+```
+
 
 # Introduction
 
@@ -20,7 +38,7 @@ wing span, wing area, accelaration due to gravity and air density. Therefore, in
 the penguin example, this implies comparing these physiological variables 
 between penguins and hummingbirds (gravity and air density as constants). 
 
-@penny75 determinde that five variables are necessary in estimating the flight 
+@penny75 determined that five variables are necessary in estimating the flight 
 range of birds. These are:
 
 *   __All up mass__: The body mass (Kg.) including contents of the crop, 
@@ -38,20 +56,25 @@ wings.
 body part in-between the wings.
 
 ## Migration
-Bird migration is influenced by seasonal patterns, primarily for food and breeding. Studying bird migration takes more into account than general flight. The distance
-covered during migration varies widely between species, and therofore it is of
-interest to understand physiological components that explain differences in
-range. Estimation of flight range in migrating birds aids in estimating flight 
-time therefore number of stops for feeding and resting before final destination (hot-spots). In ornithology, flight range is important because it gives insight 
-into fuel consumption, energy requirements, feeding habits, resting time duration.
-While this can be achieved by geo-tagging birds before migration, it is neither 
-possible for all species (example in the case of extinct species or rare bird
-species) nor economical. In addition, a good number will be victims of 
-predation, diseases, weather and collisions. What are the consequences if birds
-have to migrate longer distances due to interference with hot-spots, either due 
-to human activity or climate change.
+Bird migration is influenced by seasonal patterns, primarily for food and 
+breeding. Studying bird migration takes more into account than general flight. 
+The distance covered during migration varies widely between species, and 
+therofore it is of interest to understand physiological components that explain 
+differences in range. Estimation of flight range in migrating birds aids in 
+estimating flight time therefore number of stops for feeding and resting before 
+final destination (hot-spots). In ornithology, flight range is important because
+it gives insight into fuel consumption, energy requirements, feeding habits, 
+resting time duration. While this can be achieved by geo-tagging birds before 
+migration, it is neither possible for all species (example in the case of extinct
+species or rare bird species) nor economical. In addition, a good number will be
+victims of predation, diseases, weather and collisions. What are the consequences
+if birds have to migrate longer distances due to interference with hot-spots, 
+either due to human activity or climate change.
 
 ## Outline method 1 based on Brequet equations.
+This method is intended for passerines with body mass less than 50 grams. In the 
+included _birds_ data set, these are:
+
 
 Defined constants:
 
@@ -99,7 +122,7 @@ $$
 
 The box-plot below shows the distribution of profile power ratio of the preset birds.
 
-```{r X1, echo=FALSE}
+```{r X1, echo=FALSE, fig.height=5, fig.width=6}
 #load("~/Documents/R projects/Flight project/flying/data/birds.rda")
 data("birds", package = "flying")
 prof.pow.ratio <- function(ws, wa, cons) {
@@ -155,23 +178,23 @@ Where $\alpha \ \text{and} \ \delta$ are constants from basal metabolism (see eq
 *  Basal metabolism for passerines:
 
 $$
-  \Pi_m = \alpha M^{\delta} \\
+  \Pi _m = \alpha M^{\delta} \\
   \alpha = 6.25 \\
   \delta = 0.724
-  
 $$
 
 *  Basal metabolism for non-passerines:
 
 $$
-  \Pi_m = \alpha M^{\delta} \\
+  \Pi _m = \alpha M^{\delta} \\
   \alpha = 3.79 \\
   \delta = 0.723
 $$
 
 With both metabolism power ratio and profile power ration defined, enables interpolation of the drag (D) from the table below.
 
-```{r table2, echo=FALSE}
+`r table_nums('tab_1')`
+```{r table2, echo=FALSE, fig.cap=tab.1_cap}
 gen.table2 <- function() {
   x1Plusx2 <- c(0.00, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00,
                 2.25, 2.50, 2.75, 3.00, 3.25, 3.50, 3.75, 4.00, 4.25,
@@ -190,7 +213,8 @@ gen.table2 <- function() {
   return(table2)
 }
 
-gen.table2()
+kable(gen.table2())
+
 ```
 
 In calculating the lift:drag ratio, the disk and equivalent flat-plate areas of a bird are important. The disc area ($S_d$) is the area of complete circle under which the wing span is the diameter, while the equivalent flat-plate area is a product of the frontal area and drag coefficient of a bird.
@@ -234,13 +258,20 @@ $$
 $$
 ## Outline method 2 based on Brequet equations.
 
-In this method, lift:drag ratio is calculated at the beginning and at the end of the flight. Lift:drag ratio at the start of flight is calculated using the all-up mass at start, while at end of flight the mass of fuel to be used during the flight it is subtracted from the all up mass. In the function, the user can specify percentage of fuel mass to be used during mass. This method, uses the constants defined in method 1. 
+Method is only appropriate for __non-passerines__ and or birds with 
+$body mass > 50 \ g$ , lift:drag ratio is calculated at the beginning and at the
+end of the flight. Lift:drag ratio at the start of flight is calculated using 
+the all-up mass at start, while at end of flight the mass of fuel to be used 
+during the flight it is subtracted from the all up mass. In the function, user 
+can specify percentage of fuel mass to be used during mass. This method, uses 
+the constants defined in method 1. 
 
 *Step 1*
 Fat fraction is computed as before (as a ratio of fat mass and all-up body mass). 
 
 *Step 2*
-An estimate of the body mass at end of flight is attained by subtracting fuel mass to be consumed during flight from the all-up body mass.
+An estimate of the body mass at end of flight is attained by subtracting fuel 
+mass to be consumed during flight from the all-up body mass.
 
 *Step 3*
 Calculate *metabolic power ratio* but this time using body mass at end of flight.
@@ -299,11 +330,13 @@ $$
 $$
 
 
-Where $M_1$ and $M_2$ are all-up mass at beginning and body mass at end of flight respectively.
+Where $M_1$ and $M_2$ are all-up mass at beginning and body mass at end of 
+flight respectively.
 
 
 *Step 9*
-Calculate lift:drag ratio using the start of flight estimates then get the average of the two lift:drag ratio.
+Calculate lift:drag ratio using the start of flight estimates then get the 
+average of the two lift:drag ratio.
 
 *Step 10*
 Get range using the mean of the lift:drag ratio.
@@ -311,6 +344,128 @@ Get range using the mean of the lift:drag ratio.
 $$
  Y = \frac{e \eta}{g} \bigg( \frac{L}{D}\bigg)'_{avg} ln \frac{1}{1 - F}
 $$
+
+## Comparison of results with Flight.
+Data used as an example, is from the program _Flight_ version 1.2.5.2 with 
+default constants. In some cases, the fat mass was set to zero as defualt, and 
+therefore uniformly random percentages (between 18 and 35) of all the all-up mass
+(which in this case is the _Empty.mass_ because crop is empty).
+
+```{r data, echo = FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+data("birds")
+kable(birds, caption = "Preset birds from Flight program")
+```
+
+In the simulation in Flight program, air density was set to 1 (Altitude 2063 
+metres above sea-level), muscle was held constant (Protein burn criterion), 
+fat energy at $4.0E+07$, continous flapping style (Flight style), and minimum
+energy from protein at 10%. Induced power factor was set to 1.20 for all birds.
+Flight provides two methods of speed control, maximum range to minimum power 
+speed is held constant, and speed is held constant. Both of these scenarios are 
+compared to the output of this package below:
+
+```{r sim, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+small_passerinesID <- which(birds$Order == 1 & birds$Empty.mass <= 0.05)
+
+small_passerines <- birds[small_passerinesID, ]
+
+sim1 <- flying::flysim(data = small_passerines, method = "breguet")
+
+range_sim1 <- sim1$Range
+
+# other birds (non-passerines or body mass > 50)
+other_birds <- birds[-small_passerinesID, ]
+sim2 <- flying::flysim(data = other_birds, method = "breguet_adj")
+
+range_sim2 <- sim2$Range
+
+mps_sim1<- sim1$Vmp
+
+mps_sim2 <- sim2$Vmp
+```
+
+```{r sp, echo=FALSE, results='asis'}
+# simulated from flight
+std_option_10 <- c(1440, 4097, 3254, 2552, 3437, 3155)
+
+v_vmp_cons_10 <- c(1354, 3723, 2960, 2372, 3122, 2862)
+
+flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_10)
+
+comparison <- as.data.frame(cbind(range_sim1, "Flight" = flight))
+
+sp <- kable(comparison, caption = "Small Passerines range comparison (10% protein)")
+add_footnote(sp, 
+             c("Flight.constant speed = hold speed constant",
+             "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
+             "Minimum 10% of protein is used as fuel"),
+             notation = "none")
+```
+
+```{r sp2, echo=FALSE, results='asis'}
+# 5% minimum protein
+std_option_5 <- c(1272, 3453, 2696, 2184, 2853, 2639)
+
+v_vmp_cons_5 <- c(1215, 3228, 2520, 2072, 2666, 2463)
+
+flight <- cbind("constant speed" = std_option_5, "V:Vmp constant" = v_vmp_cons_5)
+
+comparison <- as.data.frame(cbind(range_sim1, "Flight" = flight))
+
+sp <- kable(comparison, caption = "Small Passerines range comparison (5% protein)")
+add_footnote(sp, 
+             c("Flight.constant speed = hold speed constant",
+             "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
+             "Minimum 5% of protein is used as fuel"),
+             notation = "none")
+
+```
+
+
+```{r oth1, echo = FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# simulated from flight non-passerines or mass greater than 50 grams
+std_option_10 <- c(4215, 3553, 5078, 4660, 4678, NA, 4883, 4105, 2668, 8724, 
+                   18658)
+
+v_vmp_cons_10 <- c(4003, 3337, 4774, 4382, 4452, NA, 4554, 3933, 2531, 8004,
+                   17211)
+
+flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_10)
+
+comparison <- as.data.frame(cbind(range_sim2, "Flight" = flight))
+
+sp <- kable(comparison, caption = "Other birds, range comparison (10% protein)")
+add_footnote(sp, 
+             c("Birds with bodymass > 50 grams (both passerines and non-passerines)",
+               "Flight.constant speed = hold speed constant",
+             "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
+             "Minimum 10% of protein is used as fuel"),
+             notation = "none")
+```
+
+```{r oth2, echo = FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+std_option_10 <- c(3615, 3089, 4331, 3969, 4061, 17015, 4056, 3575, 2337, 6603, 
+                   14384)
+
+v_vmp_cons_10 <- c(3480, 2952, 4136, 3792, 3911, 15487, 3851, 3459, 2247, 6176,
+                   1352)
+
+flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_10)
+
+comparison <- as.data.frame(cbind(range_sim2, "Flight" = flight))
+
+sp <- kable(comparison, caption = "Other birds, range comparison (5% protein)")
+add_footnote(sp, 
+             c("Birds with bodymass > 50 grams (both passerines and non-passerines)",
+               "Flight.constant speed = hold speed constant",
+             "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
+             "Minimum 5% of protein is used as fuel"),
+             notation = "none")
+```
+
+
 
 ## Time-marching computation
 Breguet equations assume that lift:drag ratio remains constant through out the flight. This is appropriate for fixed wing aircraft. However, birds are known to consume part of the engine (use protein in flight muscles and air-frame as supplementary fuel). This leads to an increase in lift:drag ratio during the flight as result of the reduce in body mass and thus, an increase in flight range
