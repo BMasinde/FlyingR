@@ -44,9 +44,9 @@ library(flying)
 ## birds comes with the package
 data("birds")
 
-birds_range <- flysim(data = birds, method = "breguet")
+birds_range <- flysim(data = birds)
 
-birds_range$Range
+birds_range$range
 ```
 
 The function *flysim* also outputs: constants used, fuel, Minimum power speed

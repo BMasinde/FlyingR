@@ -30,41 +30,42 @@ library(flying)
 ## birds comes with the package
 data("birds")
 
-birds_range <- flysim(data = birds, method = "breguet")
+birds_range <- flysim(data = birds)
 #> ## ctrl not defined. Using default constants.
 #>             
 #> Default air_dens = 1.00 kg m^3
+#> ## ctrl not defined. Using default constants. ##
 
-birds_range$Range
-#>                     name     Range
-#> 1            Anser anser  3272.723
-#> 2   Hydrobates pelagicus  3329.229
-#> 3    Pachyptila desolata  4291.788
-#> 4        Regulus regulus  1560.582
-#> 5       Calidris canutus  4337.117
-#> 6      Aegypius monachus   4051.36
-#> 7       Limosa lapponica 11765.814
-#> 8            Anas crecca  3883.619
-#> 9        Hirundo rustica  3997.965
-#> 10         Cygnus cygnus  3379.585
-#> 11          Sylvia borin  2873.567
-#> 12     Luscinia luscinia  2360.887
-#> 13       Corvus monedula  2515.598
-#> 14         Anas penelope  5287.346
-#> 15   Fregata magnificens 10196.672
-#> 16      Larus ridibundus  5980.341
-#> 17      Diomedea exulans  5571.444
-#> 18   Phalacrocorax carbo  2992.898
-#> 19       Gyps rueppellii  6935.188
-#> 20   Torgos tracheliotus  6469.259
-#> 21         Ardeotis kori  4304.302
-#> 22      Sturnus vulgaris  4305.009
-#> 23     Fringilla coelebs  2941.452
-#> 24      Carduelis spinus  3001.646
-#> 25     Turdus philomelos  3103.075
-#> 26 Calidris tenuirostris  5891.472
-#> 27     Buteo swainsoni M  5797.573
-#> 28     Buteo swainsoni F   7123.03
+birds_range$range
+#>                  species   range
+#> 1            Anser anser  3275.7
+#> 2   Hydrobates pelagicus  3336.3
+#> 3    Pachyptila desolata  4299.5
+#> 4        Regulus regulus  1560.6
+#> 5       Calidris canutus  4349.4
+#> 6      Aegypius monachus  4052.9
+#> 7       Limosa lapponica 11496.7
+#> 8            Anas crecca  3724.5
+#> 9        Hirundo rustica    3998
+#> 10         Cygnus cygnus  3380.5
+#> 11          Sylvia borin  2873.6
+#> 12     Luscinia luscinia  2360.9
+#> 13       Corvus monedula  2426.9
+#> 14         Anas penelope  5567.1
+#> 15   Fregata magnificens 10797.4
+#> 16      Larus ridibundus  5997.5
+#> 17      Diomedea exulans  5576.2
+#> 18   Phalacrocorax carbo  2993.6
+#> 19       Gyps rueppellii  6982.9
+#> 20   Torgos tracheliotus  6497.1
+#> 21         Ardeotis kori  4319.5
+#> 22      Sturnus vulgaris  4177.7
+#> 23     Fringilla coelebs  2941.5
+#> 24      Carduelis spinus  3001.6
+#> 25     Turdus philomelos  3217.9
+#> 26 Calidris tenuirostris  6208.7
+#> 27     Buteo swainsoni M  5561.5
+#> 28     Buteo swainsoni F  7174.2
 ```
 
 The function *flysim* also outputs: constants used, fuel, Minimum power speed *Vmp*, Maximum range speed *Vmr* (still needs looking into), and lastly the data).
