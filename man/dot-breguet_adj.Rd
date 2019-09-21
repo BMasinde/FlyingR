@@ -5,7 +5,7 @@
 \title{Method 2 practical range calculation based on Breguets equations with mean
  of effective lift: drag ratio}
 \usage{
-.breguet_adj(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl)
+.breguet_adj(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl, name)
 }
 \arguments{
 \item{bodyMass}{All up mass. Including fuel, crop contents and equipment in Kg}
@@ -20,6 +20,8 @@
 
 \item{ctrl}{A list of re-definition of constants (i.e *airDensity*,
 *consume*, *enegry e*, *mechanical efficiency n*).}
+
+\item{name}{species name or id}
 }
 \description{
 Practical range estimation using Breguet equation for fixed wing

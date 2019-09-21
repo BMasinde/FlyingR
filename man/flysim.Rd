@@ -5,12 +5,10 @@
 \title{Implementation of the methods 1 and 2 base on Pennycuick. Both use Breguet's
 equations for lift drag ratio calculation.}
 \usage{
-flysim(data, method, ctrl)
+flysim(data, ctrl)
 }
 \arguments{
 \item{data}{A data frame or a list (for a single bird observation). See example}
-
-\item{method}{Two methods are currently available: "breguet" and "breguet_adj"}
 
 \item{ctrl}{A list of re-definition of constants (*airDensity*,
 *consume*, *enegry e*, *mechanical efficiency n*).}
@@ -25,8 +23,7 @@ equations for lift drag ratio calculation.
 }
 \examples{
 flysim(data = birds, ctrl = list(energy = 3.89*10^7))
-flysim(data = birds, method = "breguet", ctrl = list(airDensity = 0.905))
-flysim(data = birds, method = "breguet_adj", ctrl = list(airDensity = 0.905))
+flysim(data = birds,  ctrl = list(airDensity = 0.905))
 }
 \author{
 Brian Masinde

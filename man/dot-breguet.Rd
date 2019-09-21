@@ -4,7 +4,7 @@
 \alias{.breguet}
 \title{Method 1 on practical range calculation based on Breguets equations}
 \usage{
-.breguet(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl)
+.breguet(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl, name)
 }
 \arguments{
 \item{bodyMass}{all up mass}
@@ -19,6 +19,8 @@
 
 \item{ctrl}{A list of re-definition of constants (i.e *airDensity*,
 *consume*, *enegry e*, *mechanical efficiency n*).}
+
+\item{name}{Species name or id}
 }
 \value{
 List with range (in km), constants used and fat fraction
