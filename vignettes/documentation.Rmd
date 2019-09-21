@@ -370,19 +370,19 @@ small_passerinesID <- which(birds$Order == 1 & birds$Empty.mass <= 0.05)
 
 small_passerines <- birds[small_passerinesID, ]
 
-sim1 <- flying::flysim(data = small_passerines, method = "breguet")
+sim1 <- flying::flysim(data = small_passerines )
 
-range_sim1 <- sim1$Range
+range_sim1 <- sim1$range
 
 # other birds (non-passerines or body mass > 50)
 other_birds <- birds[-small_passerinesID, ]
-sim2 <- flying::flysim(data = other_birds, method = "breguet_adj")
+sim2 <- flying::flysim(data = other_birds)
 
-range_sim2 <- sim2$Range
+range_sim2 <- sim2$range
 
-mps_sim1<- sim1$Vmp
+#mps_sim1<- sim1$Vmp
 
-mps_sim2 <- sim2$Vmp
+#mps_sim2 <- sim2$Vmp
 ```
 
 ```{r sp, echo=FALSE, results='asis'}
