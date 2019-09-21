@@ -8,6 +8,7 @@
 #' @param wingArea Wing area
 #' @param ctrl A list of re-definition of constants (i.e *airDensity*,
 #'             *consume*, *enegry e*, *mechanical efficiency n*).
+#' @param name species name or id
 #' @importFrom utils tail
 #' @include misc_functions.R lookup_table2.R
 #' @description Practical range estimation using Breguet equation for fixed wing
@@ -15,7 +16,7 @@
 #'              end of flight is used as proxy for engine burn.
 
 
-.breguet_adj <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl) {
+.breguet_adj <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl, name) {
 
   ##############################################################################
   if (missing(ctrl) == T)  {
@@ -151,15 +152,17 @@
     log(1 / (1 - fatFrac)) / 1000
 
   # Power curve
-  pc <- .pow.curve(bodyMass, wingSpan, wingArea, cons)
+  #pc <- .pow.curve(bodyMass, wingSpan, wingArea, cons)
 
   ## Results ###################################################################
 
-  results <- list("Range" = kmRange,
-              "constants" = cons,
+  results <- list("Range" = as.data.frame(cbind("species" = name,
+                                                "range" = round(kmRange,1))),
               "fuel" = fatFrac,
-              "Vmp" = pc[[1]],
-              "Vmr" = pc[[2]])
+              #"Vmp" = pc[[1]],
+              #"Vmr" = pc[[2]],
+              "constants" = cons
+              )
 
   return(results)
 }

@@ -8,13 +8,14 @@
 #' @param wingArea area of wing
 #' @param ctrl A list of re-definition of constants (i.e *airDensity*,
 #'             *consume*, *enegry e*, *mechanical efficiency n*).
+#' @param name Species name or id
 #' @importFrom utils tail
 #' @return List with range (in km), constants used and fat fraction
 #' @include misc_functions.R lookup_table2.R
 #'
 
 
-.breguet <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl) {
+.breguet <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl, name) {
 
   ##############################################################################
   # ctrl list of user defined constants
@@ -131,15 +132,16 @@
 
   ##############################################################################
   # power curve
-  pc <- .pow.curve(bodyMass, wingSpan, wingArea, cons)
+  #pc <- .pow.curve(bodyMass, wingSpan, wingArea, cons)
 
   # return list of objects
 
-  results <- list("Range" = kmRange,
-              "constants" = cons,
+  results <- list("Range" = as.data.frame(cbind("species" = name,
+                                                "range" = round(kmRange,1))),
               "fuel" = fatFrac,
-              "Vmp" = pc[[1]],
-              "Vmr" = pc[[2]]
+              #"Vmp" = pc[[1]],
+              #"Vmr" = pc[[2]],
+              "constants" = cons
               )
 
   return(results)
