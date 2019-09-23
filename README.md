@@ -31,41 +31,13 @@ library(flying)
 data("birds")
 
 birds_range <- flysim(data = birds)
-#> ## ctrl not defined. Using default constants.
-#>             
-#> Default air_dens = 1.00 kg m^3
-#> ## ctrl not defined. Using default constants. ##
+#> >> ctrl not defined. Using default constants. <<
 
 birds_range$range
-#>                  species   range
-#> 1            Anser anser  3275.7
-#> 2   Hydrobates pelagicus  3336.3
-#> 3    Pachyptila desolata  4299.5
-#> 4        Regulus regulus  1560.6
-#> 5       Calidris canutus  4349.4
-#> 6      Aegypius monachus  4052.9
-#> 7       Limosa lapponica 11496.7
-#> 8            Anas crecca  3724.5
-#> 9        Hirundo rustica    3998
-#> 10         Cygnus cygnus  3380.5
-#> 11          Sylvia borin  2873.6
-#> 12     Luscinia luscinia  2360.9
-#> 13       Corvus monedula  2426.9
-#> 14         Anas penelope  5567.1
-#> 15   Fregata magnificens 10797.4
-#> 16      Larus ridibundus  5997.5
-#> 17      Diomedea exulans  5576.2
-#> 18   Phalacrocorax carbo  2993.6
-#> 19       Gyps rueppellii  6982.9
-#> 20   Torgos tracheliotus  6497.1
-#> 21         Ardeotis kori  4319.5
-#> 22      Sturnus vulgaris  4177.7
-#> 23     Fringilla coelebs  2941.5
-#> 24      Carduelis spinus  3001.6
-#> 25     Turdus philomelos  3217.9
-#> 26 Calidris tenuirostris  6208.7
-#> 27     Buteo swainsoni M  5561.5
-#> 28     Buteo swainsoni F  7174.2
+#>  [1]  3275.7  3336.3  4299.5  1559.8  4349.4  4052.9 11496.7  3724.5
+#>  [9]  3904.7  3380.5  2797.9  2364.3  2426.9  5567.1 10797.4  5997.5
+#> [17]  5576.2  2993.6  6982.9  6497.1  4319.5  4177.7  2951.3  2933.6
+#> [25]  3217.9  6208.7  5561.5  7174.2
 ```
 
 The function *flysim* also outputs: constants used, fuel, Minimum power speed *Vmp*, Maximum range speed *Vmr* (still needs looking into), and lastly the data).
