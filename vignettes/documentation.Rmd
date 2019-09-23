@@ -393,7 +393,8 @@ v_vmp_cons_10 <- c(1354, 3723, 2960, 2372, 3122, 2862)
 
 flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_10)
 
-comparison <- as.data.frame(cbind(range_sim1, "Flight" = flight))
+sp_names <- as.vector(small_passerines$Scientific.name)
+comparison <- as.data.frame(cbind(sp_names, range_sim1, "Flight" = flight))
 
 sp <- knitr::kable(comparison, caption = "Small Passerines range comparison (10% protein)")
 kableExtra::add_footnote(sp, 
@@ -411,7 +412,7 @@ v_vmp_cons_5 <- c(1215, 3228, 2520, 2072, 2666, 2463)
 
 flight <- cbind("constant speed" = std_option_5, "V:Vmp constant" = v_vmp_cons_5)
 
-comparison <- as.data.frame(cbind(range_sim1, "Flight" = flight))
+comparison <- as.data.frame(cbind(sp_names, range_sim1, "Flight" = flight))
 
 sp <- knitr::kable(comparison, caption = "Small Passerines range comparison (5% protein)")
 kableExtra::add_footnote(sp, 
@@ -433,7 +434,9 @@ v_vmp_cons_10 <- c(4003, 3337, 4774, 4382, 4452, NA, 4554, 3933, 2531, 8004,
 
 flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_10)
 
-comparison <- as.data.frame(cbind(range_sim2, "Flight" = flight))
+np_names <- as.vector(other_birds$Scientific.name)
+
+comparison <- as.data.frame(cbind(np_names, range_sim2, "Flight" = flight))
 
 sp <- knitr::kable(comparison, caption = "Other birds, range comparison (10% protein)")
 kableExtra::add_footnote(sp, 
@@ -454,7 +457,7 @@ v_vmp_cons_10 <- c(3480, 2952, 4136, 3792, 3911, 15487, 3851, 3459, 2247, 6176,
 
 flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_10)
 
-comparison <- as.data.frame(cbind(range_sim2, "Flight" = flight))
+comparison <- as.data.frame(cbind(np_names, range_sim2, "Flight" = flight))
 
 sp <- knitr::kable(comparison, caption = "Other birds, range comparison (5% protein)")
 kableExtra::add_footnote(sp, 
