@@ -1,43 +1,37 @@
-#' Method 2 practical range calculation based on Breguets equations with mean
-#'  of effective lift: drag ratio
-#' @author Brian Masinde
-#' @param bodyMass All up mass. Including fuel, crop contents and equipment in Kg
-#' @param wingSpan Wing span in metres
-#' @param fatMass Fat mass in kg (fuel)
-#' @param ordo Passerine (1) or non-passerine (2)
-#' @param wingArea Wing area
-#' @param ctrl A list of re-definition of constants (i.e *airDensity*,
-#'             *consume*, *enegry e*, *mechanical efficiency n*).
-#' @param name species name or id
+# Method 2 practical range calculation based on Breguets equations with mean
+#  of effective lift: drag ratio
+# @author Brian Masinde
+# @param bodyMass All up mass. Including fuel, crop contents and equipment in Kg
+# @param wingSpan Wing span in metres
+# @param fatMass Fat mass in kg (fuel)
+# @param ordo Passerine (1) or non-passerine (2)
+# @param wingArea Wing area
+# @param ctrl A list of re-definition of constants (i.e *airDensity*,
+#             *consume*, *enegry e*, *mechanical efficiency n*).
+# @importFrom utils tail
+# @include misc_functions.R lookup_table2.R
+# @description Practical range estimation using Breguet equation for fixed wing
+#              with crude adjustments. Mean lift:drag ratio between start and
+#              end of flight is used as proxy for engine burn.
+
 #' @importFrom utils tail
-#' @include misc_functions.R lookup_table2.R
-#' @description Practical range estimation using Breguet equation for fixed wing
-#'              with crude adjustments. Mean lift:drag ratio between start and
-#'              end of flight is used as proxy for engine burn.
-
-
-.breguet_adj <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl, name) {
+.breguet_adj <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl) {
 
   ##############################################################################
   if (missing(ctrl) == T)  {
-    message("## ctrl not defined. Using default constants. ## \n")
-    # use all fuel
-    consume <- 1
-
+    message(">> ctrl not defined. Using default constants. << \n")
   } else if (missing(ctrl) == F &&
       is.list(ctrl) == FALSE) {
-    stop("ctrl must be a list")
-  } else if(!missing(ctrl) && is.null(ctrl[["consume"]]) == T) {
-    # use all fuel
-    consume  <- 1
-    message("## 100% fuel consumption during flight ## \n")
-  } else if(!missing(ctrl) && ctrl$consume < 0 || ctrl$consume > 1){
-    stop("In ctrl, consume adhere [0,1]")
+    stop("ctrl must be a list", call. = FALSE)
   }
 
   # non-zero fat mass
   if (length(which(fatMass == 0)) != 0) {
-    stop("In Method breguet, empty fat mass.")
+    stop("In Method breguet, empty fat mass.", call. = FALSE)
+  }
+
+  if (sum(levels(ordo) == levels(factor(c(1, 2)))) != 2) {
+    stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
   }
 
   ##############################################################################
@@ -68,7 +62,9 @@
 
     # constant varies btw passerines and non-passerines
     alpha = c(6.25, 3.79),
-    delta = c(0.724, 0.723)
+    delta = c(0.724, 0.723),
+    # consumption
+    consume = 1
   )
 
   # user defined
@@ -83,7 +79,8 @@
       "airDensity",
       "alpha",
       "delta",
-      "bdc"
+      "bdc",
+      "consume"
     )
 
     # match extArgs to user provided
@@ -95,6 +92,17 @@
       cons[consGive[i]] <- ctrl[consGive[i]]
     }
 
+    if(length(cons) > 11){
+      stop("Wrong argument in ctrl", call. = FALSE)
+    }
+
+    if(length(cons$delta) != 2 || length(cons$alpha) != 2) {
+      stop("In ctrl, alpha and delta as vectors of length == 2", call. = FALSE)
+    }
+
+    if(cons$consume < 0 || cons$consume > 1) {
+      stop("In ctrl, consume adhere [0,1]", call. = FALSE)
+    }
   }
 
 
@@ -104,7 +112,7 @@
 
   ## lift:drag end of flight ###################################################
   # m2 mass end of flight
-  bodyMassEnd <- bodyMass - (fatMass * consume )
+  bodyMassEnd <- bodyMass - (fatMass * cons$consume )
 
   # x2
   metPowRatioEnd <- .met.pow.ratio(cons, bodyMassEnd, wingSpan, ordo)
@@ -156,8 +164,7 @@
 
   ## Results ###################################################################
 
-  results <- list("Range" = as.data.frame(cbind("species" = name,
-                                                "range" = round(kmRange,1))),
+  results <- list("Range" = round(kmRange,1),
               "fuel" = fatFrac,
               #"Vmp" = pc[[1]],
               #"Vmr" = pc[[2]],

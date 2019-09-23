@@ -1,21 +1,21 @@
-#' Method 1 on practical range calculation based on Breguets equations
-#'
-#' @author Brian Masinde
-#' @param bodyMass all up mass
-#' @param wingSpan wing span of bird in metres
-#' @param fatMass fat mass of bird
-#' @param ordo Passerine (1) or non-passerine (2)
-#' @param wingArea area of wing
-#' @param ctrl A list of re-definition of constants (i.e *airDensity*,
-#'             *consume*, *enegry e*, *mechanical efficiency n*).
-#' @param name Species name or id
+# Method 1 on practical range calculation based on Breguets equations
+#
+# @author Brian Masinde
+# @param bodyMass all up mass
+# @param wingSpan wing span of bird in metres
+# @param fatMass fat mass of bird
+# @param ordo Passerine (1) or non-passerine (2)
+# @param wingArea area of wing
+# @param ctrl A list of re-definition of constants (i.e *airDensity*,
+#             *consume*, *enegry e*, *mechanical efficiency n*).
+# @importFrom utils tail
+# @return List with range (in km), constants used and fat fraction
+# @include misc_functions.R lookup_table2.R
+#
+
 #' @importFrom utils tail
-#' @return List with range (in km), constants used and fat fraction
-#' @include misc_functions.R lookup_table2.R
-#'
 
-
-.breguet <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl, name) {
+.breguet <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl) {
 
   ##############################################################################
   # ctrl list of user defined constants
@@ -26,8 +26,12 @@
 
   # non-zero fat mass
   if (length(which(fatMass == 0)) != 0) {
-    stop("In Method breguet, empty fat mass.")
+    stop("In Method breguet, empty fat mass.", call. = FALSE)
   }
+
+  if (sum(levels(ordo) == levels(factor(c(1, 2)))) != 2) {
+     stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
+   }
 
   #############################################################################
   # default constants
@@ -57,7 +61,11 @@
 
     # constant varies btw passerines and non-passerines
     alpha = c(6.25, 3.79),
-    delta = c(0.724, 0.723)
+
+    delta = c(0.724, 0.723),
+
+    # consumption
+    consume = 1
   )
 
   ##############################################################################
@@ -82,10 +90,20 @@
     # match extArgs to user provided
     given <- which(extArgs %in% names(ctrl) == TRUE)
 
+
     # extract names
     consGive <- extArgs[given]
     for (i in 1:length(consGive)) {
       cons[consGive[i]] <- ctrl[consGive[i]]
+    }
+
+    # throw error wrong argument in ctrl
+    if(length(cons) > 11){
+      stop("Wrong argument in ctrl", call. = FALSE)
+    }
+
+    if(length(cons$delta) != 2 || length(cons$alpha) != 2) {
+      stop("In ctrl, alpha and delta as vectors of length == 2", call. = FALSE)
     }
   }
 
@@ -136,8 +154,7 @@
 
   # return list of objects
 
-  results <- list("Range" = as.data.frame(cbind("species" = name,
-                                                "range" = round(kmRange,1))),
+  results <- list("Range" = round(kmRange,1),
               "fuel" = fatFrac,
               #"Vmp" = pc[[1]],
               #"Vmr" = pc[[2]],
