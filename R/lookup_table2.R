@@ -1,12 +1,12 @@
-#' load table 2 generate. Description in Pennycuick earlier version
-#' @name .gen.table2
-#' @author Brian Masinde
-#' @return table2
-#' @description Pennycuick's table II aids in calculation of D factor for finding
-#'              lift:drag ratio. C factor for finding power required at maximum
-#'              range speed and B a ratio of maximum range speed and minimum
-#'              power speed.
-#'
+# load table 2 generate. Description in Pennycuick earlier version
+# @name .gen.table2
+# @author Brian Masinde
+# @return table2
+# @description Pennycuick's table II aids in calculation of D factor for finding
+#              lift:drag ratio. C factor for finding power required at maximum
+#              range speed and B a ratio of maximum range speed and minimum
+#              power speed.
+#
 
 
 .gen.table2 <- function() {
