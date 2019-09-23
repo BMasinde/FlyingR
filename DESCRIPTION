@@ -26,9 +26,10 @@ Depends: R (>= 2.10)
 VignetteBuilder: knitr
 Collate: 
     'birds_documentation.R'
-    'lookup_table2.R'
-    'misc_functions.R'
     'method_2.R'
     'method_1.R'
+    'input_match.R'
+    'lookup_table2.R'
+    'misc_functions.R'
     'flight_simulation.R'
     'time_march.R'
