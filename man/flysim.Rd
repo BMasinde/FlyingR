@@ -2,28 +2,50 @@
 % Please edit documentation in R/flight_simulation.R
 \name{flysim}
 \alias{flysim}
-\title{Implementation of the methods 1 and 2 base on Pennycuick. Both use Breguet's
-equations for lift drag ratio calculation.}
+\title{Range Estimation}
 \usage{
-flysim(data, ctrl)
+flysim(data, ctrl = list())
 }
 \arguments{
-\item{data}{A data frame or a list (for a single bird observation). See example}
+\item{data}{A data frame.}
 
-\item{ctrl}{A list of re-definition of constants (*airDensity*,
-*consume*, *enegry e*, *mechanical efficiency n*).}
+\item{ctrl}{A list for re-defining constants. See details.}
 }
 \value{
 S3 class object with range estimates based on methods defined and
        constants
+\itemize{
+   \item data as a data frame
+   \item range estimates
+   \item fuel
+   \item constants (list)
+}
 }
 \description{
-Implementation of the methods 1 and 2 base on Pennycuick. Both use Breguet's
-equations for lift drag ratio calculation.
+Practical range estimation of birds using methods in Pennycuik (1975)
+Mechanics of Flight. These methods are based on Breguet equations.
+}
+\details{
+The option *ctrl takes the folowing arguments
+\itemize{
+   \item ppcons: Profile power constant
+   \item energy: Energy content of fuel from fat
+   \item g: Accelaration due to gravity
+   \item n: Mechanical conversion efficiency [0,1]
+   \item k: Induced power factor
+   \item R: Ventilation and circulation power
+   \item airDensity: Air density at cruising altitude
+   \item bdc: Body drag coefficient
+   \item alpha: Basal metabolism factors in passerines and non passerines
+   \item delta: Basal metabolism factors in passerines and non passerines
+   alpha*bodyMass^delta
+   \item consume: Percentage of fuel to be used from fat mass
+}
 }
 \examples{
 flysim(data = birds, ctrl = list(energy = 3.89*10^7))
 flysim(data = birds,  ctrl = list(airDensity = 0.905))
+
 }
 \author{
 Brian Masinde
