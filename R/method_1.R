@@ -29,9 +29,9 @@
     stop("In Method breguet, empty fat mass.", call. = FALSE)
   }
 
-  if (sum(levels(ordo) == levels(factor(c(1, 2)))) != 2) {
-     stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
-   }
+  # if (sum(levels(ordo) == levels(factor(c(1, 2)))) != 2) {
+  #    stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
+  #  }
 
   #############################################################################
   # default constants
