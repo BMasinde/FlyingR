@@ -21,3 +21,11 @@ test_that("Multiple column match throw error", {
 test_that("Missing column match throws error", {
   expect_error(flysim(data = mis_col))
 })
+
+bad_factor <- birds[, -5]
+
+bad_factor$ordo <-  as.factor(rep(c(3,2), 14))
+
+test_that("Factor in ordo other 1 and 2 throws error", {
+  expect_error(flysim(data = bad_factor))
+})
