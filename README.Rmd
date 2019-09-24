@@ -22,8 +22,7 @@ knitr::opts_chunk$set(
 
 The package provides methods for predicting flight range of birds based on their
 physiological characteristics. This is an R implementation of Flight program
-provided by Pennycuick. Note, that this package is constantly under development,
-funcitons will break.
+provided by Pennycuick.
 
 ## Installation
 
@@ -49,12 +48,33 @@ birds_range <- flysim(data = birds)
 birds_range$range
 ```
 
+```{r}
+## when estimating range of a single bird
+Garden_Warbler <- list("name" = "Garden Warbler",
+                       "body_mass" = 0.022,
+                       "fat_mass" = 0.00660,
+                       "wing_span" = 0.240,
+                       "wing_area" = 0.0110,
+                       "order" = as.factor(1)
+)
+
+G_warbler <- flysim(data = Garden_Warbler, ctrl = list(airDensity = 0.9093))
+
+G_warbler$range
+```
+
+
+
 The function *flysim* also outputs: constants used, fuel, Minimum power speed
 *Vmp*, Maximum range speed *Vmr* (still needs looking into), and lastly the data).
 
 ## The data
-Note order of columns and definition in *birds*. Data passed to the function 
-*flysim* agree with this order.
+*birds* definitions pulled from Flight program in-built datasets and fat mass g
+randomly generated where initially zero. Users's data should have columns named
+appropriately. The package looks for columns named *id, name or species.name*,
+*bodymass or allupmass*, *wingspan, ws*, *wingarea*, *ordo, order* (which is a
+factored column with levles 1 or 2 passerines and non-passerines respectively.
+Lastly *fatmass, fat.mass, fat_mass*.
 
 ```{r }
 birds

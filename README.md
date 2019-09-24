@@ -6,7 +6,7 @@ flying
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.org/BMasinde/flight.svg?branch=master)](https://travis-ci.org/BMasinde/flight) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/BMasinde/flight?branch=master&svg=true)](https://ci.appveyor.com/project/BMasinde/flight) [![Coveralls test coverage](https://coveralls.io/repos/github/BMasinde/flight/badge.svg)](https://coveralls.io/r/BMasinde/flight?branch=master) <!-- badges: end -->
 
-The package provides methods for predicting flight range of birds based on their physiological characteristics. This is an R implementation of Flight program provided by Pennycuick. Note, that this package is constantly under development, funcitons will break.
+The package provides methods for predicting flight range of birds based on their physiological characteristics. This is an R implementation of Flight program provided by Pennycuick.
 
 Installation
 ------------
@@ -40,12 +40,28 @@ birds_range$range
 #> [25]  3217.9  6208.7  5561.5  7174.2
 ```
 
+``` r
+## when estimating range of a single bird
+Garden_Warbler <- list("name" = "Garden Warbler",
+                       "body_mass" = 0.022,
+                       "fat_mass" = 0.00660,
+                       "wing_span" = 0.240,
+                       "wing_area" = 0.0110,
+                       "order" = as.factor(1)
+)
+
+G_warbler <- flysim(data = Garden_Warbler, ctrl = list(airDensity = 0.9093))
+
+G_warbler$range
+#> [1] 2873.6
+```
+
 The function *flysim* also outputs: constants used, fuel, Minimum power speed *Vmp*, Maximum range speed *Vmr* (still needs looking into), and lastly the data).
 
 The data
 --------
 
-Note order of columns and definition in *birds*. Data passed to the function *flysim* agree with this order.
+*birds* definitions pulled from Flight program in-built datasets and fat mass g randomly generated where initially zero. Users's data should have columns named appropriately. The package looks for columns named *id, name or species.name*, *bodymass or allupmass*, *wingspan, ws*, *wingarea*, *ordo, order* (which is a factored column with levles 1 or 2 passerines and non-passerines respectively. Lastly *fatmass, fat.mass, fat\_mass*.
 
 ``` r
 birds
