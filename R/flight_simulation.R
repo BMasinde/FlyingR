@@ -76,6 +76,11 @@ flysim <- function(data, ctrl = list()) {
   ## compute data/list p/np ####################################################
 
   if (is.data.frame(data)  == TRUE) {
+
+    if (sum(levels(data[, cols$order]) == levels(factor(c(1, 2)))) != 2) {
+      stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
+    }
+
     smallPasserines <-
       dplyr::filter(data, cols$order == 1 & cols$bodyMass <= 0.05)
 
@@ -170,9 +175,9 @@ flysim <- function(data, ctrl = list()) {
         args$ctrl <- ctrl
         smallBirds <- do.call(.breguet, args = args)
       }
-      results$Range <- smallBirds[[1]]
+      results$range <- smallBirds[[1]]
       results$fuel <- smallBirds[[2]]
-      results$constant <- smallBirds[[3]]
+      results$constants <- smallBirds[[3]]
     }
 
     if (args$ordo == 2) {
@@ -182,10 +187,11 @@ flysim <- function(data, ctrl = list()) {
         args$ctrl <- ctrl
         bigBirds <- do.call(.breguet_adj, args = args)
       }
+      results$range <- bigBirds[[1]]
+      results$fuel <- bigBirds[[2]]
+      results$constants <- bigBirds[[3]]
     }
-    results$Range <- bigBirds[[1]]
-    results$fuel <- bigBirds[[2]]
-    results$constant <- bigBirds[[3]]
+
   }
 
   # return object of class flysim
