@@ -13,14 +13,14 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
     utils,
-    dplyr
+    dplyr,
+    captioner
 Suggests: 
     testthat,
     knitr,
     rmarkdown,
     covr,
-    kableExtra,
-    captioner
+    kableExtra
 RoxygenNote: 6.1.1
 Depends: R (>= 2.10)
 VignetteBuilder: knitr
