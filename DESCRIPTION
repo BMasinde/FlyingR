@@ -14,13 +14,13 @@ LazyData: true
 Imports: 
     utils,
     dplyr,
+    knitr,
+    kableExtra,
+    rmarkdown,
     captioner
 Suggests: 
     testthat,
-    knitr,
-    rmarkdown,
-    covr,
-    kableExtra
+    covr
 RoxygenNote: 6.1.1
 Depends: R (>= 2.10)
 VignetteBuilder: knitr
