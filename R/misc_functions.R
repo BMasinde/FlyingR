@@ -236,7 +236,7 @@
 #'               speed.
 
 
-.total.mech.power <- function(m, ws, wa, Vmp, cons) {
+.total.mech.power <- function(m, ws, wa, Vt, cons) {
 
   # induced power at starting speed
   pind <- .induced.pow(m, ws, Vt = Vmp, cons)
