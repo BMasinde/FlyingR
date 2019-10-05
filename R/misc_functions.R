@@ -224,7 +224,7 @@
 }
 
 ################################################################################
-#' @name .total.power
+#' @name .total.mech.power
 #' @author Brian Masinde
 #' @inheritParams .induced.pow
 #' @inheritParams .parasite.pow
@@ -236,7 +236,7 @@
 #'               speed.
 
 
-.total.power <- function(m, ws, wa, Vmp, cons) {
+.total.mech.power <- function(m, ws, wa, Vmp, cons) {
 
   # induced power at starting speed
   pind <- .induced.pow(m, ws, Vt = Vmp, cons)
@@ -283,15 +283,15 @@
   Vmp <- .min.pow.speed(m, ws, cons)
 
   for (i in 1:length(Vmp)) {
-    init_pow <- ceiling(.total.power(m[i], ws[i], wa[i], Vmp[i], cons))
+    init_pow <- ceiling(.total.mech.power(m[i], ws[i], wa[i], Vmp[i], cons))
 
-    nxt_pow <- ceiling(.total.power(m[i], ws[i], wa[i], Vmp[i] + 0.1, cons))
+    nxt_pow <- ceiling(.total.mech.power(m[i], ws[i], wa[i], Vmp[i] + 0.1, cons))
 
     j <- 2
     while (init_pow > nxt_pow) {
       init_pow <- nxt_pow
       nxt_pow <-
-        ceiling(.total.power(m[i], ws[i], wa[i], Vmp[i] + (0.1 * j), cons))
+        ceiling(.total.mech.power(m[i], ws[i], wa[i], Vmp[i] + (0.1 * j), cons))
       j <- j + 1
     }
 
