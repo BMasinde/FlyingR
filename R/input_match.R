@@ -21,7 +21,7 @@
                 "fatMass" = fmass,
                 "order" = ordo,
                 "wingArea" =wingArea,
-                "muslceMass"  = mmass)
+                "muscleMass"  = mmass)
 
   matches <- sapply(names, length)
 
