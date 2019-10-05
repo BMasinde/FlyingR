@@ -7,7 +7,7 @@
                    ignore.case = TRUE, names)
   wingArea <- grep("wa|wing.area|wing area|wingarea|wing_area",
                    ignore.case = TRUE,names)
-  ordo <- grep("order|ordo|ord", ignore.case = TRUE, names)
+  ordo <- grep("order|ordo|ord|taxon", ignore.case = TRUE, names)
   bmass <- grep("body.mass|empty.mass|all-up_mass|allupmass|body_mass|bodymass",
                 ignore.case = TRUE, names)
   fmass <- grep("fat.mass|fatmass|fat_mass",
