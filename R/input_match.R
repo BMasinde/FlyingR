@@ -12,6 +12,8 @@
                 ignore.case = TRUE, names)
   fmass <- grep("fat.mass|fatmass|fat_mass",
                 ignore.case = TRUE,names)
+  mmass <- grep("muscle.mass|musclemass|muscle_mass",
+                ignore.case = TRUE,names)
 
   names <- list("name" = name,
                 "bodyMass" = bmass,
