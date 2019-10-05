@@ -57,6 +57,12 @@ csw <- function(data, control = list()) {
     # constant varies btw passerines and non-passerines
     alpha = c(6.25, 3.79),
     delta = c(0.724, 0.723),
+    # inverse power density of mitochondria
+    invPowMit <- 1.1 * 10 ^-6,
+    # ratio V:Vmp
+    vvmp_ratio <- 1.2,
+    # density of muscle
+    muscDensity <- 1060,
     # consumption
     consume = 1
   )
