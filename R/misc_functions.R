@@ -40,7 +40,7 @@
 ################################################################################
 #' @name .min.pow.speed
 #' @author Brian Masinde
-#' @param m all bofy mass
+#' @param m all body mass
 #' @param ws wing span
 #' @param cons constants
 #' @return Vmp (minimum power speed)
@@ -49,14 +49,14 @@
 #'              value but the actual value is estimated by simulation.
 
 .min.pow.speed <- function(m, ws, cons) {
-  Vmp <- ((0.807 * cons$k ^ 0.25 * m ^ 0.5 * cons$g ^ 0.5) /
+  Vmp <- (0.807 * cons$k ^ 0.25 * m ^ 0.5 * cons$g ^ 0.5) /
             (
               cons$airDensity ^ 0.5 * ws ^ 0.5 * .body.front.area(m) ^ 0.25 *
                 cons$bdc ^ 0.25
             )
-  )
 
-  Vmp <- Vmp - (Vmp * 0.1)
+
+  #Vmp <- Vmp - (Vmp * 0.1)
 
   return(Vmp)
 }
@@ -87,6 +87,20 @@
 #'
 .disc.area <- function(ws) {
   Sd <- (pi*(ws^2))/4
+}
+
+################################################################################
+#' @name .wing.frequency
+#' @author Brian Masinde
+#' @param m all-up mass
+#' @param g gravity
+#' @param ws wing span
+#' @param wa wing area
+#' @param rho air density
+#' @description wing beat frequency at specified air density
+#'
+.wingbeat.freq <- function(m, g, ws, wa, rho){
+  f <- m^0.375*g^0.5*ws^(-23/24)*wa^(-1/3)*rho^(-3/8)
 }
 
 ################################################################################
