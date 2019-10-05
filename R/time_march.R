@@ -21,20 +21,6 @@ csw <- function(data, control = list()) {
                   "constants" = list()
   )
 
-  # column match
-  cols <- .colnames.match(names(data))
-
-  # compute fractions
-  fatFrac <- data[, cols$fatMass]/data[, cols$bodyMass]
-
-  muscleFrac <- data[, cols$muscleMass]/data[, cols$bodyMass]
-
-  results$frameMass <- data[, cols$bodyMass]*(1 - fatFrac - muscleFrac)
-
-  results$fatFrac <- fatFrac
-
-  results$muscleFrac <- muscleFrac
-
   cons <- list(
     # profile power constant
     ppcons = 8.4,
@@ -58,14 +44,72 @@ csw <- function(data, control = list()) {
     alpha = c(6.25, 3.79),
     delta = c(0.724, 0.723),
     # inverse power density of mitochondria
-    invPowMit <- 1.1 * 10 ^-6,
+    invPowMit = 1.1 * 10 ^-6,
     # ratio V:Vmp
-    vvmp_ratio <- 1.2,
+    vvmp_ratio = 1.2,
     # density of muscle
-    muscDensity <- 1060,
+    muscDensity = 1060,
     # consumption
     consume = 1
   )
+
+  # column match
+  cols <- .colnames.match(names(data))
+
+  allMass <- data[, cols$bodyMass]
+  fatMass <- data[, cols$fatMass]
+  muscMass <- data[, cols$muslceMass]
+  wingSpan <- data[, cols$wingSpan]
+  wingArea <- data[, cols$wingArea]
+  taxon <- data[, cols$order]
+
+
+  # compute fractions
+  fatFrac <- data[, cols$fatMass]/data[, cols$bodyMass]
+
+  muscleFrac <- data[, cols$muscleMass]/data[, cols$bodyMass]
+
+  results$frameMass <- data[, cols$bodyMass]*(1 - fatFrac - muscleFrac)
+
+  results$fatFrac <- fatFrac
+
+  results$muscleFrac <- muscleFrac
+
+  # wing beat frequency
+  wingFreq <- .wingbeat.freq(m = data[, cols$bodyMass], g = cons$g,
+                      ws = data[, cols$wingSpan], wa = data[, cols$wingArea],
+                      rho = cons$airDensity
+                      )
+  # minimum power speed
+  vmp <- .min.pow.speed(m = data[, cols$bodyMass],
+                        ws = data[, cols$wingSpan],
+                        cons = cons)
+
+  # total mechanical power
+  pmech <- .total.mech.power(m = data[, cols$bodyMass],
+                             ws = data[, cols$wingSpan],
+                             wa = data[, cols$wingArea],
+                             Vt = vmp*cons$vvmp_ratio, cons = cons)
+
+  #rangeL <- rep(list(vector()), length(pmech))
+  rangeSim <- matrix(nrow = length(pmech))
+
+  fatSim <- matrix(nrow = length(pmech))
+  fatSim[, 1] <- fatFrac
+
+  pmechSim <- matrix(nrow = length(pmech))
+  pmechSim[, 1] <- pmech
+  specWork <- pmech/(muscMass * wingFreq)
+
+  for (i in 1:nrow(pmechSim)) {
+    for (j in 1:ncol(pmechSim)) {
+      if (fatSim[i, j] == 0) {
+        break()
+      } else{
+
+      }
+    }
+  }
 
   # return object of class flysim
   class(results) <- append(class(results), "csw")
