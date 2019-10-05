@@ -165,7 +165,7 @@
 #'              the body drag coefficient.
 
 .parasite.pow <- function(m, Vt, cons) {
-  ppar <- (cons$airDensity * Vt * .body.front.area(m) * cons$bdc) / 2
+  ppar <- (cons$airDensity * Vt^3 * .body.front.area(m) * cons$bdc) / 2
 
   return(ppar)
 }
@@ -239,10 +239,10 @@
 .total.mech.power <- function(m, ws, wa, Vt, cons) {
 
   # induced power at starting speed
-  pind <- .induced.pow(m, ws, Vt = Vmp, cons)
+  pind <- .induced.pow(m, ws, Vt, cons)
 
   # parasite power
-  ppar <- .parasite.pow(m, Vt = Vmp, cons)
+  ppar <- .parasite.pow(m, Vt, cons)
 
   # profile power
   x1 <- .prof.pow.ratio(ws, wa, cons)
