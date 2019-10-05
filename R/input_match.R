@@ -20,7 +20,8 @@
                 "wingSpan" = wingSpan,
                 "fatMass" = fmass,
                 "order" = ordo,
-                "wingArea" =wingArea)
+                "wingArea" =wingArea,
+                "muslceMass"  = mmass)
 
   matches <- sapply(names, length)
 
