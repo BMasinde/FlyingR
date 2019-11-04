@@ -124,8 +124,16 @@
   # round off to 2 digits
   table2 <- .gen.table2()
 
-  dFactorEnd <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) +
-                               metPowRatioEnd, 2), .interpolate, table2)
+  # dFactorEnd <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) +
+  #                              metPowRatioEnd, 2), .interpolate, table2)
+  dFactorEnd <-
+    sapply(round((
+      .prof.pow.ratio(ws = wingSpan, wa = wingArea, cons) + metPowRatioEnd
+    ),
+    2), .interpolate, table2)
+
+  # dFactorEnd <- sapply(round(1.2 +
+  #                              metPowRatioEnd, 2), .interpolate, table2)
 
   ### Ask if we should round off when interpolating
 
@@ -144,9 +152,17 @@
   # start
   metPowRatioStart <- metPowRatioEnd / ((1 / (1 - fatFrac)) ^ 1.75)
 
-  dFactorStart <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) +
-                                 metPowRatioStart, 2), .interpolate, table2)
+  # dFactorStart <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) +
+  #                                metPowRatioStart, 2), .interpolate, table2)
 
+  dFactorStart <-
+    sapply(round((
+      .prof.pow.ratio(ws = wingSpan, wa = wingArea, cons) + metPowRatioStart
+    ),
+    2), .interpolate, table2)
+
+  # dFactorStart <- sapply(round(1.2 +
+  #                                metPowRatioStart, 2), .interpolate, table2)
 
   liftDragStart <-
     (dFactorStart / ((cons$k ^ 0.5) * cons$R)) *
