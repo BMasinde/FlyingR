@@ -65,6 +65,7 @@ flysim <- function(data, ctrl = list()) {
   # column match
   cols <- .colnames.match(names(data))
 
+
   results <- list("data" = data,
                   "range" = vector(),
                   "fuel" = vector(),
@@ -81,34 +82,34 @@ flysim <- function(data, ctrl = list()) {
       stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
     }
 
-    smallPasserines <-
-      dplyr::filter(data, cols$order == 1 & cols$bodyMass <= 0.05)
+    # smallPasserines <-
+    #   dplyr::filter(data, cols$order == 1 & cols$bodyMass <= 0.05)
 
-    id_sp <- which(cols$order == 1 & cols$bodyMass <= 0.05)
+    id_sp <- which(data[cols$order] == 1 & data[cols$bodyMass] <= 0.05)
 
-    nonSmallPasserines <-
-      dplyr::filter(data, cols$order == 2 | cols$bodyMass >= 0.05)
+    # nonSmallPasserines <-
+    #   dplyr::filter(data, cols$order == 2 | cols$bodyMass >= 0.05)
 
-    id_np <- which(cols$order == 2 | cols$bodyMass >= 0.05)
+    id_np <- which(data[cols$order] == 2 | data[cols$bodyMass] >= 0.05)
     # args small passerines
-    argsSmallBird <- list("bodyMass" = smallPasserines[, cols$bodyMass],
-                   "wingSpan" = smallPasserines[, cols$wingSpan],
-                   "fatMass" = smallPasserines[, cols$fatMass],
-                   "ordo" = smallPasserines[, cols$order],
-                   "wingArea" = smallPasserines[, cols$wingArea]
+    argsSmallBird <- list("bodyMass" = data[id_sp, cols$bodyMass],
+                   "wingSpan" = data[id_sp, cols$wingSpan],
+                   "fatMass" = data[id_sp, cols$fatMass],
+                   "ordo" = data[id_sp, cols$order],
+                   "wingArea" = data[id_sp, cols$wingArea]
                    #"name" = as.vector(smallPasserines[ ,1]
                    )
 
     # args big birds
-    argsBigBird <- list("bodyMass" = nonSmallPasserines[, cols$bodyMass],
-                   "wingSpan" = nonSmallPasserines[, cols$wingSpan],
-                   "fatMass" = nonSmallPasserines[, cols$fatMass],
-                   "ordo" = nonSmallPasserines[, cols$order],
-                   "wingArea" = nonSmallPasserines[, cols$wingArea]
+    argsBigBird <- list("bodyMass" = data[id_np, cols$bodyMass],
+                   "wingSpan" =  data[id_np, cols$wingSpan],
+                   "fatMass" =  data[id_np, cols$fatMass],
+                   "ordo" =  data[id_np, cols$order],
+                   "wingArea" =  data[id_np, cols$wingArea]
                    #"name" = as.vector(nonSmallPasserines[ ,1])
                    )
 
-    if (nrow(smallPasserines) > 0 & nrow(nonSmallPasserines) > 0) {
+    if (length(id_sp) > 0 & length(id_np) > 0) {
 
       if (missing(ctrl) == TRUE) {
 
@@ -131,7 +132,7 @@ flysim <- function(data, ctrl = list()) {
       results$fuel[id_np] <- bigBirds[[2]]
       range <- c(smallBirds[[1]],bigBirds[[1]])
       results$range <- range[order(as.numeric(names(range)))]
-    }else if(nrow(smallPasserines) == 0) {
+    }else if(length(id_sp) == 0) {
 
       if(missing(ctrl) == TRUE){
         bigBirds <- do.call(.breguet_adj, args = argsBigBird)
@@ -145,7 +146,7 @@ flysim <- function(data, ctrl = list()) {
         results$range <- bigBirds[[1]]
         results$fuel <- bigBirds[[2]]
       }
-    } else if(nrow(nonSmallPasserines) == 0) {
+    } else if(length(id_np) == 0) {
       if(missing(ctrl) == TRUE){
         smallBirds <- do.call(.breguet, args = argsSmallBird)
         results$constants <- smallBirds[[3]]
