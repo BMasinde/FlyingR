@@ -16,17 +16,10 @@
 
 
 .met.pow.ratio <- function(cons, m, ws, ordo) {
-  # passerines index
-  pind <- which(ordo == 1)
 
-  a <- rep(cons$alpha[[1]], length(ordo))
+  a <- ifelse(ordo == 1, cons$alpha[[1]], cons$alpha[[2]])
 
-  d <- rep(cons$delta[[1]], length(ordo))
-
-  # reassign non-passerines
-  a[-pind] <- cons$alpha[[2]]
-
-  d[-pind] <- cons$delta[[2]]
+  d <- ifelse(ordo == 1, cons$delta[[1]], cons$delta[[2]])
 
   num <-
     6.023 * a * cons$n * cons$airDensity ^ 0.5 * ws ^ 1.5 * m ^(d - (5 / 3))
@@ -36,6 +29,27 @@
 
   return(x2)
 }
+
+################################################################################
+#' @name .basal.met
+#' @author Brian Masinde
+#' @param cons Constants defined
+#' @param mFrame mass of frame
+#' @param mMusc mass of muscle
+#' @param ord Order (passerine or non-passerine)
+#' @return x2 (basal metabolism)
+#' @description Rate at which fuel energy (not mechanical work) is needed
+#' irrespective of what the bird is doing.
+
+.basal.met <- function(cons, mFrame, mMusc, ordo) {
+    pbmr <-
+      ifelse(ordo == 1, cons$alpha[[1]], cons$alpha[[2]]) * (mFrame + mMusc) ^
+      ifelse(ordo == 1, cons$delta[[1]], cons$delta[[2]])
+
+  return(pbmr)
+}
+
+
 
 ################################################################################
 #' @name .min.pow.speed
@@ -142,11 +156,11 @@
 
 
 .induced.pow <- function(m, ws, Vt, cons) {
-  sapply(Vt, function(x)
-    if (x <= 0) {
-      x  <-  0.1
-      cat("minimum true airspeed zero for some obesrvations")
-    })
+  # sapply(Vt, function(x)
+  #   if (x <= 0) {
+  #     x  <-  0.1
+  #     cat("minimum true airspeed zero for some obesrvations")
+  #   })
 
   pind <- (2 * cons$k * (m * cons$g) ^ 2) / (Vt * pi * ws ^ 2 * cons$airDensity)
 
