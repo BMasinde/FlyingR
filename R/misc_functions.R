@@ -36,8 +36,8 @@
 #' @param cons Constants defined
 #' @param mFrame mass of frame
 #' @param mMusc mass of muscle
-#' @param ord Order (passerine or non-passerine)
-#' @return x2 (basal metabolism)
+#' @param ordo (passerine or non-passerine)
+#' @return Pbmr (basal metabolism)
 #' @description Rate at which fuel energy (not mechanical work) is needed
 #' irrespective of what the bird is doing.
 
@@ -49,7 +49,23 @@
   return(pbmr)
 }
 
+################################################################################
+#' @name .basal.met2
+#' @author Brian Masinde
+#' @param cons Constants defined
+#' @param bodyMass mass of frame
+#' @param fatMass mass of muscle
+#' @param ordo Order (passerine or non-passerine)
+#' @return Pbmr (basal metabolism)
+#' @description Rate at which fuel energy (not mechanical work) is needed
+#' irrespective of what the bird is doing.
+.basal.met2 <- function(cons, bodyMass, fatMass, ordo) {
+  pbmr <-
+    ifelse(ordo == 1, cons$alpha[[1]], cons$alpha[[2]]) * (bodyMass - fatMass) ^
+    ifelse(ordo == 1, cons$delta[[1]], cons$delta[[2]])
 
+  return(pbmr)
+}
 
 ################################################################################
 #' @name .min.pow.speed
