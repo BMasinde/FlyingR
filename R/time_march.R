@@ -46,11 +46,13 @@ csw <- function(data, control = list()) {
     # inverse power density of mitochondria
     invPowMit = 1.1 * 10 ^-6,
     # ratio V:Vmp
-    vvmp_ratio = 1.2,
+    vvmpRatio = 1.2,
     # density of muscle
     muscDensity = 1060,
     # consumption
-    consume = 1
+    consume = 1,
+    # protein hydration ratio
+    hprot = 2.2
   )
 
   # column match
@@ -58,7 +60,7 @@ csw <- function(data, control = list()) {
 
   allMass <- data[, cols$bodyMass]
   fatMass <- data[, cols$fatMass]
-  muscMass <- data[, cols$muslceMass]
+  muscMass <- data[, cols$muscleMass]
   wingSpan <- data[, cols$wingSpan]
   wingArea <- data[, cols$wingArea]
   taxon <- data[, cols$order]
@@ -69,11 +71,8 @@ csw <- function(data, control = list()) {
 
   muscleFrac <- data[, cols$muscleMass]/data[, cols$bodyMass]
 
-  results$frameMass <- data[, cols$bodyMass]*(1 - fatFrac - muscleFrac)
+  frameMass <- data[, cols$bodyMass]*(1 - fatFrac - muscleFrac)
 
-  results$fatFrac <- fatFrac
-
-  results$muscleFrac <- muscleFrac
 
   # wing beat frequency
   wingFreq <- .wingbeat.freq(m = data[, cols$bodyMass], g = cons$g,
@@ -89,27 +88,87 @@ csw <- function(data, control = list()) {
   pmech <- .total.mech.power(m = data[, cols$bodyMass],
                              ws = data[, cols$wingSpan],
                              wa = data[, cols$wingArea],
-                             Vt = vmp*cons$vvmp_ratio, cons = cons)
+                             Vt = vmp*cons$vvmpRatio, cons = cons)
 
-  #rangeL <- rep(list(vector()), length(pmech))
-  rangeSim <- matrix(nrow = length(pmech))
+  # convert mechanical power to chemical
+  rateCons <- (pmech/cons$n)
 
-  fatSim <- matrix(nrow = length(pmech))
-  fatSim[, 1] <- fatFrac
+  rateMassDep <- rateCons/cons$efat
 
-  pmechSim <- matrix(nrow = length(pmech))
-  pmechSim[, 1] <- pmech
-  specWork <- pmech/(muscMass * wingFreq)
 
-  for (i in 1:nrow(pmechSim)) {
-    for (j in 1:ncol(pmechSim)) {
-      if (fatSim[i, j] == 0) {
-        break()
-      } else{
+  pchem <-
+    (rateCons * 0.1 + rateCons) +
+    .basal.met(cons, mFrame = frameMass, mMusc = muscMass, ordo = taxon)
 
-      }
+  # simulation for song thrush
+  range <- vector()
+  pmech <- vector(); #power <- pchem[2]
+  pchem <- vector() # power
+  rConsumeFuel <- vector() # rate of consumption of fuel energy
+  fmass <- vector() ; fmass <- fatMass
+  rateMassDep <- vector()
+  specWork <- vector(); #specWork <- pmech[2]/(muscMass[2] * wingFreq[2])
+  speed <- vector(); #speed[1] <- vmp[2] * cons$vvmp_ratio
+  mmass <- vector(); #mmass[1] <- muscMass[2]
+  fwing <- vector(); #fwing[1] <- wingFreq[2]
+
+  i <- 1
+  while (fmass[i] > 0) {
+    # find speed and power
+    pmech[i] <- .total.mech.power(m = data[, cols$bodyMass],
+                               ws = data[, cols$wingSpan],
+                               wa = data[, cols$wingArea],
+                               Vt = vmp*cons$vvmpRatio, cons = cons)
+    rConsumeFuel[i] <- (pmech/cons$n)
+
+    rateMassDep <- rateCons/cons$efat
+
+    pchem[i] <-
+      (rConsumeFuel * 0.1 + rateCons) +
+      .basal.met(cons, mFrame = frameMass, mMusc = muscMass, ordo = taxon)
+
+    # specific work
+    specWorkS <- pmech[1]/(muscMass * wingFreq)
+
+    ratioChange <- (cons$efat/cons$eprot)*(1 + cons$hprot)
+
+    mmusc <- 0
+
+    mfat <- 0
+
+    specWork <- vector()
+    specWork[1] <- 0
+    j <- 1
+    while (specWork[j] != specWorkS) {
+
+      # increase muscle mass
+
+      # decrease mass of f
+
     }
   }
+
+
+  #rangeL <- rep(list(vector()), length(pmech))
+  # rangeSim <- matrix(nrow = length(pmech))
+  #
+  # fatSim <- matrix(nrow = length(pmech))
+  # fatSim[, 1] <- fatFrac
+  #
+  # pmechSim <- matrix(nrow = length(pmech))
+  # pmechSim[, 1] <- pmech
+  # specWork <- pmech/(muscMass * wingFreq)
+  # bodyMassSim <- matrix(nrow = length(pmech))
+  #
+  # for (i in 1:nrow(pmechSim)) {
+  #   for (j in 1:ncol(pmechSim)) {
+  #     if (fatSim[i, j] == 0) {
+  #       break()
+  #     } else{
+  #
+  #     }
+  #   }
+  # }
 
   # return object of class flysim
   class(results) <- append(class(results), "csw")
