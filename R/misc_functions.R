@@ -129,8 +129,8 @@
 #' @param rho air density
 #' @description wing beat frequency at specified air density
 #'
-.wingbeat.freq <- function(m, g, ws, wa, rho){
-  f <- m^0.375*g^0.5*ws^(-23/24)*wa^(-1/3)*rho^(-3/8)
+.wingbeat.freq <- function(m, ws, wa, cons){
+  f <- m^0.375*cons$g^0.5*ws^(-23/24)*wa^(-1/3)*cons$airDensity^(-3/8)
 }
 
 ################################################################################
