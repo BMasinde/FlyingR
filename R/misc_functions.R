@@ -232,7 +232,7 @@
 .prof.pow.ratio <- function(ws, wa, cons) {
   # ws = wing span
   # wa = wing area
-  X1 <- cons$ppcons / (ws ^ 2 / wa)
+  X1 <- cons$ppc / (ws ^ 2 / wa)
 
   return(X1)
 }
