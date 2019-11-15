@@ -22,7 +22,7 @@
   d <- ifelse(ordo == 1, cons$delta[[1]], cons$delta[[2]])
 
   num <-
-    6.023 * a * cons$n * cons$airDensity ^ 0.5 * ws ^ 1.5 * m ^(d - (5 / 3))
+    6.023 * a * cons$mce * cons$airDensity ^ 0.5 * ws ^ 1.5 * m ^(d - (5 / 3))
   den <-  cons$k ^ (3 / 4) * cons$g ^ (5 / 3)
 
   x2 <- num / den
