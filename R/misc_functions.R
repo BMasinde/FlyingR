@@ -23,7 +23,7 @@
 
   num <-
     6.023 * a * cons$mce * cons$airDensity ^ 0.5 * ws ^ 1.5 * m ^(d - (5 / 3))
-  den <-  cons$k ^ (3 / 4) * cons$g ^ (5 / 3)
+  den <-  cons$ipf ^ (3 / 4) * cons$g ^ (5 / 3)
 
   x2 <- num / den
 
@@ -79,7 +79,7 @@
 #'              value but the actual value is estimated by simulation.
 
 .min.pow.speed <- function(m, ws, cons) {
-  Vmp <- (0.807 * cons$k ^ 0.25 * m ^ 0.5 * cons$g ^ 0.5) /
+  Vmp <- (0.807 * cons$ipf ^ 0.25 * m ^ 0.5 * cons$g ^ 0.5) /
             (
               cons$airDensity ^ 0.5 * ws ^ 0.5 * .body.front.area(m) ^ 0.25 *
                 cons$bdc ^ 0.25
@@ -146,7 +146,7 @@
 #'              ratio ceases to increases.
 
 .max.range.speed <- function(m, ws, cons) {
-  num <- cons$k ^ 0.25 * m ^ 0.5 * cons$g ^ 0.5
+  num <- cons$ipf ^ 0.25 * m ^ 0.5 * cons$g ^ 0.5
 
   den <-
     cons$airDensity ^ 0.5 * (cons$bdc * .body.front.area(m)) ^ 0.25 *
@@ -178,7 +178,7 @@
   #     cat("minimum true airspeed zero for some obesrvations")
   #   })
 
-  pind <- (2 * cons$k * (m * cons$g) ^ 2) / (Vt * pi * ws ^ 2 * cons$airDensity)
+  pind <- (2 * cons$ipf * (m * cons$g) ^ 2) / (Vt * pi * ws ^ 2 * cons$airDensity)
 
   return(pind)
 }
@@ -211,7 +211,7 @@
 
 .abs.min.pow <- function(m, ws, cons) {
   pam <-
-    (1.05 * cons$k ^ 0.75 * m ^ 1.5 * cons$g ^ 1.5 * .body.front.area(m) ^ 0.25 *
+    (1.05 * cons$ipf ^ 0.75 * m ^ 1.5 * cons$g ^ 1.5 * .body.front.area(m) ^ 0.25 *
        cons$bdc) / (cons$airDensity ^ 0.5 * ws ^ 1.5)
 
   return(pam)
