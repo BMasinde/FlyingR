@@ -85,9 +85,6 @@
                 cons$bdc ^ 0.25
             )
 
-
-  #Vmp <- Vmp - (Vmp * 0.1)
-
   return(Vmp)
 }
 
