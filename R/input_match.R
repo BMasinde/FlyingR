@@ -91,5 +91,17 @@
     }
   }
 
+  # check factors in taxon
+  if (is.factor(data$taxon) == FALSE) {
+    data$taxon <- as.factor(data$taxon)
+    if (sum(levels(data$taxon) == levels(factor(c(1, 2)))) != 2) {
+      stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
+    }
+  } else {
+    if (sum(levels(data$taxon) == levels(factor(c(1, 2)))) != 2) {
+      stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
+    }
+  }
+
   return(data)
 }
