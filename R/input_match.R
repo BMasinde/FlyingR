@@ -1,65 +1,95 @@
+#' Identify and rename columns in Data
+#' @author Brian Masinde
+#' @name .colnames.match
+#' @param data
+#' @return data returns processed data
 
-# identify columns from data
-.colnames.match <- function(names) {
-  id <- grepl("id", names)
-
-  name <- grepl("species.name|name|species name|species_name|scientific.name", names)
-
-  wingSpan <- grepl("ws|wing.span|wing_span|wing span|wingspan",
-                   ignore.case = TRUE, names)
-
-  wingArea <- grepl("wa|wing.area|wing area|wingarea|wing_area",
-                   ignore.case = TRUE,names)
-
-  taxon <- grepl("order|ordo|ord|taxon", ignore.case = TRUE, names)
-
-  bMass <- grepl("body.mass|empty.mass|all-up_mass|allupmass|body_mass|bodymass",
-                ignore.case = TRUE, names)
-
-  fMass <- grepl("fat.mass|fatmass|fat_mass",
-                ignore.case = TRUE,names)
-
-  mMass <- grepl("muscle.mass|musclemass|muscle_mass",
-                ignore.case = TRUE,names)
-
-  # only one with bird names
-  if (sum(name) > 2) {
-    stop("multiple name columns found. Remove one", call. = FALSE)
+.colnames.match <- function(data) {
+  # data should be a dataframe
+  if (is.data.frame(data) == FALSE) {
+    stop("Expects data as a dataframe", call. = FALSE)
   }
 
-  # missing column with id and name, set to false to gen
-  # if (sum(id) == 0 & sum(name) == 0) {
-  #   id == FALSE
-  # }
+  colNames <- colnames(data)
 
-  if (sum(taxon) == 0) {
-    stop("taxon column not found", call. = FALSE)
+  variables <- list(
+    id = c(),
+    name = c(),
+    wingSpan = c(),
+    wingArea = c(),
+    taxon = c(),
+    allMass = c(),
+    fatMass = c(),
+    muscleMass = c()
+  )
+
+
+  variables$id <- grepl("id", ignore.case = TRUE, colNames)
+
+  variables$name <- grepl("species.name|name|species name|species_name|scientific.name",
+                        ignore.case = TRUE, colNames)
+
+  variables$wingSpan <- grepl("ws|wing.span|wing_span|wing span|wingspan",
+                   ignore.case = TRUE, colNames)
+
+  variables$wingArea <- grepl("wa|wing.area|wing area|wingarea|wing_area",
+                   ignore.case = TRUE, colNames)
+
+  variables$taxon <- grepl("order|ordo|ord|taxon", ignore.case = TRUE, colNames)
+
+  variables$allMass <- grepl("body.mass|empty.mass|all-up_mass|allupmass|body_mass|bodymass",
+                ignore.case = TRUE, colNames)
+
+  variables$fatMass <- grepl("fat.mass|fatmass|fat_mass",
+                ignore.case = TRUE, colNames)
+
+  variables$muscleMass <- grepl("muscle.mass|musclemass|muscle_mass",
+                ignore.case = TRUE, colNames)
+
+
+  for (i in 1:length(variables)) {
+    # only one column for each variable
+    if (sum(variables[[i]]) > 1) {
+      stop(paste0("multiple columns found matching: ", names(variables)[i], "\n",
+                  sep = "  "),
+           call. = FALSE)
+    }
+
+    #  missing column
+    if (sum(variables[[i]]) == 0) {
+      if (i != 1 & i != 2 & i != 8) {
+        stop(paste0("missing column: ", names(variables)[i], "\n",
+                    sep = " "), call. = FALSE)
+      } else if(i == 8) {
+        warning("No column matching muscle mass \n", call. = FALSE)
+      }
+    }
   }
 
-  if (sum(bMass) == 0) {
-    stop("body mass not found", call. = FALSE)
+
+
+  # missing name and ID auto-gen
+  if (sum(variables$name) == 0 & sum(variables$id) == 0) {
+    message("Identifier column not found. Auto-gen \n")
+    data$ID <- 1:nrow(data)
   }
 
-  if (sum(fMass) == 0) {
-    stop("fat mass not found", call. = FALSE)
+  # non unique species names in data add a suffix of ID
+  if (sum(duplicated(data$name)) != 0) {
+    dups <- anyDuplicated(data$name)
+    for (i in 1:length(dups)) {
+      index <- which(data$name == dups[i])
+      data$name[index] <- paste(data$name[index], index, sep = "_")
+    }
   }
 
-  if (sum(mMass) == 0) {
-    warning("muscle mass not found", call. = FALSE)
+  for (i in 1:length(variables)) {
+    # rename columns to standard
+    if (i != 1 & sum(variables[[i]]) != 0) {
+      colIndex <- which(variables[[i]] == TRUE)
+      colnames(data)[colIndex] <- names(variables)[[i]]
+    }
   }
 
-
-
-
-  colIndex <- list("name" = which(name == TRUE),
-                "bodyMass" = which(bMass == TRUE),
-                "wingSpan" = which(wingSpan == TRUE),
-                "fatMass" = which(fMass == TRUE),
-                "order" = which(taxon == TRUE),
-                "wingArea" = which(wingArea == TRUE),
-                "muscleMass"  = which(mMass == TRUE),
-                "id" = which(id == TRUE)
-                )
-
-  return(colIndex)
+  return(data)
 }
