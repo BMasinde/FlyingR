@@ -54,7 +54,7 @@
 
   if (missing(control) == TRUE) {
     # use team of default parameters
-    message("## ctrl not defined. Using default constants.
+    message("## control not defined. Using default constants.
             \nDefault airDensity = 1.00 kg m^3 \n")
   }else{
     extArgs <- c(
@@ -76,7 +76,7 @@
     )
 
     # match extArgs to user provided
-    given <- which(extArgs %in% names(ctrl) == TRUE)
+    given <- which(extArgs %in% names(control) == TRUE)
 
 
     # extract names
@@ -85,7 +85,7 @@
       cons[consGive[i]] <- control[consGive[i]]
     }
 
-    # throw error wrong argument in ctrl
+    # throw error wrong argument in control
     if(length(cons) > 15){
       stop("Wrong argument in control", call. = FALSE)
     }
