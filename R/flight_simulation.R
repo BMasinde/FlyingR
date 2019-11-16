@@ -33,8 +33,6 @@
 #'    \item
 #' }
 #'
-#' @importFrom dplyr filter
-#'
 #' @export flysim
 #'
 #' @examples
