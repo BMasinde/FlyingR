@@ -7,8 +7,13 @@
 #' @name migrate
 #'
 #' @param data A data frame.
-#' @param path Path to data csv file
+#' @param fileArgs Arguments for path to data
 #' @param control A list for re-defining constants. See details.
+#' @param method Methods for fuel management
+#' @param speed_control One of two speed control methods. By default
+#'        \textit{constant_speed} is used. \textit{vvmp_constant} is the alternative.
+#'        The former holds the true airspeed constant while the latter holds the
+#'        ratio of true airspeed and minimum power speed constant.
 #'
 #' @details The option *control takes the folowing arguments
 #' \itemize{
@@ -34,8 +39,6 @@
 #'    \item constants (list)
 #' }
 #'
-#' @importFrom dplyr filter
-#'
 #' @export migrate
 #'
 #' @examples
@@ -46,12 +49,24 @@
 #'
 
 
-migrate <- function(path, data, control, method = "cmm") {
+migrate <- function(fileArgs = list(), data, control = list(), method = "cmm",
+                    speed_control = "constant_speed", ...) {
 
-  if (missing(path) == TRUE & missing(data) == TRUE) {
-    stop("Data not found", call. = TRUE)
+  if (missing(fileArgs) == TRUE & missing(data) == TRUE) {
+    stop("Data not found \n", call. = TRUE)
   }
 
+  if (missing(fileArgs) == FALSE & missing(data) == FALSE) {
+    stop("Both path and data given. Function needs only one of the two \n", call. = TRUE)
+  }
+
+  if(speed_control != "constant_speed" | speed_control != "vvmp_constant") {
+    stop("Wrong speed control  argument", call. = TRUE)
+  }
+
+  if(missing(fileArgs) == FALSE) {
+    data <- .pathToData(fileArgs, ...)
+  }
 
 
 }
