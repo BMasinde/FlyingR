@@ -17,95 +17,95 @@
 
 .breguet <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, ctrl) {
 
-  ##############################################################################
-  # ctrl list of user defined constants
-  if (missing(ctrl) == F &&
-      is.list(ctrl) == FALSE) {
-    stop("ctrl must be a list")
-  }
-
-  # non-zero fat mass
-  if (length(which(fatMass == 0)) != 0) {
-    stop("In Method breguet, empty fat mass.", call. = FALSE)
-  }
-
-  # if (sum(levels(ordo) == levels(factor(c(1, 2)))) != 2) {
-  #    stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
-  #  }
-
-  #############################################################################
-  # default constants
-  cons <- list(
-    # profile power constant
-    ppcons = 8.4,
-
-    # energy content of fuel per kg
-    energy = 4 * 10 ^ 7,
-
-    # accelaration due to gravity
-    g = 9.81,
-    # mechanical conversion efficiency  [0,1]
-    n = 0.23,
-
-    # induced power factor
-    k = 1.20,
-
-    # ventilation and circulation power (Tucker's data)
-    R =  1.10,
-
-    # air density at fligh height
-    airDensity = 1.00,
-
-    # body drag coefficient
-    bdc = 0.10,
-
-    # constant varies btw passerines and non-passerines
-    alpha = c(6.25, 3.79),
-
-    delta = c(0.724, 0.723),
-
-    # consumption
-    consume = 1
-  )
-
-  ##############################################################################
-  # check ctrl
-  if (missing(ctrl)) {
-    message("## ctrl not defined. Using default constants.
-            \nDefault air_dens = 1.00 kg m^3 \n")
-
-  } else {
-    extArgs <- c(
-      "ppcons",
-      "energy",
-      "g",
-      "n",
-      "k",
-      "R",
-      "airDensity",
-      "alpha",
-      "delta",
-      "bdc"
-    )
-    # match extArgs to user provided
-    given <- which(extArgs %in% names(ctrl) == TRUE)
-
-
-    # extract names
-    consGive <- extArgs[given]
-    for (i in 1:length(consGive)) {
-      cons[consGive[i]] <- ctrl[consGive[i]]
-    }
-
-    # throw error wrong argument in ctrl
-    if(length(cons) > 11){
-      stop("Wrong argument in ctrl", call. = FALSE)
-    }
-
-    if(length(cons$delta) != 2 || length(cons$alpha) != 2) {
-      stop("In ctrl, alpha and delta as vectors of length == 2", call. = FALSE)
-    }
-  }
+  # ##############################################################################
+  # # ctrl list of user defined constants
+  # if (missing(ctrl) == F &&
+  #     is.list(ctrl) == FALSE) {
+  #   stop("ctrl must be a list")
+  # }
+  #
+  # # non-zero fat mass
+  # if (length(which(fatMass == 0)) != 0) {
+  #   stop("In Method breguet, empty fat mass.", call. = FALSE)
+  # }
+  #
+  # # if (sum(levels(ordo) == levels(factor(c(1, 2)))) != 2) {
+  # #    stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
+  # #  }
+  #
+  # #############################################################################
+  # # default constants
+  # cons <- list(
+  #   # profile power constant
+  #   ppcons = 8.4,
+  #
+  #   # energy content of fuel per kg
+  #   energy = 4 * 10 ^ 7,
+  #
+  #   # accelaration due to gravity
+  #   g = 9.81,
+  #   # mechanical conversion efficiency  [0,1]
+  #   n = 0.23,
+  #
+  #   # induced power factor
+  #   k = 1.20,
+  #
+  #   # ventilation and circulation power (Tucker's data)
+  #   R =  1.10,
+  #
+  #   # air density at fligh height
+  #   airDensity = 1.00,
+  #
+  #   # body drag coefficient
+  #   bdc = 0.10,
+  #
+  #   # constant varies btw passerines and non-passerines
+  #   alpha = c(6.25, 3.79),
+  #
+  #   delta = c(0.724, 0.723),
+  #
+  #   # consumption
+  #   consume = 1
+  # )
+  #
+  # ##############################################################################
+  # # check ctrl
+  # if (missing(ctrl)) {
+  #   message("## ctrl not defined. Using default constants.
+  #           \nDefault air_dens = 1.00 kg m^3 \n")
+  #
+  # } else {
+  #   extArgs <- c(
+  #     "ppcons",
+  #     "energy",
+  #     "g",
+  #     "n",
+  #     "k",
+  #     "R",
+  #     "airDensity",
+  #     "alpha",
+  #     "delta",
+  #     "bdc"
+  #   )
+  #   # match extArgs to user provided
+  #   given <- which(extArgs %in% names(ctrl) == TRUE)
+  #
+  #
+  #   # extract names
+  #   consGive <- extArgs[given]
+  #   for (i in 1:length(consGive)) {
+  #     cons[consGive[i]] <- ctrl[consGive[i]]
+  #   }
+  #
+  #   # throw error wrong argument in ctrl
+  #   if(length(cons) > 11){
+  #     stop("Wrong argument in ctrl", call. = FALSE)
+  #   }
+  #
+  #   if(length(cons$delta) != 2 || length(cons$alpha) != 2) {
+  #     stop("In ctrl, alpha and delta as vectors of length == 2", call. = FALSE)
+  #   }
+  # }
 
   ##############################################################################
   # fat fraction
@@ -137,7 +137,7 @@
   flatPlateArea <- 0.00813 * (bodyMass ^ 0.666) * cons$bdc
 
   # lift drag ratio at begining of flight
-  liftDragRatio <- (dFactor / ((cons$k ^ 0.5) * cons$R)) *
+  liftDragRatio <- (dFactor / ((cons$ipf ^ 0.5) * cons$vcp)) *
     ((diskArea / flatPlateArea) ^ 0.5)
 
   # increase by 10F%
@@ -145,7 +145,7 @@
 
   # range in kilometres
   kmRange <-
-    ((cons$energy * cons$n) / cons$g) * liftDragRatio *
+    ((cons$eFat * cons$mce) / cons$g) * liftDragRatio *
     log(1 / (1 - fatFrac))/1000
 
   ##############################################################################
@@ -154,14 +154,15 @@
 
   # return list of objects
 
-  results <- list("Range" = round(kmRange,1),
-              "fuel" = fatFrac,
-              #"Vmp" = pc[[1]],
-              #"Vmr" = pc[[2]],
-              "constants" = cons
-              )
+  # results <- list("Range" = round(kmRange,1),
+  #             "fuel" = fatFrac,
+  #             #"Vmp" = pc[[1]],
+  #             #"Vmr" = pc[[2]],
+  #             "constants" = cons
+  #             )
 
-  return(results)
+  #return(results)
+  return(round(kmRange, 1))
 }
 
 ################################################################################
