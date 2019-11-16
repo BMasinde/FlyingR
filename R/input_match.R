@@ -37,7 +37,7 @@
 
   variables$taxon <- grepl("order|ordo|ord|taxon", ignore.case = TRUE, colNames)
 
-  variables$allMass <- grepl("body.mass|empty.mass|all-up_mass|allupmass|body_mass|bodymass",
+  variables$allMass <- grepl("body.mass|empty.mass|all-up_mass|allupmass|body_mass|bodymass|allmass",
                 ignore.case = TRUE, colNames)
 
   variables$fatMass <- grepl("fat.mass|fatmass|fat_mass",
