@@ -5,33 +5,32 @@
 #' @author Brian Masinde
 #'
 #' @name flysim
-#'
+#' @param fileArgs Arguments for path to data. Same arguments as would be supplied
+#'        to read.csv(), but as a list
 #' @param data A data frame.
-#' @param ctrl A list for re-defining constants. See details.
+#' @param control A list for re-defining constants. See details.
 #'
-#' @details The option *ctrl takes the folowing arguments
+#' @details The option *control takes the folowing arguments
 #' \itemize{
-#'    \item ppcons: Profile power constant
-#'    \item energy: Energy content of fuel from fat
+#'    \item ppc: Profile power constant
+#'    \item eFat: Energy content of fuel from fat
 #'    \item g: Accelaration due to gravity
-#'    \item n: Mechanical conversion efficiency [0,1]
-#'    \item k: Induced power factor
-#'    \item R: Ventilation and circulation power
+#'    \item mce: Mechanical conversion efficiency [0,1]
+#'    \item ipf: Induced power factor
+#'    \item vcp: Ventilation and circulation power
 #'    \item airDensity: Air density at cruising altitude
 #'    \item bdc: Body drag coefficient
 #'    \item alpha: Basal metabolism factors in passerines and non passerines
 #'    \item delta: Basal metabolism factors in passerines and non passerines
 #'    alpha*bodyMass^delta
-#'    \item consume: Percentage of fuel to be used from fat mass
 #'}
 #' @include misc_functions.R lookup_table2.R input_match.R method_1.R method_2.R
 #' @return S3 class object with range estimates based on methods defined and
 #'        constants
 #' \itemize{
-#'    \item data as a data frame
-#'    \item range estimates
-#'    \item fuel
+#'    \item range estimates in kilometre
 #'    \item constants (list)
+#'    \item
 #' }
 #'
 #' @importFrom dplyr filter
@@ -39,161 +38,72 @@
 #' @export flysim
 #'
 #' @examples
-#' flysim(data = birds, ctrl = list(energy = 3.89*10^7))
-#' flysim(data = birds,  ctrl = list(airDensity = 0.905))
+#' flysim(data = birds, control = list(energy = 3.89*10^7))
+#' flysim(data = birds,  control = list(airDensity = 0.905))
 #'
-#' @usage flysim(data, ctrl = list())
+#' @usage flysim(data, control = list())
 
 
-flysim <- function(data, ctrl = list()) {
-  # ... extra arguments to be passed to methods
+flysim <- function(fileArgs = list(), data, control = list()) {
 
   ##  Error check data #########################################################
-  if (is.data.frame(data) == FALSE & is.list(data) == FALSE) {
-    stop(">> data as list or data frame <<")
+  if (missing(fileArgs) == TRUE & missing(data) == TRUE) {
+    stop("Data not found \n", call. = TRUE)
   }
 
-  # check number of columns
-  if (is.data.frame(data) == TRUE && ncol(data) < 6) {
-    stop(">> at least 5 columns for data <<")
+  if (missing(fileArgs) == FALSE & missing(data) == FALSE) {
+    stop("Both path and data given. Function needs only one of the two \n", call. = TRUE)
   }
-  # check number of fields
-  if (is.list(data) == TRUE && length(data) < 6) {
-    stop("data list should have at least 4 fields")
-  }
+
+  # if (is.data.frame(data) == FALSE & is.list(data) == FALSE) {
+  #   stop(">> data as list or data frame <<")
+  # }
+  #
+  # # check number of columns
+  # if (is.data.frame(data) == TRUE && ncol(data) < 6) {
+  #   stop(">> at least 5 columns for data <<")
+  # }
+  # # check number of fields
+  # if (is.list(data) == TRUE && length(data) < 6) {
+  #   stop("data list should have at least 4 fields")
+  # }
 
   # column match
-  cols <- .colnames.match(names(data))
+  if (missing(fileArgs) == FALSE) {
+    data <- .pathToData(fileArgs, ...)
+  } else if (missing(fileArgs) == TRUE) {
+    data <- .colnames.match(data)
+  }
+
+  # control check
+  if (missing(control) == TRUE) {
+    cons <- .control()
+  } else {
+    cons <- .control(control)
+  }
 
 
-  results <- list("data" = data,
-                  "range" = vector(),
-                  "fuel" = vector(),
+  results <- list("range" = vector(),
+                  #"fuel" = vector(),
                   #"Vmp" = vector(),
                   #"Vmr" = vector(),
-                  "constants" = list()
+                  "constants" = cons,
+                  "data" = data
                   )
 
-  ## compute data/list p/np ####################################################
+  results$range <-ifelse( data$taxon == 1, .breguet( data$allMass, data$wingSpan,
+        data$fatMass, data$taxon, data$wingArea, cons),
+      .breguet_adj( data$allMass, data$wingSpan, data$fatMass, data$taxon,
+                    data$wingArea, cons)
+    )
 
-  if (is.data.frame(data)  == TRUE) {
-
-    if (sum(levels(data[, cols$order]) == levels(factor(c(1, 2)))) != 2) {
-      stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
-    }
-
-    # smallPasserines <-
-    #   dplyr::filter(data, cols$order == 1 & cols$bodyMass <= 0.05)
-
-    id_sp <- which(data[cols$order] == 1 & data[cols$bodyMass] <= 0.05)
-
-    # nonSmallPasserines <-
-    #   dplyr::filter(data, cols$order == 2 | cols$bodyMass >= 0.05)
-
-    id_np <- which(data[cols$order] == 2 | data[cols$bodyMass] >= 0.05)
-    # args small passerines
-    argsSmallBird <- list("bodyMass" = data[id_sp, cols$bodyMass],
-                   "wingSpan" = data[id_sp, cols$wingSpan],
-                   "fatMass" = data[id_sp, cols$fatMass],
-                   "ordo" = data[id_sp, cols$order],
-                   "wingArea" = data[id_sp, cols$wingArea]
-                   #"name" = as.vector(smallPasserines[ ,1]
-                   )
-
-    # args big birds
-    argsBigBird <- list("bodyMass" = data[id_np, cols$bodyMass],
-                   "wingSpan" =  data[id_np, cols$wingSpan],
-                   "fatMass" =  data[id_np, cols$fatMass],
-                   "ordo" =  data[id_np, cols$order],
-                   "wingArea" =  data[id_np, cols$wingArea]
-                   #"name" = as.vector(nonSmallPasserines[ ,1])
-                   )
-
-    if (length(id_sp) > 0 & length(id_np) > 0) {
-
-      if (missing(ctrl) == TRUE) {
-
-        smallBirds <- do.call(.breguet, args = argsSmallBird)
-        bigBirds <- do.call(.breguet_adj, args = argsBigBird)
-        results$constants <- bigBirds[[3]]
-
-      }else {
-        argsSmallBird$ctrl <- ctrl
-        argsBigBird$ctrl <- ctrl
-        smallBirds <- do.call(.breguet, args = argsSmallBird)
-        #constants <- smallBirds[[3]]
-        bigBirds <- do.call(.breguet_adj, args = argsBigBird)
-        results$constants <- bigBirds[[3]]
-      }
-      # consitent order of results and input data
-      names(smallBirds[[1]]) <- id_sp
-      results$fuel[id_sp] <- smallBirds[[2]]
-      names(bigBirds[[1]]) <- id_np
-      results$fuel[id_np] <- bigBirds[[2]]
-      range <- c(smallBirds[[1]],bigBirds[[1]])
-      results$range <- range[order(as.numeric(names(range)))]
-    }else if(length(id_sp) == 0) {
-
-      if(missing(ctrl) == TRUE){
-        bigBirds <- do.call(.breguet_adj, args = argsBigBird)
-        results$constants <- bigBirds[[3]]
-        results$range <- bigBirds[[1]]
-        results$fuel <- bigBirds[[2]]
-      }else {
-        argsBigBird$ctrl <- ctrl
-        bigBirds <- do.call(.breguet_adj, args = argsBigBird)
-        results$constants <- bigBirds[[3]]
-        results$range <- bigBirds[[1]]
-        results$fuel <- bigBirds[[2]]
-      }
-    } else if(length(id_np) == 0) {
-      if(missing(ctrl) == TRUE){
-        smallBirds <- do.call(.breguet, args = argsSmallBird)
-        results$constants <- smallBirds[[3]]
-        results$range <- smallBirds[[1]]
-        results$fuel <- smallBirds[[2]]
-      }else {
-        argsSmallBird$ctrl <- ctrl
-        smallBirds <- do.call(.breguet, args = argsSmallBird)
-        results$constants <- smallBirds[[3]]
-        results$range <- smallBirds[[1]]
-        results$fuel <- smallBirds[[2]]
-      }
-    }
-
+  # results should be named vectors
+  if (!is.null(data$name)) {
+    names(results$range) <- as.vector(data$name)
   } else {
-    args <- list("bodyMass" = data[[cols$bodyMass]],
-                 "wingSpan" = data[[cols$wingSpan]],
-                 "fatMass" = data[[cols$fatMass]],
-                 "ordo" = data[[cols$order]],
-                 "wingArea" = data[[cols$wingArea]]
-                 )
-
-    if (args$ordo == 1) {
-      if (missing(ctrl) == TRUE) {
-        smallBirds <- do.call(.breguet, args = args)
-      }else {
-        args$ctrl <- ctrl
-        smallBirds <- do.call(.breguet, args = args)
-      }
-      results$range <- smallBirds[[1]]
-      results$fuel <- smallBirds[[2]]
-      results$constants <- smallBirds[[3]]
-    }
-
-    if (args$ordo == 2) {
-      if (missing(ctrl) == TRUE) {
-        bigBirds <- do.call(.breguet_adj, args = args)
-      }else {
-        args$ctrl <- ctrl
-        bigBirds <- do.call(.breguet_adj, args = args)
-      }
-      results$range <- bigBirds[[1]]
-      results$fuel <- bigBirds[[2]]
-      results$constants <- bigBirds[[3]]
-    }
-
+    names(results$range) <- as.vector(data$ID)
   }
+
 
   # return object of class flysim
   class(results) <- append(class(results), "flysim")
