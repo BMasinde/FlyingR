@@ -13,7 +13,7 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
     utils,
-    Rcpp (>= 0.11.0)
+    Rcpp (>=1.0.2),
     knitr,
     kableExtra,
     rmarkdown,
@@ -21,16 +21,21 @@ Imports:
 Suggests: 
     testthat,
     covr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.0
 Depends: R (>= 2.10)
 VignetteBuilder: knitr
 Collate: 
+    'RcppExports.R'
     'birds_documentation.R'
+    'constant_muscle_mass.R'
+    'control.R'
     'method_2.R'
     'method_1.R'
     'input_match.R'
     'lookup_table2.R'
     'misc_functions.R'
     'flight_simulation.R'
+    'migrate.R'
+    'path_to_data.R'
     'time_march.R'
 LinkingTo: Rcpp

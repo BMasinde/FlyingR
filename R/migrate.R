@@ -39,6 +39,7 @@
 #'    \item constants (list)
 #' }
 #'
+#' @import Rcpp
 #' @export migrate
 #'
 #' @examples
