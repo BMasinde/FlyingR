@@ -175,7 +175,7 @@
   #     cat("minimum true airspeed zero for some obesrvations")
   #   })
 
-  pind <- (2 * cons$ipf * (m * cons$g) ^ 2) / (Vt * pi * ws ^ 2 * cons$airDensity)
+  pind <- (2 * cons$ipf * (m * cons$g) ^ 2) / (Vt * pi * (ws ^ 2) * cons$airDensity)
 
   return(pind)
 }
@@ -208,8 +208,8 @@
 
 .abs.min.pow <- function(m, ws, cons) {
   pam <-
-    (1.05 * cons$ipf ^ 0.75 * m ^ 1.5 * cons$g ^ 1.5 * .body.front.area(m) ^ 0.25 *
-       cons$bdc) / (cons$airDensity ^ 0.5 * ws ^ 1.5)
+    (1.05 * (cons$ipf ^ 0.75) * (m ^ 1.5) * (cons$g ^ 1.5) * (.body.front.area(m) ^ 0.25) *
+       cons$bdc^0.25) / ((cons$airDensity) ^ 0.5 * (ws ^ 1.5))
 
   return(pam)
 }
