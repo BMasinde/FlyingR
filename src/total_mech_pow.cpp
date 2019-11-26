@@ -9,7 +9,7 @@ using namespace Rcpp;
 //' @return totalMechPower total mechanical power
 //' @export
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.total_Mech_Pow_cpp)]]
 NumericVector total_Mech_Pow_cpp(NumericVector bm, NumericVector ws, NumericVector wa,
                                  NumericVector vt, float g, float airDensity,
                                  float ipf, float bdc, float ppc){
