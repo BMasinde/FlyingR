@@ -4,21 +4,23 @@
 \alias{flysim}
 \title{Range Estimation}
 \usage{
-flysim(data, ctrl = list())
+flysim(data, control = list())
 }
 \arguments{
+\item{fileArgs}{Arguments for path to data. Same arguments as would be supplied
+to read.csv(), but as a list}
+
 \item{data}{A data frame.}
 
-\item{ctrl}{A list for re-defining constants. See details.}
+\item{control}{A list for re-defining constants. See details.}
 }
 \value{
 S3 class object with range estimates based on methods defined and
        constants
 \itemize{
-   \item data as a data frame
-   \item range estimates
-   \item fuel
+   \item range estimates in kilometre
    \item constants (list)
+   \item
 }
 }
 \description{
@@ -26,25 +28,24 @@ Practical range estimation of birds using methods in Pennycuik (1975)
 Mechanics of Flight. These methods are based on Breguet equations.
 }
 \details{
-The option *ctrl takes the folowing arguments
+The option *control takes the folowing arguments
 \itemize{
-   \item ppcons: Profile power constant
-   \item energy: Energy content of fuel from fat
+   \item ppc: Profile power constant
+   \item eFat: Energy content of fuel from fat
    \item g: Accelaration due to gravity
-   \item n: Mechanical conversion efficiency [0,1]
-   \item k: Induced power factor
-   \item R: Ventilation and circulation power
+   \item mce: Mechanical conversion efficiency [0,1]
+   \item ipf: Induced power factor
+   \item vcp: Ventilation and circulation power
    \item airDensity: Air density at cruising altitude
    \item bdc: Body drag coefficient
    \item alpha: Basal metabolism factors in passerines and non passerines
    \item delta: Basal metabolism factors in passerines and non passerines
    alpha*bodyMass^delta
-   \item consume: Percentage of fuel to be used from fat mass
 }
 }
 \examples{
-flysim(data = birds, ctrl = list(energy = 3.89*10^7))
-flysim(data = birds,  ctrl = list(airDensity = 0.905))
+flysim(data = birds, control = list(energy = 3.89*10^7))
+flysim(data = birds,  control = list(airDensity = 0.905))
 
 }
 \author{
