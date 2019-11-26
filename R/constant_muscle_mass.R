@@ -1,12 +1,12 @@
 #' Constant muscle mass time marching computation
 #' @author Brain Masinde.
-#' @name constant_muscle_mass
+#' @name constant_muscle_mass_old
 #' @param data
 #' @param constant
 #' @param speed_control
 
 
-.constant_muscle_mass <- function(data, constant, speed_control) {
+.constant_muscle_mass_old <- function(data, constant, speed_control) {
   if (missing(data) == TRUE) {
     stop("Missing data argument")
   }
