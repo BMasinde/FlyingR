@@ -5,12 +5,19 @@
 #' @author Brian Masinde
 #'
 #' @name flysim
-#' @param fileArgs Arguments for path to data. Same arguments as would be supplied
-#'        to read.csv(), but as a list
+#' @param file Arguments for path to data.
+#' @param header Lofical. If TRUE use first row as column headers
+#' @param sep separator
+#' @param quote The set of quoting characters. see read.csv
+#' @param dec The character used in the file for decimal points.
+#' @param fill See read.csv
+#' @param comment.char For more details see read.csv
+#' @param ... further arguments see read.csv
 #' @param data A data frame.
 #' @param control A list for re-defining constants. See details.
 #'
-#' @details The option *control takes the folowing arguments
+#' @details The option *settings takes the folowing arguments (those particulary
+#' required by this function)
 #' \itemize{
 #'    \item ppc: Profile power constant
 #'    \item eFat: Energy content of fuel from fat
@@ -26,30 +33,33 @@
 #'}
 #' @include misc_functions.R lookup_table2.R input_match.R method_1.R method_2.R
 #' @return S3 class object with range estimates based on methods defined and
-#'        constants
+#'        settings used
 #' \itemize{
-#'    \item range estimates in kilometre
-#'    \item constants (list)
-#'    \item
+#'    \item range estimates (Km)
+#'    \item settings used
+#'    \item data
 #' }
 #'
+#' @importFrom  utils read.csv
 #' @export flysim
 #'
 #' @examples
-#' flysim(data = birds, control = list(energy = 3.89*10^7))
-#' flysim(data = birds,  control = list(airDensity = 0.905))
+#' flysim(data = birds, settings = list(eFat = 3.89*10^7))
+#' flysim(data = birds,  settings = list(airDensity = 0.905))
 #'
-#' @usage flysim(data, control = list())
+#' @usage flysim(data, settings = list())
 
 
-flysim <- function(fileArgs = list(), data, control = list()) {
+flysim <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
+                   fill = TRUE, comment.char = "", ..., data, settings = list()) {
 
   ##  Error check data #########################################################
-  if (missing(fileArgs) == TRUE & missing(data) == TRUE) {
+  # missing file and data should throw an error
+  if (missing(file) == TRUE & missing(data) == TRUE) {
     stop("Data not found \n", call. = TRUE)
   }
 
-  if (missing(fileArgs) == FALSE & missing(data) == FALSE) {
+  if (missing(file) == FALSE & missing(data) == FALSE) {
     stop("Both path and data given. Function needs only one of the two \n", call. = TRUE)
   }
 
@@ -67,9 +77,11 @@ flysim <- function(fileArgs = list(), data, control = list()) {
   # }
 
   # column match
-  if (missing(fileArgs) == FALSE) {
-    data <- .pathToData(fileArgs, ...)
-  } else if (missing(fileArgs) == TRUE) {
+  if (missing(file) == FALSE) {
+    dataRead <- read.csv(file = file, sep, quote, dec, fill, comment.char, ...)
+    # column identification
+    data <- .colnames.match(dataRead)
+  } else if (missing(file) == TRUE) {
     data <- .colnames.match(data)
   }
 
@@ -77,7 +89,7 @@ flysim <- function(fileArgs = list(), data, control = list()) {
   if (missing(control) == TRUE) {
     cons <- .control()
   } else {
-    cons <- .control(control)
+    cons <- .control(settings)
   }
 
 
@@ -85,7 +97,7 @@ flysim <- function(fileArgs = list(), data, control = list()) {
                   #"fuel" = vector(),
                   #"Vmp" = vector(),
                   #"Vmr" = vector(),
-                  "constants" = cons,
+                  "constants" = unlist(cons, use.names = TRUE),
                   "data" = data
                   )
 
