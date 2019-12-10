@@ -1,8 +1,8 @@
 
-.control <- function(control) {
+.control <- function(settings) {
 
-  if (missing(control) == FALSE &&
-      is.list(control) == FALSE) {
+  if (missing(settings) == FALSE &&
+      is.list(settings) == FALSE) {
     stop("contorl must be a list")
   }
 
@@ -28,7 +28,7 @@
     # ventilation and circulation power (Tucker's data)
     vcp =  1.10,
 
-    # air density at fligh height
+    # air density at flight height
     airDensity = 1.00,
 
     # body drag coefficient
@@ -40,7 +40,7 @@
     delta = c(0.724, 0.723),
 
     # inverse power density of mitochondria
-    invPower= 1.1 * 10 ^-6,
+    invPower= 1.2 * 10 ^-6,
 
     # ratio V:Vmp
     speedRatio = 1.2,
@@ -52,9 +52,9 @@
     phr = 2.2
   )
 
-  if (missing(control) == TRUE) {
+  if (missing(settings) == TRUE) {
     # use team of default parameters
-    message("## control not defined. Using default constants.
+    message("## settings not defined. Using default constants.
             \nDefault airDensity = 1.00 kg m^3 \n")
   }else{
     extArgs <- c(
@@ -76,22 +76,22 @@
     )
 
     # match extArgs to user provided
-    given <- which(extArgs %in% names(control) == TRUE)
+    given <- which(extArgs %in% names(settings) == TRUE)
 
 
     # extract names
     consGive <- extArgs[given]
     for (i in 1:length(consGive)) {
-      cons[consGive[i]] <- control[consGive[i]]
+      cons[consGive[i]] <- settings[consGive[i]]
     }
 
-    # throw error wrong argument in control
+    # throw error wrong argument in settings
     if(length(cons) > 15){
-      stop("Wrong argument in control", call. = FALSE)
+      stop("Wrong argument in settings", call. = FALSE)
     }
 
     if(length(cons$delta) != 2 || length(cons$alpha) != 2) {
-      stop("In control, alpha and delta as vectors of length == 2", call. = FALSE)
+      stop("In settings, alpha and delta as vectors of length == 2", call. = FALSE)
     }
 
   }
