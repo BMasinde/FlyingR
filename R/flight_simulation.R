@@ -31,7 +31,7 @@
 #'    \item delta: Basal metabolism factors in passerines and non passerines
 #'    alpha*bodyMass^delta
 #'}
-#' @include misc_functions.R lookup_table2.R input_match.R method_1.R method_2.R
+#' @include control.R misc_functions.R lookup_table2.R input_match.R method_1.R method_2.R
 #' @return S3 class object with range estimates based on methods defined and
 #'        settings used
 #' \itemize{
@@ -76,9 +76,11 @@ flysim <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   #   stop("data list should have at least 4 fields")
   # }
 
-  # column match
+  # data processing
   if (missing(file) == FALSE) {
-    dataRead <- read.csv(file = file, sep, quote, dec, fill, comment.char, ...)
+    # read data from file path
+    dataRead <- read.csv(file = file, header = header, sep = sep,
+                         quote = quote, dec = dec, fill = fill, comment.char, ...)
     # column identification
     data <- .colnames.match(dataRead)
   } else if (missing(file) == TRUE) {
@@ -86,12 +88,11 @@ flysim <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   }
 
   # control check
-  if (missing(control) == TRUE) {
+  if (missing(settings) == TRUE) {
     cons <- .control()
   } else {
     cons <- .control(settings)
   }
-
 
   results <- list("range" = vector(),
                   #"fuel" = vector(),
@@ -101,10 +102,18 @@ flysim <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                   "data" = data
                   )
 
-  results$range <-ifelse( data$taxon == 1, .breguet( data$allMass, data$wingSpan,
-        data$fatMass, data$taxon, data$wingArea, cons),
-      .breguet_adj( data$allMass, data$wingSpan, data$fatMass, data$taxon,
-                    data$wingArea, cons)
+  results$range <-ifelse( data$taxon == 1, .breguet(bodyMass = data$allMass,
+                                                    wingSpan = data$wingSpan,
+                                                    fatMass = data$fatMass,
+                                                    ordo = data$taxon,
+                                                    wingArea = data$wingArea,
+                                                    cons = cons),
+      .breguet_adj(bodyMass = data$allMass,
+                   wingSpan = data$wingSpan,
+                   fatMass = data$fatMass,
+                   ordo = data$taxon,
+                   wingArea= data$wingArea,
+                   cons = cons)
     )
 
   # results should be named vectors
