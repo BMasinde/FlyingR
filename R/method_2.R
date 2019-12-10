@@ -176,19 +176,6 @@
     apply(cbind(liftDragStart, liftDragEnd), 1, mean) *
     log(1 / (1 - fatFrac)) / 1000
 
-  # Power curve
-  #pc <- .pow.curve(bodyMass, wingSpan, wingArea, cons)
-
-  ## Results ###################################################################
-
-  # results <- list("Range" = round(kmRange,1),
-  #             "fuel" = fatFrac,
-  #             #"Vmp" = pc[[1]],
-  #             #"Vmr" = pc[[2]],
-  #             "constants" = cons
-  #             )
-
-  #return(results)
   return(round(kmRange, 1))
 }
 
