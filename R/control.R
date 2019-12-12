@@ -1,4 +1,4 @@
-
+# function takes user settings and generates constants to be used for simulation
 .control <- function(settings) {
 
   if (missing(settings) == FALSE &&
