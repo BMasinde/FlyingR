@@ -4,23 +4,38 @@
 \alias{flysim}
 \title{Range Estimation}
 \usage{
-flysim(data, control = list())
+flysim(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
+             fill = TRUE, comment.char = "", ..., data = NULL,
+             settings = list())
 }
 \arguments{
-\item{fileArgs}{Arguments for path to data. Same arguments as would be supplied
-to read.csv(), but as a list}
+\item{file}{Arguments for path to data.}
+
+\item{header}{Logical. If TRUE use first row as column headers}
+
+\item{sep}{separator}
+
+\item{quote}{The set of quoting characters. see read.csv}
+
+\item{dec}{The character used in the file for decimal points.}
+
+\item{fill}{See read.csv}
+
+\item{comment.char}{For more details see read.csv}
+
+\item{...}{further arguments see read.csv}
 
 \item{data}{A data frame.}
 
-\item{control}{A list for re-defining constants. See details.}
+\item{settings}{A list for re-defining constants. See details.}
 }
 \value{
 S3 class object with range estimates based on methods defined and
-       constants
+       settings used
 \itemize{
-   \item range estimates in kilometre
-   \item constants (list)
-   \item
+   \item range estimates (Km)
+   \item settings used
+   \item data
 }
 }
 \description{
@@ -28,7 +43,8 @@ Practical range estimation of birds using methods in Pennycuik (1975)
 Mechanics of Flight. These methods are based on Breguet equations.
 }
 \details{
-The option *control takes the folowing arguments
+The option *settings takes the arguments (those particulary
+required by this function)
 \itemize{
    \item ppc: Profile power constant
    \item eFat: Energy content of fuel from fat
@@ -44,8 +60,8 @@ The option *control takes the folowing arguments
 }
 }
 \examples{
-flysim(data = birds, control = list(energy = 3.89*10^7))
-flysim(data = birds,  control = list(airDensity = 0.905))
+flysim(data = birds, settings = list(eFat = 3.89*10^7))
+flysim(data = birds,  settings = list(airDensity = 0.905))
 
 }
 \author{
