@@ -119,15 +119,15 @@
 ################################################################################
 #' @name .wing.frequency
 #' @author Brian Masinde
-#' @param m all-up mass
+#' @param bm all-up mass
 #' @param g gravity
 #' @param ws wing span
 #' @param wa wing area
 #' @param rho air density
 #' @description wing beat frequency at specified air density
 #'
-.wingbeat.freq <- function(m, ws, wa, cons){
-  f <- m^0.375*cons$g^0.5*ws^(-23/24)*wa^(-1/3)*cons$airDensity^(-3/8)
+.wingbeat.freq <- function(bm, ws, wa, cons){
+  f <- bm^0.375*cons$g^0.5*ws^(-23/24)*wa^(-1/3)*cons$airDensity^(-3/8)
 }
 
 ################################################################################
@@ -142,11 +142,11 @@
 #'              speed. In flight this speed is identified when effective lift drag
 #'              ratio ceases to increases.
 
-.max.range.speed <- function(m, ws, cons) {
-  num <- cons$ipf ^ 0.25 * m ^ 0.5 * cons$g ^ 0.5
+.max.range.speed <- function(bm, ws, cons) {
+  num <- cons$ipf ^ 0.25 * bm ^ 0.5 * cons$g ^ 0.5
 
   den <-
-    cons$airDensity ^ 0.5 * (cons$bdc * .body.front.area(m)) ^ 0.25 *
+    cons$airDensity ^ 0.5 * (cons$bdc * .body.front.area(bm)) ^ 0.25 *
     .disc.area(ws) ^ 0.25
 
   Vmr <- num / den
