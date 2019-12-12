@@ -121,23 +121,19 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   if (!is.null(data$name)) {
     names(results$range) <- as.vector(data$name)
     for(i in 1:length(simulation)) {
-      for(j in 1:length(simulation[[i]])){
         names(simulation[[i]]) <- as.vector(data$name)
-      }
     }
   } else {
     names(results$range) <- as.vector(data$ID)
     for(i in 1:length(simulation)) {
-      for(j in 1:length(simulation[[i]])){
-        names(simulation[[i]]) <- as.vector(data$ID)
-      }
+      names(simulation[[i]]) <- as.vector(data$ID)
     }
   }
 
   # store the rest of results
   results$mechPow <- simulation$mechPow
-  results$bm <- simulation$bm
-  results$fm <- simulation$fm
+  results$bodyMass <- simulation$bm
+  results$fatMass <- simulation$fm
   results$chemPow <- simulation$E
 
   # return object of class migrate
