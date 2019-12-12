@@ -1,8 +1,8 @@
-#' Identify and rename columns in Data
-#' @author Brian Masinde
-#' @name .colnames.match
-#' @param data
-#' @return data returns processed data
+# Identify and rename columns in Data
+# @author Brian Masinde
+# @name .colnames.match
+# @param data
+# @return data returns processed data
 
 .colnames.match <- function(data) {
   # data should be a dataframe
