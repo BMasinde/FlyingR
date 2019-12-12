@@ -10,17 +10,17 @@
 #' @param header Logical. If TRUE use first row as column headers
 #' @param sep separator
 #' @param quote The set of quoting characters. see read.csv
-#' @param dec The character used in the file for decimal points.
+#' @param dec The character used in the file for decimal points
 #' @param fill See read.csv
 #' @param comment.char For more details see read.csv
 #' @param ... further arguments see read.csv
-#' @param data A data frame.
-#' @param settings A list for re-defining constants. See details.
+#' @param data A data frame
+#' @param settings A list for re-defining constants. See details
 #' @param method Methods for fuel management
 #' @param speed_control One of two speed control methods. By default
 #'        \emph{constant_speed} is used. \emph{vvmp_constant} is the alternative.
 #'        The former holds the true airspeed constant while the latter holds the
-#'        ratio of true airspeed and minimum power speed constant.
+#'        ratio of true airspeed and minimum power speed constant
 #'
 #' @details The option *control takes the folowing arguments
 #' \itemize{
@@ -59,7 +59,10 @@
 #' migrate(data = birds,  method = "cmm", settings = list(airDensity = 0.905))
 #'
 #'
-#' @usage migrate(data, settings = list(), method = "cmm", speed_control = "constant_speed")
+#' @usage migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
+#'                fill = TRUE, comment.char = "", ...,
+#'                data = NULL, settings = list(), method = "cmm",
+#'                speed_control = "constant_speed")
 #'
 
 

@@ -47,7 +47,9 @@
 #' flysim(data = birds, settings = list(eFat = 3.89*10^7))
 #' flysim(data = birds,  settings = list(airDensity = 0.905))
 #'
-#' @usage flysim(data, settings = list())
+#' @usage flysim(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
+#'              fill = TRUE, comment.char = "", ..., data = NULL,
+#'              settings = list())
 
 
 flysim <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
