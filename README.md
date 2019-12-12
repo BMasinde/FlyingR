@@ -18,10 +18,10 @@ Install the development version from [GitHub](https://github.com/) with:
 devtools::install_github("BMasinde/flight")
 ```
 
-Example
--------
+Examples
+--------
 
-This is a basic example which shows you how to solve a common problem:
+### Time-Marching computation
 
 ``` r
 library(flying)
@@ -30,38 +30,70 @@ library(flying)
 ## birds comes with the package
 data("birds")
 
-birds_range <- flysim(data = birds)
-#> >> ctrl not defined. Using default constants. <<
+simulation <- migrate(data = birds,  method = "cmm", settings = list(airDensity = 0.905))
+#> Warning: No column matching muscle mass
 
-birds_range$range
-#>  [1]  3275.7  3336.3  4299.5  1559.8  4349.4  4052.9 11496.7  3724.5
-#>  [9]  3904.7  3380.5  2797.9  2364.3  2426.9  5567.1 10797.4  5997.5
-#> [17]  5576.2  2993.6  6982.9  6497.1  4319.5  4177.7  2951.3  2933.6
-#> [25]  3217.9  6208.7  5561.5  7174.2
+simulation$range
+#>           Anser anser  Hydrobates pelagicus   Pachyptila desolata 
+#>              3099.512              2711.612              3728.924 
+#>       Regulus regulus      Calidris canutus     Aegypius monachus 
+#>              1134.909              3845.427              3523.496 
+#>      Limosa lapponica           Anas crecca       Hirundo rustica 
+#>             11488.486              3406.054              2987.473 
+#>         Cygnus cygnus          Sylvia borin     Luscinia luscinia 
+#>              3097.141              2281.368              1892.490 
+#>       Corvus monedula         Anas penelope   Fregata magnificens 
+#>              2051.622              5206.999              9954.016 
+#>      Larus ridibundus      Diomedea exulans   Phalacrocorax carbo 
+#>              5359.893              5519.687              2613.821 
+#>       Gyps rueppellii   Torgos tracheliotus         Ardeotis kori 
+#>              6443.840              5800.438              3918.554 
+#>      Sturnus vulgaris     Fringilla coelebs      Carduelis spinus 
+#>              3603.239              2420.191              2262.704 
+#>     Turdus philomelos Calidris tenuirostris     Buteo swainsoni M 
+#>              2712.934              5689.756              5102.483 
+#>     Buteo swainsoni F 
+#>              6459.878
 ```
+
+The function also returns the mechanical and chemical power during the simulation
+
+### Range estimation based on ODE
+
+This function estimates the range based on Pennycuick (1975) Mechanics of Flight where Breguet set of equations are used.
 
 ``` r
 ## when estimating range of a single bird
-Garden_Warbler <- list("name" = "Garden Warbler",
-                       "body_mass" = 0.022,
-                       "fat_mass" = 0.00660,
-                       "wing_span" = 0.240,
-                       "wing_area" = 0.0110,
-                       "order" = as.factor(1)
-)
+birds_range <- flysim(data = birds,  settings = list(airDensity = 0.905))
+#> Warning: No column matching muscle mass
 
-G_warbler <- flysim(data = Garden_Warbler, ctrl = list(airDensity = 0.9093))
-
-G_warbler$range
-#> [1] 2873.6
+birds_range$range
+#>           Anser anser  Hydrobates pelagicus   Pachyptila desolata 
+#>                3193.8                3252.9                4192.0 
+#>       Regulus regulus      Calidris canutus     Aegypius monachus 
+#>                1521.6                4240.6                3951.6 
+#>      Limosa lapponica           Anas crecca       Hirundo rustica 
+#>               11209.3                3797.8                3898.0 
+#>         Cygnus cygnus          Sylvia borin     Luscinia luscinia 
+#>                3296.0                2801.7                2301.9 
+#>       Corvus monedula         Anas penelope   Fregata magnificens 
+#>                2452.7                5428.0               10527.4 
+#>      Larus ridibundus      Diomedea exulans   Phalacrocorax carbo 
+#>                6113.1                5436.8                2918.8 
+#>       Gyps rueppellii   Torgos tracheliotus         Ardeotis kori 
+#>                6808.3                6334.7                4211.5 
+#>      Sturnus vulgaris     Fringilla coelebs      Carduelis spinus 
+#>                4197.4                3036.6                2926.6 
+#>     Turdus philomelos Calidris tenuirostris     Buteo swainsoni M 
+#>                3243.8                6053.5                5671.6 
+#>     Buteo swainsoni F 
+#>                6994.8
 ```
-
-The function *flysim* also outputs: constants used, fuel, Minimum power speed *Vmp*, Maximum range speed *Vmr* (still needs looking into), and lastly the data).
 
 The data
 --------
 
-*birds* definitions pulled from Flight program in-built datasets and fat mass g randomly generated where initially zero. Users's data should have columns named appropriately. The package looks for columns named *id, name or species.name*, *bodymass or allupmass*, *wingspan, ws*, *wingarea*, *ordo, order* (which is a factored column with levles 1 or 2 passerines and non-passerines respectively. Lastly *fatmass, fat.mass, fat\_mass*.
+*birds* definitions pulled from Flight program in-built datasets and fat mass g randomly generated where initially zero. Users's data should have columns named appropriately. The package looks for columns named *id, name or species.name*, *bodymass or allupmass*, *wingspan, ws*, *wingarea*, *ordo, order* (which is a factored column with levels 1 or 2 passerines and non-passerines respectively. Lastly *fatmass, fat.mass, fat\_mass*.
 
 ``` r
 birds

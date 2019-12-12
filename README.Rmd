@@ -32,10 +32,9 @@ Install the development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("BMasinde/flight")
 ```
-## Example
+## Examples
 
-This is a basic example which shows you how to solve a common problem:
-
+###  Time-Marching computation 
 ```{r example}
 library(flying)
 ## basic example code
@@ -43,37 +42,28 @@ library(flying)
 ## birds comes with the package
 data("birds")
 
-birds_range <- flysim(data = birds)
+simulation <- migrate(data = birds,  method = "cmm", settings = list(airDensity = 0.905))
+
+simulation$range
+```
+
+The function also returns the mechanical and chemical power during the simulation
+
+### Range estimation based on ODE
+This function estimates the range based on Pennycuick (1975) Mechanics of Flight where Breguet set of equations are used.
+```{r}
+## when estimating range of a single bird
+birds_range <- flysim(data = birds,  settings = list(airDensity = 0.905))
 
 birds_range$range
 ```
-
-```{r}
-## when estimating range of a single bird
-Garden_Warbler <- list("name" = "Garden Warbler",
-                       "body_mass" = 0.022,
-                       "fat_mass" = 0.00660,
-                       "wing_span" = 0.240,
-                       "wing_area" = 0.0110,
-                       "order" = as.factor(1)
-)
-
-G_warbler <- flysim(data = Garden_Warbler, ctrl = list(airDensity = 0.9093))
-
-G_warbler$range
-```
-
-
-
-The function *flysim* also outputs: constants used, fuel, Minimum power speed
-*Vmp*, Maximum range speed *Vmr* (still needs looking into), and lastly the data).
 
 ## The data
 *birds* definitions pulled from Flight program in-built datasets and fat mass g
 randomly generated where initially zero. Users's data should have columns named
 appropriately. The package looks for columns named *id, name or species.name*,
 *bodymass or allupmass*, *wingspan, ws*, *wingarea*, *ordo, order* (which is a
-factored column with levles 1 or 2 passerines and non-passerines respectively.
+factored column with levels 1 or 2 passerines and non-passerines respectively.
 Lastly *fatmass, fat.mass, fat_mass*.
 
 ```{r }
