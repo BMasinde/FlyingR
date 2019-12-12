@@ -6,7 +6,7 @@
 #'
 #' @name flysim
 #' @param file Arguments for path to data.
-#' @param header Lofical. If TRUE use first row as column headers
+#' @param header Logical. If TRUE use first row as column headers
 #' @param sep separator
 #' @param quote The set of quoting characters. see read.csv
 #' @param dec The character used in the file for decimal points.
@@ -16,7 +16,7 @@
 #' @param data A data frame.
 #' @param control A list for re-defining constants. See details.
 #'
-#' @details The option *settings takes the folowing arguments (those particulary
+#' @details The option *settings takes the arguments (those particulary
 #' required by this function)
 #' \itemize{
 #'    \item ppc: Profile power constant
