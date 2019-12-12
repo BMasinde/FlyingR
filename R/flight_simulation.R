@@ -14,7 +14,7 @@
 #' @param comment.char For more details see read.csv
 #' @param ... further arguments see read.csv
 #' @param data A data frame.
-#' @param control A list for re-defining constants. See details.
+#' @param settings A list for re-defining constants. See details.
 #'
 #' @details The option *settings takes the arguments (those particulary
 #' required by this function)
@@ -51,15 +51,15 @@
 
 
 flysim <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
-                   fill = TRUE, comment.char = "", ..., data, settings = list()) {
+                   fill = TRUE, comment.char = "", ..., data = NULL, settings = list()) {
 
   ##  Error check data #########################################################
   # missing file and data should throw an error
-  if (missing(file) == TRUE & missing(data) == TRUE) {
+  if (missing(file) == TRUE & is.null(data) == TRUE) {
     stop("Data not found \n", call. = TRUE)
   }
 
-  if (missing(file) == FALSE & missing(data) == FALSE) {
+  if (missing(file) == FALSE & is.null(data) == FALSE) {
     stop("Both path and data given. Function needs only one of the two \n", call. = TRUE)
   }
 

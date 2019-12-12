@@ -1,18 +1,11 @@
 #' @title Range Estimation
-#' @description  Practical range estimation of birds using methods in Pennycuik (1975)
-#' Mechanics of Flight. These methods are based on Breguet equations.
+#' @description  Practical range estimation of birds using methods in Pennycuick (1998)
+#' and Pennycuick (2008).
 #'
 #' @author Brian Masinde
 #'
 #' @name migrate
 #'
-#' @param data A data frame.
-#' @param settings A list for re-defining constants. See details.
-#' @param method Methods for fuel management
-#' @param speed_control One of two speed control methods. By default
-#'        \emp{constant_speed} is used. \emph{vvmp_constant} is the alternative.
-#'        The former holds the true airspeed constant while the latter holds the
-#'        ratio of true airspeed and minimum power speed constant.
 #' @param file The name of the file which the data are to read from
 #' @param header Logical. If TRUE use first row as column headers
 #' @param sep separator
@@ -21,6 +14,13 @@
 #' @param fill See read.csv
 #' @param comment.char For more details see read.csv
 #' @param ... further arguments see read.csv
+#' @param data A data frame.
+#' @param settings A list for re-defining constants. See details.
+#' @param method Methods for fuel management
+#' @param speed_control One of two speed control methods. By default
+#'        \emph{constant_speed} is used. \emph{vvmp_constant} is the alternative.
+#'        The former holds the true airspeed constant while the latter holds the
+#'        ratio of true airspeed and minimum power speed constant.
 #'
 #' @details The option *control takes the folowing arguments
 #' \itemize{
@@ -41,7 +41,7 @@
 #'    \item muscDensity: Density of the flight muscles.
 #'    \item phr: Protein hydration ratio
 #'}
-#' @include control.R misc_functions.R lookup_table2.R input_match.R
+#' @include control.R input_match.R misc_functions.R cmm2cpp.R
 #' @return S3 class object with range estimates based on methods defined and
 #'        settings
 #' \itemize{
@@ -55,7 +55,7 @@
 #' @export migrate
 #'
 #' @examples
-#' migrate(data = birds, settings = list(energy = 3.89*10^7))
+#' migrate(data = birds, settings = list(eFat = 3.89*10^7))
 #' migrate(data = birds,  method = "cmm", settings = list(airDensity = 0.905))
 #'
 #'
@@ -65,7 +65,7 @@
 
 migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                     fill = TRUE, comment.char = "", ...,
-                    data, settings = list(), method = "cmm",
+                    data = NULL, settings = list(), method = "cmm",
                     speed_control = "constant_speed") {
 
   # object with results
@@ -80,11 +80,11 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   )
 
   # both file and data not given throw an error
-  if (missing(file) == TRUE & missing(data) == TRUE) {
+  if (missing(file) == TRUE & is.null(data) == TRUE) {
     stop("Data not found \n", call. = TRUE)
   }
 
-  if (missing(file) == FALSE & missing(data) == FALSE) {
+  if (missing(file) == FALSE & is.null(data) == FALSE) {
     stop("Both path and data given. Function needs only one of the two \n", call. = TRUE)
   }
 
