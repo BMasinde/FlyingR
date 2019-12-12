@@ -28,7 +28,6 @@ Collate:
     'RcppExports.R'
     'birds_documentation.R'
     'cmm2cpp.R'
-    'constant_muscle_mass.R'
     'control.R'
     'method_2.R'
     'method_1.R'
@@ -36,7 +35,6 @@ Collate:
     'lookup_table2.R'
     'misc_functions.R'
     'flight_simulation.R'
+    'flying.R'
     'migrate.R'
-    'path_to_data.R'
-    'time_march.R'
 LinkingTo: Rcpp
