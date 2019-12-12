@@ -10,7 +10,7 @@
 #' @param settings A list for re-defining constants. See details.
 #' @param method Methods for fuel management
 #' @param speed_control One of two speed control methods. By default
-#'        \textit{constant_speed} is used. \textit{vvmp_constant} is the alternative.
+#'        \emp{constant_speed} is used. \emph{vvmp_constant} is the alternative.
 #'        The former holds the true airspeed constant while the latter holds the
 #'        ratio of true airspeed and minimum power speed constant.
 #' @param file The name of the file which the data are to read from
