@@ -1,9 +1,9 @@
-#' Constant muscle mass time marching computation
-#' @author Brain Masinde.
-#' @name constant_muscle_mass
-#' @param data Data as output from .colnames.match
-#' @param cons
-#' @param speed_control speed control as either
+# Constant muscle mass time marching computation
+# @author Brain Masinde.
+# @name .constant_muscle_mass
+# @param data Data as output from .colnames.match
+# @param cons
+# @param speed_control speed control as either
 
 
 .constant_muscle_mass <- function(data, cons, speed_control) {
