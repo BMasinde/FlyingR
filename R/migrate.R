@@ -41,7 +41,7 @@
 #'    \item muscDensity: Density of the flight muscles.
 #'    \item phr: Protein hydration ratio
 #'}
-#' @include control.R input_match.R misc_functions.R cmm2cpp.R
+#' @include control.R input_match.R misc_functions.R constant_muscle_mass.R
 #' @return S3 class object with range estimates based on methods defined and
 #'        settings
 #' \itemize{
@@ -112,7 +112,7 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   }
 
   if(method == "cmm") {
-    simulation <- .constant_muscle_mass(data, cons, speed_control)
+    simulation <- .constant.muscle.mass(data, cons, speed_control)
   } else {
     print("No other method for now")
   }

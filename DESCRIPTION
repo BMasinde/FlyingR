@@ -27,7 +27,7 @@ VignetteBuilder: knitr
 Collate: 
     'RcppExports.R'
     'birds_documentation.R'
-    'cmm2cpp.R'
+    'constant_muscle_mass.R'
     'control.R'
     'method_2.R'
     'method_1.R'
