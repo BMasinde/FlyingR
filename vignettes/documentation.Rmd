@@ -28,6 +28,13 @@ tab.2_cap <- table_nums(name = "tab_2",
 
 
 # Introduction
+Flight is a computer program that accompanies @penny08 which in detail discusses
+the theory behind bird flight. However, there are two drawbacks whih the program.
+First, it is only available for windows, and second, it requires manuall imputation
+of bird measurements which is a tedious process when one has thousands of birds to 
+analyse. Thus, the aim of this project is to implement these methods in R. R runs on
+all major operating system and the package is able to read files from a path, with
+multiple bird samples.
 
 ## Mechanics of Flight
 Mechanics of flight in birds requires more than a set of wings. For example 
@@ -478,6 +485,8 @@ Breguet equations assume that lift:drag ratio remains constant through out the f
 required distance or it runs out of fat mass. This procedure places no restriction
 on speed. @penny03 points out that the remaining fat and mass at the end of the flight can be compared with field observations. 
 
+### Constant Muscle Mass criterion.
+
 ### Protein withdrawal criterion.
 @penny03 find that holding specific work constant is most realistic criteria for
 determining how  much fuel and protein to be withdrawn during 6 minute intervals
@@ -488,12 +497,6 @@ mass of myofibrils is reduced by an amount sufficient to restore specific work
 to the value it had at beginning of flight. In addition, fuel energy corresponding
 to mass of dry protein consumed is deducted from energy that would otherwise
 come from fuel/fat consumption.
-
- 
-
-
-
-
 Also, initial climb, and all other flight styles other than continuous wing flapping are not accounted for. 
 
 # References
