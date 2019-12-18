@@ -285,66 +285,54 @@
 ################################################################################
 #' @name .pow.curve
 #' @author Brian Masinde
-#' @inheritParams .prof.pow
-#' @inheritParams .prof.pow.ratio
-#' @inheritParams .abs.min.pow
-#' @inheritParams .parasite.pow
-#' @inheritParams .induced.pow
-#' @inheritParams .body.front.area
-#' @inheritParams .min.pow.speed
-#' @return Total power from minimum power speed to maximum range speed.
-#' @description In calculating the power curve, the minimum power speed is
-#'              estimated where total power is stable. Calculation ends slightly
-#'              after maximum range speed is achieved. According to Pennycuick
-#'              this should be when N (Effective lift:drag ratio from fuel
-#'              consumption ceases to increase). Therefore, N is calculated at
-#'              each speed step.
+#' @param bm all-up body mass
+#' @param ws wing span
+#' @param wa wing area
+#' @param tas true airspeed
+#' @param cons settings
+#' @return Total mechanical power using true airspeed
+#' @description In calculating the power curve, the true air-speed is
+#'              estimated where total power is stable. Since we are only interested
+#'              in the mechanical power where it is stable the estimation ends slightly
+#'              above the total mechanical power estimated at start of flight.
 #'
 
-.pow.curve <- function(m, ws, wa, cons) {
-  # minimum power speed for birds
-  #m <- body_mass
-  #ws <- wing_span
-  #wa <- wing_area
+.pow.curve <- function(m, ws, wa, tas, cons) {
+  # starting mechanical power
+  start_mech_pow <- .total_Mech_Pow_cpp(
+    bm = bm,
+    ws = ws,
+    wa = wa,
+    vt = tas, # holding speed constant
+    g = cons$g,
+    airDensity = cons$airDensity,
+    ipf = cons$ipf,
+    bdc = cons$bdc,
+    ppc = cons$ppc
+  )
 
-  Vmp <- .min.pow.speed(m, ws, cons)
+  # reduce tas slightly
+  true_speed <- tas * 0.8
+  current_mech_pow <- 0  # power curve estimate of mechanical power
+  repeat {
+    if ((current_mech_pow > start_mech_pow) == TRUE) {
+      break
+    } else{
+      true_speed <- true_speed + 0.1
 
-  for (i in 1:length(Vmp)) {
-    init_pow <- ceiling(.total.mech.power(m[i], ws[i], wa[i], Vmp[i], cons))
-
-    nxt_pow <- ceiling(.total.mech.power(m[i], ws[i], wa[i], Vmp[i] + 0.1, cons))
-
-    j <- 2
-    while (init_pow > nxt_pow) {
-      init_pow <- nxt_pow
-      nxt_pow <-
-        ceiling(.total.mech.power(m[i], ws[i], wa[i], Vmp[i] + (0.1 * j), cons))
-      j <- j + 1
+      current_mech_pow <- .total_Mech_Pow_cpp(
+        bm = bm,
+        ws = ws,
+        wa = wa,
+        vt = tas,
+        # holding speed constant
+        g = cons$g,
+        airDensity = cons$airDensity,
+        ipf = cons$ipf,
+        bdc = cons$bdc,
+        ppc = cons$ppc
+      )
     }
-
-    # lowest rate of muscular exertion required to fly
-    Vmp[i] <- Vmp[i] + (0.1 * j)
-
   }
-
-  # maximum range speed
-  Vmr <- .max.range.speed(m, ws, cons)
-
-  # # mechanical power btwn Vmp and Vmr
-  #
-  # mech_power <- list()
-  # chem_power <- list()
-  # for (i in length(Vmp)) {
-  #   while (Vmp[i] < Vmr) {
-  #     # mech power
-  #    mech_power[[i]] <-  pc.proc(m[i], ws[i], wa[i], Vmp[i])
-  #    chem_power[[i]] <- mech_power[[i]]/cons$n
-  #    Vmp[i] <- Vmp[i] + 0.1
-  #   }
-  # }
-
-  # return list of Vmp and Vmr
-  return(list(Vmp, Vmr))
+  return(current_mech_pow)
 }
-
-###############################################################################
