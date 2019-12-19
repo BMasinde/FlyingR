@@ -25,13 +25,13 @@ Examples
 
 ``` r
 library(flying)
+#> Welcome to package flying
 ## basic example code
 
 ## birds comes with the package
 data("birds")
 
 simulation <- migrate(data = birds,  method = "cmm", settings = list(airDensity = 0.905))
-#> Warning: No column matching muscle mass
 
 simulation$range
 #>           Anser anser  Hydrobates pelagicus   Pachyptila desolata 
@@ -65,7 +65,6 @@ This function estimates the range based on Pennycuick (1975) Mechanics of Flight
 ``` r
 ## when estimating range of a single bird
 birds_range <- flysim(data = birds,  settings = list(airDensity = 0.905))
-#> Warning: No column matching muscle mass
 
 birds_range$range
 #>           Anser anser  Hydrobates pelagicus   Pachyptila desolata 
@@ -93,7 +92,7 @@ birds_range$range
 The data
 --------
 
-*birds* definitions pulled from Flight program in-built datasets and fat mass g randomly generated where initially zero. Users's data should have columns named appropriately. The package looks for columns named *id, name or species.name*, *bodymass or allupmass*, *wingspan, ws*, *wingarea*, *ordo, order* (which is a factored column with levels 1 or 2 passerines and non-passerines respectively. Lastly *fatmass, fat.mass, fat\_mass*.
+*birds* definitions pulled from Flight program in-built datasets and fat mass randomly generated where initially zero. In addition, by default muscle mass was derived as 0.17 fraction of the all-up mass. Users's data should have columns named appropriately. The package looks for columns named *id, name or species.name*, *bodymass or allupmass*, *wingspan, ws*, *wingarea*, *ordo, order* (which is a factored column with levels 1 or 2 passerines and non-passerines respectively) *fatmass, fat.mass, fat\_mass* and lastly *muscle\_mass*.
 
 ``` r
 birds
@@ -126,4 +125,33 @@ birds
 #> 26 Calidris tenuirostris    0.23300     0.587  0.08970     2   0.03960
 #> 27     Buteo swainsoni M    0.77500     1.250  0.22248     2   0.21000
 #> 28     Buteo swainsoni F    1.06000     1.330  0.37117     2   0.24000
+#>    Muscle.mass
+#> 1    0.6409000
+#> 2    0.0043860
+#> 3    0.0263500
+#> 4    0.0009214
+#> 5    0.0215900
+#> 6    1.6829999
+#> 7    0.0623900
+#> 8    0.0399500
+#> 9    0.0032300
+#> 10   2.1250000
+#> 11   0.0037400
+#> 12   0.0045900
+#> 13   0.0307700
+#> 14   0.1309000
+#> 15   0.2839000
+#> 16   0.0484500
+#> 17   1.6268999
+#> 18   0.4352000
+#> 19   1.2410000
+#> 20   1.1220000
+#> 21   2.0229999
+#> 22   0.0139230
+#> 23   0.0039100
+#> 24   0.0019040
+#> 25   0.0121720
+#> 26   0.0396100
+#> 27   0.1317500
+#> 28   0.1802000
 ```

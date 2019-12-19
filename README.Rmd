@@ -59,12 +59,13 @@ birds_range$range
 ```
 
 ## The data
-*birds* definitions pulled from Flight program in-built datasets and fat mass g
-randomly generated where initially zero. Users's data should have columns named
+*birds* definitions pulled from Flight program in-built datasets and fat mass
+randomly generated where initially zero. In addition, by default muscle mass was
+derived as 0.17 fraction of the all-up mass. Users's data should have columns named
 appropriately. The package looks for columns named *id, name or species.name*,
 *bodymass or allupmass*, *wingspan, ws*, *wingarea*, *ordo, order* (which is a
-factored column with levels 1 or 2 passerines and non-passerines respectively.
-Lastly *fatmass, fat.mass, fat_mass*.
+factored column with levels 1 or 2 passerines and non-passerines respectively)
+*fatmass, fat.mass, fat_mass* and lastly *muscle_mass*.
 
 ```{r }
 birds
