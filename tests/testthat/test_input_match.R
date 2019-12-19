@@ -37,7 +37,7 @@ test_that("Factor in ordo other 1 and 2 throws error", {
   expect_error(.colnames.match(data = bad_factor))
 })
 
-no_muscle_mass <- birds
+no_muscle_mass <- birds[1:6]
 
 test_that("No muscle mass throws a warning", {
   expect_warning(.colnames.match(data = no_muscle_mass))
