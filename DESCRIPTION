@@ -31,6 +31,7 @@ Collate:
     'RcppExports.R'
     'birds_documentation.R'
     'constant_muscle_mass.R'
+    'constant_specific_work.R'
     'control.R'
     'method_2.R'
     'method_1.R'
