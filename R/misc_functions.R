@@ -297,7 +297,8 @@
 #'              above the total mechanical power estimated at start of flight.
 #'
 
-.pow.curve <- function(m, ws, wa, tas, cons) {
+.pow.curve <- function(bm, ws, wa, tas, cons) {
+  #cons <- cons
   # starting mechanical power
   start_mech_pow <- .total_Mech_Pow_cpp(
     bm = bm,
@@ -324,7 +325,7 @@
         bm = bm,
         ws = ws,
         wa = wa,
-        vt = tas,
+        vt = true_speed,
         # holding speed constant
         g = cons$g,
         airDensity = cons$airDensity,
