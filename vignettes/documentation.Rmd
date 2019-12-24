@@ -29,44 +29,28 @@ tab.2_cap <- table_nums(name = "tab_2",
 
 # Introduction
 Flight is a computer program that accompanies @penny08 which in detail discusses
-the theory behind bird flight. However, there are two drawbacks whih the program.
-First, it is only available for windows, and second, it requires manuall imputation
+the theory behind bird flight. However, there are two drawbacks with the program.
+First, it is only available for Windows OS, and second, it requires manual imputation
 of bird measurements which is a tedious process when one has thousands of birds to 
-analyse. Thus, the aim of this project is to implement these methods in R. R runs on
-all major operating system and the package is able to read files from a path, with
-multiple bird samples.
+analyse. Thus, the aim of this project is to implement in R, range estimation methods.
+R runs on all major operating system and the package is able to read files
+from a path, with multiple bird samples.
 
-## Mechanics of Flight
-Mechanics of flight in birds requires more than a set of wings. For example 
-penguins have wings but yet they do not fly. @penny08 using Flight program shows 
-that for a penguin to fly it requires a wingbeat frequency equivalent to a 
-hummingbird's. The wingbeat frequency is proportional to the all-up body mass, 
-wing span, wing area, accelaration due to gravity and air density. Therefore, in
-the penguin example, this implies comparing these physiological variables 
-between penguins and hummingbirds (gravity and air density as constants). 
-
-@penny75 determined that five variables are necessary in estimating the flight 
-range of birds. These are:
-
-*   __All up mass__: The body mass (Kg.) including contents of the crop, 
-fuel (fat mass), and any other equipment the bird has to carry for the duration 
-of the flight.
-
-*   __Wing span__: In meters measured from tip to tip of the fully outstretched 
-wings.
-
-*   __Fat mass__: Mass of fat that is consumable as fuel.
-
-*   __Order__: Passerine vs non-passerine.
-
-*   __Wing area__: Area of both wings projected on a flat surface, including the 
-body part in-between the wings.
+The theory behind flight mechanism has evolved over time. @penny75 used Breguet equations
+originally intended for range estimation in fixed wing aircraft. Later ornithologists had 
+hypotheses that in long-distance bird migration a more complex process occurs. 
+And these were confirmed by field study where samples of birds were weighed before
+migration and after migration. Wind tunnel studies were also done to determine
+the aerodynamics of birds, that is the body components that contribute to lift and drag.
+Considering the tremendous distances covered by migrating birds, at great cost,
+this branch of ornithology is more concerned with the mechanical and chemical
+process that aid migration.
 
 ## Migration
 Bird migration is influenced by seasonal patterns, primarily for food and 
 breeding. Studying bird migration takes more into account than general flight. 
 The distance covered during migration varies widely between species, and 
-therofore it is of interest to understand physiological components that explain 
+therefore it is of interest to understand physiological components that explain 
 differences in range. Estimation of flight range in migrating birds aids in 
 estimating flight time therefore number of stops for feeding and resting before 
 final destination (hot-spots). In ornithology, flight range is important because
@@ -78,30 +62,56 @@ victims of predation, diseases, weather and collisions. What are the consequence
 if birds have to migrate longer distances due to interference with hot-spots, 
 either due to human activity or climate change.
 
+## Mechanics of Flight
+Mechanics of flight in birds requires more than a set of wings. For example 
+penguins have wings but yet they do not fly. @penny08 using Flight program shows 
+that for a penguin to fly it requires a wing beat frequency equivalent to a 
+hummingbird's. The wing beat frequency is proportional to the all-up body mass, 
+wing span, wing area, acceleration due to gravity and air density. Therefore, in
+the penguin example, this implies comparing these physical characteristics 
+between penguins and hummingbirds (gravity and air density as constants). 
+
+@penny75 determined that five bird body measurements are necessary in estimating
+the flight range of birds. These are:
+
+*   __All up mass__: The body mass (Kg.) including contents of the crop, 
+fuel (fat mass), and any other equipment the bird has to carry for the duration 
+of the flight.
+
+*   __Wing span__: In meters measured from tip to tip of the fully outstretched 
+wings.
+
+*   __Fat mass__: Mass of fat that is consumable as fuel.
+
+*   __Order__: The taxon the bird belongs to (asserine vs non-passerine). These
+two taxons in theory have different metabolism rates. 
+
+*   __Wing area__: Area of both wings projected on a flat surface, including the 
+body part in-between the wings.
+
+
 ## Outline method 1 based on Brequet equations.
-This method is intended for passerines with body mass less than 50 grams. In the 
-included _birds_ data set, these are:
+This method is intended for passerines with body mass less than 50 grams. Below is
+a list of constants (variable definition within the package).
 
+*  Profile power constant (ppc = 8.4). This can also be adjusted.
 
-Defined constants:
+*  Energy content of fuel per kg $e$ (eFat = 4 * 10 ^ 7)
 
-*  Profile power constant (ppcons = 8.4). This can also be adjusted.
+*  Acceleration due to gravity $g$ (g =  9.81)
 
-*  Energy content of fuel per kg (energy = 4 * 10 ^ 7)
+*  Mechanical conversion efficiency $\eta$ (mce= 0.23).
 
-*  Acceleration due to gravity (g =  9.81)
+*  Induced power factor $k$ (ipf= 1.20)
 
-*  Conversion efficiency (n= 0.23).
+*  Ventilation and circulation power $R$ (R = 1.10)
 
-*  Induced power factor (k= 1.20)
+*  Air density at flight height $\rho$. This can be changed
+according to altitude the bird species is known to fly (default airDensity = 1.00). 
 
-*  Ventilation and circulation power (R = 1.10)
+*  Body drag coefficient $C_Db$(bdc = 0.10)
 
-*  Air density at flight height (default air_dens = 1.00). This can be changed at will.
-
-*  Body drag coefficient (bdc = 0.10)
-
-*  Basal metabolic rate (power) empirical constants
+*  Basal metabolic rate $\Pi_m$ empirical constants
 
     *  alpha passerines = 6.25, alpha non-passerines = 3.79
     
@@ -116,15 +126,15 @@ $$
  fuel \ ratio = \frac{fat \ mass}{all-up \ mass}
 $$
 
-Next calculate *profile power ratio* alternative to defining it as 1.20 for each bird. In this case the equation below provides a better individual estimate to the profile power ratio. (*Function: .prof_pow_ratio()*).
+Next calculate *profile power ratio* alternative to defining it as 1.20 for each bird as was the case in the initially for these models. Instead the profile power constant is used to derive the profile power ratio. In this case the equation below provides a better individual estimate.
 
 $$
-X1 = \frac{profile \ power \ constant}{Aspect \ ratio}
+ X_1 = \frac{C_{pro}}{R_a}
 $$
 
 Where the $profile \ power \ constant = 8.4$
 $$
-Aspect \ ratio = \frac{wing \ span^2}{wing \ area}
+R_a = \frac{B^2}{wing \ area}
 $$
 
 The box-plot below shows the distribution of profile power ratio of the preset birds.
@@ -174,13 +184,13 @@ boxplot(prof.pow.ratio(birds$Wing.span, birds$Wing.area, cons),
         col = "#58CCED")
 ```
 
-In Pennycuik's earlier version, a table is provided for interpolation of metabolic power ratio based on body mass (at start of flight) and the wing span. However, in this implementation, the metabolic power ratio is calculated using the formulas provided in the book. (*Funciton: .met_pow_ratio()*).
+In Pennycuik's earlier version, a table is provided for interpolation of metabolic power ratio based on body mass (at start of flight) and the wing span. However, in this implementation, the metabolic power ratio is calculated using the formulas provided in the book. Theory states that metabolic power is required through out irrespective of what the bird is doing.
 
 $$
-X2 = \frac{6.03 \ \alpha \ \eta \ \rho^{0.5} \ b^{3/2} M ^{\delta - 5/3}}{k^{3/4}g^{5/3}}
+X2 = \frac{6.03 \ \alpha \ \eta \ \rho^{0.5} \ B^{3/2} M ^{\delta - 5/3}}{k^{3/4}g^{5/3}}
 $$
 
-Where $\alpha \ \text{and} \ \delta$ are constants from basal metabolism (see equation below), $\rho$ as air density,  b as wing span, and M as body mass.
+Where $\alpha \ \text{and} \ \delta$ are constants from basal metabolism (see equation below), $\rho$ as air density,  $B$ as wing span, and $M$ as body mass.
 
 *  Basal metabolism for passerines:
 
@@ -257,12 +267,6 @@ $$
   Y = \frac{e \eta}{g} \bigg( \frac{L}{D}\bigg)' ln \frac{1}{1 - F}
 $$
 
-In addition, the minimum power speed and the maximum range speed, are calculated and returned as output. The idea of including these, is for the construction of the power curve.
-However, the minimum power speed is estimated numerically other than analytically. This gives a better estimate.
-
-$$
-  Vmr = \frac{k^{1/4} m ^{1/2}g^{1/2}}{\rho^{1/2} A^{1/4}S_d^{1/4}}
-$$
 ## Outline method 2 based on Brequet equations.
 
 Method is only appropriate for __non-passerines__ and or birds with 
@@ -284,7 +288,7 @@ mass to be consumed during flight from the all-up body mass.
 Calculate *metabolic power ratio* but this time using body mass at end of flight.
 
 $$
-X2_{end} = \frac{6.03 \ \alpha \ \eta \ \rho^{0.5} \ b^{3/2} M_2 ^{\delta - 5/3}}{k^{3/4}g^{5/3}} \\
+X2_{end} = \frac{6.03 \ \alpha \ \eta \ \rho^{0.5} \ B^{3/2} M_2 ^{\delta - 5/3}}{k^{3/4}g^{5/3}} \\
 \\
 \text{where } M_2 = \ \text{body mass at end of flight}    
 $$
@@ -292,7 +296,7 @@ $$
 *Profile power constant* calculation remains the same as in method 1.
 
 $$
-X1  = \frac{profile \ power \ constant}{Aspect \ ratio}
+ X_1 = \frac{C_{pro}}{R_a}
 $$
 
 *Step 4*
@@ -352,9 +356,148 @@ $$
  Y = \frac{e \eta}{g} \bigg( \frac{L}{D}\bigg)'_{avg} ln \frac{1}{1 - F}
 $$
 
+## Time-marching computation
+Breguet equations assume that lift:drag ratio remains constant through out the flight. This is appropriate for fixed wing aircraft. However, birds are known to consume part of the engine (use protein in flight muscles and air-frame as supplementary fuel). This leads to an increase in lift:drag ratio during the flight as result of the reduce in body mass and thus, an increase in flight range [@penny03]. In the methods discussed above, compensation for this is done by adding 10% of fuel to the lift:drag ratio (method 1) or averaging lift:drag ratio before start of flight and at the end of flight (method 2). @penny03 cites studies which found that protein is replenished faster during short stop-overs compared to fat mass. Furthermore, the constant ($e$) cannot be assumed to be constant because of two different sources of fuel. Protein and fat have different energy content.
+
+Other than derive equations via ODE, @penny98 found it more useful to use the 
+time-marching computation. This simulation assumes that mechanical and chemical 
+powers of a bird are held constant for a short duration during flight (usually 6
+minutes), fat and muscle mass are deducted by any one of the three criteria:
+
+* Constant specific work
+
+* Constant specific power
+
+* Constant muscle mass
+
+@penny03 describes time-marching as calculating amounts of fat and protein consumed
+during a short period (6 minutes) during which all variables including power and
+speed are assumed constant. After every 6 minute interval, the birds mass composition 
+is revised taking into account the small changes in fat and protein consumed 
+during the interval. In Flight program this is repeated until the required distance
+it achieved or it runs out of fat mass. This procedure places no restriction
+on speed. @penny03 points out that the remaining fat and mass at the end of the 
+flight can be compared with field observations. 
+
+The scope of this project involves implementing the time-marching simulation with
+the constant muscle mass criterion.
+
+### Constant Muscle Mass criterion.
+Time-marching simulations really on the speed, total mechanical power, and the 
+chemical power.
+
+#### Speed
+The minimum power speed is central in time-marching computation. This is estimated
+analytically using the formula. Notice it dependent on the air density, and all-up
+body mass
+
+$$
+  V_{mp} = \frac{0.807k^{1/4} m ^{1/2}g^{1/2}}{\rho^{1/2} B^{1/2} S_{b}^{1/4}C_{Db}^{1/4}}
+$$
+
+$$
+  V_t = 1.2 \times V_{mp}
+$$
+
+#### Total mechanical power
+The total mechanical is a sum of three powers:
+
+* __Parasite power__: The rate at which power must be done to overcome drag of body [@penny08].
+For any streamlined body the drag is expressed as:
+
+$$
+D_b = \frac{\rho V_t^2 S_b C_{Db}}{2}
+$$
+And parasite power is found by multiplying the drag by the true airspeed $V_t$:
+
+$$
+P_{par} = \frac{\rho V_t^3 S_b C_{Db}}{2}
+$$
+
+where $\rho$ is the air density, $V_t$ is the true airspeed, $S_b$ is the frontal 
+area of the body and $C_{Db}$ is the body drag coefficient.
+
+* __Profile power__
+This is power needed to over the effects of the body drag. And this is a multiple
+of _profile power ratio_ (X1) and the absolute minimum power $P_{am}$:
+
+$$
+  P_{pro} = X1 \times P_{am}
+$$
+
+$$
+P_{am} = \frac{(1.05 k ^{3/4} m^{3/2} g^{3/2} S_b^{1/4} C_{Db}^{1/4})}{(\rho^{1/2}B^{3/2})}
+$$
+and $X_1$:
+
+$$
+  X_1 = \frac{C_{pro}}{R_a}
+$$
+
+* __Induced power__
+Power required to support a birds wight during forward flight.
+
+$$
+  P_{ind} = \frac{(mg^2)}{2V_{t}Sd\rho}
+$$
+
+The total mechanical power is found by summing the profile power, parasite power
+and induced power. Parasite power and induced power are depend on the true airspeed
+during flight. 
+
+$$
+P_{mech} = P_{pro} + P_{par} + P_{ind}
+$$
+
+#### Chemical power
+@Penny08 remarks that mechanical power is derived from measurements made in unaccelerated
+flight (i.e from forces and speeds that do not involve physiology), however, the chemical power
+is derived using measurements from physiological experiments. These measurements include:
+
+* Rates of consumption of fuel
+
+* Rate of consumption of oxygen
+
+* Metabolism rate
+
+It is only useful to estimate this in long aerobic flight [@Penny08].
+
+To estimate the chemical power during a flight interval, the mechanical power is
+first estimated (power required from muscles to support the weight against gravity
+). Then the mechanical power is divided by the mechanical conversion efficiency. A
+value between 0 and 1, in Flight the default is 0.23. The basal metabolism rate is
+added because metabolism is a body function that occurs irrespective of what the bird 
+is doing. Estimate derived so far is increased by $10\%$ to account for heart and lungs.
+This chemical power expresses the total energy required by a bird to sustain flight.
+
+#### Range Estimation Constant Muscle Mass Criterion 
+So assembling this mechanism to estimate the flight range, first true airspeed is 
+estimated and used to calculate the total mechanical power, Total mechanical power
+is converted to chemical power then divided by the energy content of fat (since fat
+is the only source of fuel in this scenario). Multiplying thhis by the calculation interval
+(default 6 minutes or 360 seconds) gives the range achieved during this interval
+in m/s. It was noted that decreasing the flight interval has no effect on range
+only that the estimation of the processes is more fine grained. This procedure is iterated
+over until fat mass decreases to zero. In Flight there is an option to attribute
+a small percentage of the chemical power to protein from the muscle mass, usually
+$5\%$
+
+### Protein withdrawal criterion.
+@penny03 find that holding specific work constant is most realistic criteria for
+determining how  much fuel and protein to be withdrawn during 6 minute intervals
+of flight. Specific work is defined in as work done by unit mass of contractile
+tissue muscle. Further, @penny03, states that flight muscles contain myofibrils 
+and mitochondria, which are treated separately in the simulation. To be exact enough
+mass of myofibrils is reduced by an amount sufficient to restore specific work
+to the value it had at beginning of flight. In addition, fuel energy corresponding
+to mass of dry protein consumed is deducted from energy that would otherwise
+come from fuel/fat consumption.
+Also, initial climb, and all other flight styles other than continuous wing flapping are not accounted for. 
+
+
 ## Comparison of results with Flight.
 Data used as an example, is from the program _Flight_ version 1.2.5.2 with 
-default constants. In some cases, the fat mass was set to zero as defualt, and 
+default constants. In some cases, the fat mass was set to zero as default, and 
 therefore uniformly random percentages (between 18 and 35) of all the all-up mass
 (which in this case is the _Empty.mass_ because crop is empty).
 
@@ -364,8 +507,8 @@ knitr::kable(birds, caption = "Preset birds from Flight program")
 ```
 
 In the simulation in Flight program, air density was set to 1 (Altitude 2063 
-metres above sea-level), muscle was held constant (Protein burn criterion), 
-fat energy at $4.0E+07$, continous flapping style (Flight style), and minimum
+meters above sea-level), muscle was held constant (Protein burn criterion), 
+fat energy at $4.0E+07$, continuous flapping style (Flight style), and minimum
 energy from protein at 10%. Induced power factor was set to 1.20 for all birds.
 Flight provides two methods of speed control, maximum range to minimum power 
 speed is held constant, and speed is held constant. Both of these scenarios are 
