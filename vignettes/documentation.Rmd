@@ -1,29 +1,27 @@
 ---
-title: "Range Estimation in Migratory Birds"
-output: rmarkdown::html_vignette
-author: Brian Masinde
+title: "Predicting birds' flight range"
+author: "Brian Masinde"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+    highlight: tango
+    citation_package: natbib
+  html_document:
+    standalone: true
+    self-contained: true
 vignette: >
   %\VignetteIndexEntry{documentation}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 bibliography: references.bib
+always_allow_html: yes
 ---
 ```{r packs, echo=FALSE, eval = FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(knitr)
 library(kableExtra)
 library(dplyr)
-library(captioner)
-```
-
-```{r tbs, echo=FALSE}
-# table references
-table_nums <- captioner::captioner(prefix = "Table", levels = 1)
-
-tab.1_cap <- table_nums(name = "tab_1", 
-                        caption = "Usefull constants")
-tab.2_cap <- table_nums(name = "tab_2", 
-                        caption = "German Bundesliga: Final Table 2015/16, Position 12-18")
-
+#library(captioner)
+library(flying)
 ```
 
 
@@ -37,14 +35,14 @@ R runs on all major operating system and the package is able to read files
 from a path, with multiple bird samples.
 
 The theory behind flight mechanism has evolved over time. @penny75 used Breguet equations
-originally intended for range estimation in fixed wing aircraft. Later ornithologists had 
+intended for range estimation in fixed wing aircraft. Later ornithologists had 
 hypotheses that in long-distance bird migration a more complex process occurs. 
 And these were confirmed by field study where samples of birds were weighed before
 migration and after migration. Wind tunnel studies were also done to determine
-the aerodynamics of birds, that is the body components that contribute to lift and drag.
+the aerodynamics of birds, that is, the body components that contribute to lift and drag.
 Considering the tremendous distances covered by migrating birds, at great cost,
 this branch of ornithology is more concerned with the mechanical and chemical
-process that aid migration.
+process involved during migration.
 
 ## Migration
 Bird migration is influenced by seasonal patterns, primarily for food and 
@@ -62,6 +60,7 @@ victims of predation, diseases, weather and collisions. What are the consequence
 if birds have to migrate longer distances due to interference with hot-spots, 
 either due to human activity or climate change.
 
+# Methods
 ## Mechanics of Flight
 Mechanics of flight in birds requires more than a set of wings. For example 
 penguins have wings but yet they do not fly. @penny08 using Flight program shows 
@@ -210,8 +209,7 @@ $$
 
 With both metabolism power ratio and profile power ration defined, enables interpolation of the drag (D) from the table below.
 
-`r table_nums('tab_1')`
-```{r table2, echo=FALSE, fig.cap=tab.1_cap}
+```{r factor_table2, echo=FALSE}
 gen.table2 <- function() {
   x1Plusx2 <- c(0.00, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00,
                 2.25, 2.50, 2.75, 3.00, 3.25, 3.50, 3.75, 4.00, 4.25,
@@ -230,8 +228,14 @@ gen.table2 <- function() {
   return(table2)
 }
 
-knitr::kable(gen.table2())
+table1 <- knitr::kable(gen.table2(), label = "Table 1", caption = "Factor Table")
 
+kableExtra::kable_styling(table1, latex_options = "HOLD_position")
+
+```
+
+```{r}
+gen.table2()
 ```
 
 In calculating the lift:drag ratio, the disk and equivalent flat-plate areas of a bird are important. The disc area ($S_d$) is the area of complete circle under which the wing span is the diameter, while the equivalent flat-plate area is a product of the frontal area and drag coefficient of a bird.
@@ -300,7 +304,7 @@ $$
 $$
 
 *Step 4*
-To find drag at end of flight, metabolic power ratio and the profile power constant are summed and interpolation is done on *table 2* as defined in Pennycuick.
+To find drag at end of flight, metabolic power ratio and the profile power constant are summed and interpolation is done on *table 1* as defined in Pennycuick.
 
 *Step 5*
 Disk area and flat plate area are components that contribute to lift. While disk area is independent of body mass, flat-plate area is not. Therefore, flat-plate area is computed using body mass at end of flight.
@@ -331,7 +335,7 @@ $$
 X2_{start} = \frac{X2_{end}}{\bigg(\frac{1}{1 - F}\bigg)^{7/4}}
 $$
 
-Followed by interpolation on *table 2* to get drag at start of flight.
+Followed by interpolation on *table 1* to get drag at start of flight.
 
 *Step 8*
 Get square root of ratio between disk area and flat-plate area at beginning of flight as:
@@ -450,7 +454,7 @@ P_{mech} = P_{pro} + P_{par} + P_{ind}
 $$
 
 #### Chemical power
-@Penny08 remarks that mechanical power is derived from measurements made in unaccelerated
+@penny08 remarks that mechanical power is derived from measurements made in unaccelerated
 flight (i.e from forces and speeds that do not involve physiology), however, the chemical power
 is derived using measurements from physiological experiments. These measurements include:
 
@@ -460,7 +464,7 @@ is derived using measurements from physiological experiments. These measurements
 
 * Metabolism rate
 
-It is only useful to estimate this in long aerobic flight [@Penny08].
+It is only useful to estimate this in long aerobic flight [@penny08].
 
 To estimate the chemical power during a flight interval, the mechanical power is
 first estimated (power required from muscles to support the weight against gravity
@@ -495,152 +499,133 @@ come from fuel/fat consumption.
 Also, initial climb, and all other flight styles other than continuous wing flapping are not accounted for. 
 
 
-## Comparison of results with Flight.
-Data used as an example, is from the program _Flight_ version 1.2.5.2 with 
-default constants. In some cases, the fat mass was set to zero as default, and 
-therefore uniformly random percentages (between 18 and 35) of all the all-up mass
-(which in this case is the _Empty.mass_ because crop is empty).
+# Results comparison.
+Note that it is not fair comparison between the methods discused in @penny75
+and the methods in @penny08 and therefore the tables with range estimations are presented
+separately. Default constants were used for all the observations. Most importantly
+the air density was set to 1.00 which is about 2000 metres above sea level.
+
+## The Data
+Data used as an example, is from the program _Flight_ for windows [@penny08] version
+1.2.5.2. For some observations the fat mass and muscle mass were set to zero, maybe
+for lack of data since these variables cannot be measured directly compared to 
+the all-up mass and wing span. Flight requires that fat mass is defined to calculate
+range since it is the main source of fuel. To overcome this, fat mass was randomly 
+generated between $18\%$ and about $35\%$ of the all-up mass (empty mass because crop is empty).
+For muscle mass, by defualt, Flight uses the muscle fraction 0.17, and therefor this was used to derive the muscle mass.
+
+$$
+ muscle \ fraction = \frac{muscle \ mass}{all-up \ mass}
+$$
 
 ```{r data, echo = FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 data("birds")
-knitr::kable(birds, caption = "Preset birds from Flight program")
+table2 <- knitr::kable(birds, caption = "Preset birds from Flight program")
+kableExtra::kable_styling(table2, latex_options = "HOLD_position")
 ```
 
+## Results based on @penny75
+```{r}
+results_fixed_wing <- flysim(data = birds) 
+
+# range 
+results_fixed_wing$range
+```
+
+```{r}
+# constants used
+results_fixed_wing$constants
+```
+
+
+## Time-marching: Constant Muscle Mass
 In the simulation in Flight program, air density was set to 1 (Altitude 2063 
 meters above sea-level), muscle was held constant (Protein burn criterion), 
-fat energy at $4.0E+07$, continuous flapping style (Flight style), and minimum
-energy from protein at 10%. Induced power factor was set to 1.20 for all birds.
-Flight provides two methods of speed control, maximum range to minimum power 
-speed is held constant, and speed is held constant. Both of these scenarios are 
-compared to the output of this package below:
+fat energy at $3.9E+07$, continuous flapping style (Flight style), and minimum
+energy from protein at $0\%$ instead of the defualt $5\%$. Induced power factor
+is set to 1.20 for all birds. The mitochondrial fraction is set to hold constant.
 
-```{r sim, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+Flight provides two methods of speed control, true air-speed to minimum power 
+speed is held constant or true air-speed is held constant. Both of these scenarios are compared to the output of this package below:
 
-small_passerinesID <- which(birds$Order == 1 & birds$Empty.mass <= 0.05)
 
-small_passerines <- birds[small_passerinesID, ]
+```{r}
+# constant speed
+results_cmm_cs <- migrate(data = birds, speed_control = "constant_speed")
 
-sim1 <- flying::flysim(data = small_passerines )
-
-range_sim1 <- sim1$range
-
-# other birds (non-passerines or body mass > 50)
-other_birds <- birds[-small_passerinesID, ]
-sim2 <- flying::flysim(data = other_birds)
-
-range_sim2 <- sim2$range
-
-#mps_sim1<- sim1$Vmp
-
-#mps_sim2 <- sim2$Vmp
+results_cmm_cs$range
 ```
 
-```{r sp, echo=FALSE, results='asis'}
-# simulated from flight
-std_option_10 <- c(1440, 4097, 3254, 2552, 3437, 3155)
 
-v_vmp_cons_10 <- c(1354, 3723, 2960, 2372, 3122, 2862)
+```{r}
+# constant ratio between true air-speed and minimum power speed
+results_cmm_cratio <- migrate(data = birds, speed_control = "vvmp_constant")
 
-flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_10)
-
-sp_names <- as.vector(small_passerines$Scientific.name)
-comparison <- as.data.frame(cbind(sp_names, range_sim1, "Flight" = flight))
-
-sp <- knitr::kable(comparison, caption = "Small Passerines range comparison (10% protein)")
-kableExtra::add_footnote(sp, 
-             c("Flight.constant speed = hold speed constant",
-             "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
-             "Minimum 10% of protein is used as fuel"),
-             notation = "none")
+results_cmm_cratio$range
 ```
 
-```{r sp2, echo=FALSE, results='asis'}
-# 5% minimum protein
-std_option_5 <- c(1272, 3453, 2696, 2184, 2853, 2639)
+```{r tables, echo=FALSE}
+# results simulated from flight true air-speed constant
+flight_cons_speed <- c(3090, 2670, 3702, 1115, 3821, 3519, 11418, 3383, 2922,
+                            NA ,2248, 1867, 2031, 5186, 9880, 5308, 5498, 2606, 
+                            6439, 5776, NA, NA, 2385, 2221, 2684, 5658, 5071, 6427)
+flight_cons_ratio <- c(3007, 2586, 3566, 1076, 3679, 3417, 10647, 3267, 2789,
+                       3016, 2146, 1798, 1975, 4946, 9499, 5120, 5378, 2541, 
+                       6140, 5544, NA, 3374, 2275, 2119, 2571, 5381, 4871, 6153
+                       )
 
-v_vmp_cons_5 <- c(1215, 3228, 2520, 2072, 2666, 2463)
+results_table1 <- as.data.frame(results_cmm_cs$range)
 
-flight <- cbind("constant speed" = std_option_5, "V:Vmp constant" = v_vmp_cons_5)
+results_table1$flight_results <- flight_cons_speed
 
-comparison <- as.data.frame(cbind(sp_names, range_sim1, "Flight" = flight))
 
-sp <- knitr::kable(comparison, caption = "Small Passerines range comparison (5% protein)")
-kableExtra::add_footnote(sp, 
-             c("Flight.constant speed = hold speed constant",
-             "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
-             "Minimum 5% of protein is used as fuel"),
-             notation = "none")
+results_table2 <-  as.data.frame(results_cmm_cratio$range)
+results_table2$fight_results <- flight_cons_ratio  
+
+colnames(results_table1) <-  c("package_cons_speed", "flight_cons_speed")
+
+colnames(results_table2) <- c("package_cons_ratio","flight_cons_ratio")
 
 ```
 
 
-```{r oth1, echo = FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-# simulated from flight non-passerines or mass greater than 50 grams
-std_option_10 <- c(4215, 3553, 5078, 4660, 4678, NA, 4883, 4105, 2668, 8724, 
-                   18658)
-
-v_vmp_cons_10 <- c(4003, 3337, 4774, 4382, 4452, NA, 4554, 3933, 2531, 8004,
-                   17211)
-
-flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_10)
-
-np_names <- as.vector(other_birds$Scientific.name)
-
-comparison <- as.data.frame(cbind(np_names, range_sim2, "Flight" = flight))
-
-sp <- knitr::kable(comparison, caption = "Other birds, range comparison (10% protein)")
-kableExtra::add_footnote(sp, 
-             c("Birds with bodymass > 50 grams (both passerines and non-passerines)",
-               "Flight.constant speed = hold speed constant",
-             "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
-             "Minimum 10% of protein is used as fuel"),
-             notation = "none")
-```
-
-```{r oth2, echo = FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-
-std_option_10 <- c(3615, 3089, 4331, 3969, 4061, 17015, 4056, 3575, 2337, 6603, 
-                   14384)
-
-v_vmp_cons_10 <- c(3480, 2952, 4136, 3792, 3911, 15487, 3851, 3459, 2247, 6176,
-                   1352)
-
-flight <- cbind("constant speed" = std_option_10, "V:Vmp constant" = v_vmp_cons_10)
-
-comparison <- as.data.frame(cbind(np_names, range_sim2, "Flight" = flight))
-
-sp <- knitr::kable(comparison, caption = "Other birds, range comparison (5% protein)")
-kableExtra::add_footnote(sp, 
-             c("Birds with bodymass > 50 grams (both passerines and non-passerines)",
-               "Flight.constant speed = hold speed constant",
-             "Flight.V:Vmp constant = Hold ratio V:Vmp constant.",
-             "Minimum 5% of protein is used as fuel"),
-             notation = "none")
+```{r table1, echo=FALSE}
+table3 <- knitr::kable(results_table1, label = "Table 2", caption = "Comparison table constant speed")
+kableExtra::kable_styling(table3, latex_options = "HOLD_position")
 ```
 
 
+```{r table2, echo=FALSE}
+table4 <- knitr::kable(results_table2, label = "Table 3", caption = "Comparison table constant speed ratio")
+kableExtra::kable_styling(table4, latex_options = "HOLD_position")
+```
 
-## Time-marching computation
-Breguet equations assume that lift:drag ratio remains constant through out the flight. This is appropriate for fixed wing aircraft. However, birds are known to consume part of the engine (use protein in flight muscles and air-frame as supplementary fuel). This leads to an increase in lift:drag ratio during the flight as result of the reduce in body mass and thus, an increase in flight range
-[@penny03]. In the methods discussed above, compensation for this is done by adding 10% of fuel to the lift:drag ratio (method 1) or averaging lift:drag ratio before start of flight and at the end of flight (method 2). @penny03 cites studies which found that protein is replenished faster during short stop-overs compared to fat mass. Furthermore, the constant ($e$) cannot be assumed to be constant because of two different sources of fuel. Protein and fat have different energy content.
-
-@penny03 describes time-marching as calculating amounts of fat and protein consumed during a short period (6 minutes) during which all variables including power and speed are assumed constant. After every 6 minute interval, the birds mass composition is revised taking into account the small changes in fat and protein consumed during the interval. This is repeated until the bird covers the 
-required distance or it runs out of fat mass. This procedure places no restriction
-on speed. @penny03 points out that the remaining fat and mass at the end of the flight can be compared with field observations. 
-
-### Constant Muscle Mass criterion.
-
-### Protein withdrawal criterion.
+# Future work
+In this section, aim is to discuss the evolution path of the package so that it 
+incorporates as many features from Flight program as possible.
+## Protein withdrawal criterion
 @penny03 find that holding specific work constant is most realistic criteria for
 determining how  much fuel and protein to be withdrawn during 6 minute intervals
-of flight. Specific work is defined in as work done by unit mass of contractile
-tissue muscle. Further, @penny03, states that flight muscles contain myofibrils 
-and mitochondria, which are treated separately in the simulation. To be exact enough
-mass of myofibrils is reduced by an amount sufficient to restore specific work
-to the value it had at beginning of flight. In addition, fuel energy corresponding
-to mass of dry protein consumed is deducted from energy that would otherwise
-come from fuel/fat consumption.
-Also, initial climb, and all other flight styles other than continuous wing flapping are not accounted for. 
+of flight. This is in comparison with field observations. Specific work is defined
+in as work done by unit mass of contractile tissue muscle. Further, @penny03, states
+that flight muscles contain myofibrils and mitochondria, which are treated separately
+in the simulation. To be exact enough mass of myofibrils is reduced by an amount
+sufficient to restore specific work to the value it had at beginning of flight. 
+In addition, fuel energy corresponding to mass of dry protein consumed is deducted
+from energy that would otherwise come from fuel/fat consumption.
+
+Holding the specific power constant is a third option in Flight program. In this
+scenario, just enough protein from muscle mass is used to maintain the specific
+power estimated at beginning of flight.
+
+## Supplemtary protein from air-frame
+In Flight program user has an option to specify minimum percentage of energy that
+should come from protein. It is possible that muscle mass alone would not be able
+sustain this, and therefore some of the protein can come from the air-frame.
+
+## Initial climb
+Initial climb, calculates the power required by the bird at start of flight. It
+is possible that a bird maybe to heavy to fly under some conditions. In Table 3 and 
+4 there were such cases.
 
 # References
-
