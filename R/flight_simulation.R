@@ -82,7 +82,8 @@ flysim <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   if (missing(file) == FALSE) {
     # read data from file path
     dataRead <- read.csv(file = file, header = header, sep = sep,
-                         quote = quote, dec = dec, fill = fill, comment.char, ...)
+                         quote = quote, dec = dec, fill = fill, comment.char,
+                         stringsAsFactors = FALSE, ...)
     # column identification
     data <- .colnames.match(dataRead)
   } else if (missing(file) == TRUE) {

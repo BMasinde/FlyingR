@@ -98,7 +98,8 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   # process data
   if(missing(file) == FALSE) {
     dataRead <- read.csv(file = file, header = header, sep = sep,quote = quote,
-                         dec = dec, fill = fill, comment.char, ...)
+                         dec = dec, fill = fill, comment.char,
+                         stringsAsFactors = FALSE, ...)
     data <- .colnames.match(dataRead)
   } else {
     data <- .colnames.match(data)
