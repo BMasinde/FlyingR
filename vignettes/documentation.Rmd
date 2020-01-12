@@ -11,7 +11,7 @@ bibliography: references.bib
 ---
 
 # Introduction
-Flight is a computer program that accompanies @penny08 which in detail discusses
+'Flight' is a computer program that accompanies @penny08 which in detail discusses
 the theory behind bird flight. However, there are two drawbacks with the program.
 First, it is only available for Windows OS, and second, it requires manual imputation
 of bird measurements which is a tedious process when one has thousands of birds to 
@@ -33,7 +33,7 @@ In the _Methods_ section, the various methods are discussed in a step by step
 manner should the reader wish to implement the methods. Also included, are snippets
 of code on how to use the package and tables of results. Under _Future works_,
 a discussion of the road map for the package to incorporate more functionality
-from Flight.
+from 'Flight'.
 
 # Methods
 ## Mechanics of Flight
@@ -108,7 +108,7 @@ $$
 where $B$ is the wing span.
 
 The box-plot below shows the distribution of profile power ratio of a sample of 28
-birds (preset birds) from Flight program.
+birds (preset birds) from 'Flight' program.
 
 ```{r X1, echo=FALSE, fig.height=5, fig.width=6}
 #load("~/Documents/R projects/Flight project/flying/data/birds.rda")
@@ -354,7 +354,7 @@ minutes), fat and muscle mass are deducted by any one of the three criteria:
 during a short period (6 minutes) during which all variables including power and
 speed are assumed constant. After every 6 minute interval, the birds mass composition 
 is revised taking into account the small changes in fat and protein consumed 
-during the interval. In Flight program this is repeated until the required distance
+during the interval. In 'Flight' this is repeated until the required distance
 it achieved or it runs out of fat mass. This procedure places no restriction
 on speed. @penny03 points out that the remaining fat and mass at the end of the 
 flight can be compared with field observations. 
@@ -445,7 +445,7 @@ It is only useful to estimate this in long aerobic flight such as migration [@pe
 To estimate the chemical power during a flight interval, the mechanical power is
 first estimated (power required from muscles to support the weight against gravity
 ). Then the mechanical power is divided by the mechanical conversion efficiency
-(between 0 and 1), in Flight the default is 0.23. The basal metabolism rate is
+(between 0 and 1), in 'Flight' the default is 0.23. The basal metabolism rate is
 added because metabolism is a body function that occurs irrespective of what the bird 
 is doing. Estimate derived so far is increased by $10\%$ to account for heart and lungs.
 This chemical power expresses the total energy required by a bird to sustain flight
@@ -460,7 +460,7 @@ Multiplying this by the calculation interval (default 6 minutes or 360 seconds)
 gives the range achieved during this interval in m/s. It was noted that decreasing
 the flight interval has no effect on range only that the simulation 
 is more fine grained. This procedure is iterated over until fat mass decreases 
-to zero. In Flight there is an option to attribute a small percentage of the
+to zero. In 'Flight' there is an option to attribute a small percentage of the
 chemical power to protein from the muscle mass, usually $5\%$.
 
 # Results comparison.
@@ -471,12 +471,12 @@ observations and the air density was set to 1.00 which is about
 2063 meters above sea level.
 
 ## The Data
-Data used as an example, is from the program _Flight_ for windows [@penny08] version
-1.2.5.2. For some observations the fat mass and muscle mass were zero, Flight 
+Data used as an example, is from the program 'Flight' [@penny08] version
+1.2.5.2. For some observations the fat mass and muscle mass were zero, 'Flight' 
 requires that fat mass is non-zero to calculate range since it is the main source
 of fuel. To overcome this, fat mass was randomly generated between $18\%$ and 
 about $35\%$ of the all-up mass (empty mass because crop is empty). For muscle 
-mass, by default, Flight uses the muscle fraction 0.17, and therefore this was 
+mass, by default, 'Flight' uses the muscle fraction 0.17, and therefore this was 
 used to derive the muscle mass.
 
 $$
@@ -514,10 +514,10 @@ fat energy at $3.9E+07$, continuous flapping style (Flight style), and minimum
 energy from protein at $0\%$ instead of the default $5\%$. Induced power factor
 is set to 1.20 for all birds. The mitochondrial fraction is set to hold constant.
 
-Flight provides two methods of speed control, true air-speed to minimum power 
+'Flight' provides two methods of speed control, true air-speed to minimum power 
 speed ratio is held constant or true air-speed is held constant. Both of these scenarios are compared to the output of this package below:
 
-See Table 3 and Table 4 for comparison with Flight.
+See Table 3 and Table 4 for comparison with 'Flight'.
 
 ```{r}
 # constant speed
