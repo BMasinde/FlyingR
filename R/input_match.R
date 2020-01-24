@@ -26,7 +26,7 @@
 
   variables$id <- grepl("id", ignore.case = TRUE, colNames)
 
-  variables$name <- grepl("species.name|name|species name|species_name|scientific.name",
+  variables$name <- grepl("species.name|name|species|species name|species_name|scientific.name",
                         ignore.case = TRUE, colNames)
 
   variables$wingSpan <- grepl("ws|wing.span|wing_span|wing span|wingspan",
@@ -66,8 +66,6 @@
     }
   }
 
-
-
   # missing name and ID auto-gen
   if (sum(variables$name) == 0 & sum(variables$id) == 0) {
     message("Identifier column not found. Auto-gen \n")
@@ -76,10 +74,11 @@
 
   # non unique species names in data add a suffix of ID
   if (sum(duplicated(data$name)) != 0) {
-    dups <- anyDuplicated(data$name)
+    dups <- duplicated(data$name)
     for (i in 1:length(dups)) {
-      index <- which(data$name == dups[i])
-      data$name[index] <- paste(data$name[index], index, sep = "_")
+      if(dups[i] == TRUE) {
+        data$name[i] <- paste(data$name[i], i, sep = "_")
+      }
     }
   }
 
@@ -92,15 +91,8 @@
   }
 
   # check factors in taxon
-  if (is.factor(data$taxon) == FALSE) {
-    data$taxon <- as.factor(data$taxon)
-    if (sum(levels(data$taxon) == levels(factor(c(1, 2)))) != 2) {
-      stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
-    }
-  } else {
-    if (sum(levels(data$taxon) == levels(factor(c(1, 2)))) != 2) {
-      stop("Order column should be a factor with levels 1 or 2", call. = FALSE)
-    }
+  if(any(data$taxon != 1 & data$taxon != 2)) {
+    stop("taxon column values 1 or 2", call. = FALSE)
   }
 
   return(data)
