@@ -46,3 +46,8 @@ There were two notes
 
 - Examples with CPU or elapsed time > 5s (5.002 s exactly)
 
+## Fixed from v 0.1.0 comments
+
+* Software names package names and API names in single quotes in DESCRIPTION
+
+* DOI, ISBN, arXiv added to references in DESCPRIPTION
