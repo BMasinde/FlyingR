@@ -114,8 +114,8 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
 
   if(method == "cmm") {
     simulation <- .constant.muscle.mass(data, cons, speed_control)
-  } else {
-    print("No other method for now")
+  } else if(method == "csw") {
+    simulation <- .constant.specific.work(data, cons, speed_control)
   }
 
   # aggregate dist from simulation to get range in Km
