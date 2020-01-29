@@ -67,7 +67,7 @@
 
   if(speed_control == "constant_speed") {
     for (i in 1:nrow(data)) {
-      #i = 1
+      #i = 11
       sim_results$bm[[i]][1] <- all_mass[i]
       sim_results$fm[[i]][1] <- fat_mass[i]
       sim_results$mm[[i]][1] <-  muscle_mass[i]
@@ -109,9 +109,9 @@
         sim_results$mitochondria[[i]][j] <-
           sim_results$mm[[i]][1] - sim_results$myofibrils[[i]][1]
 
-        # specific power at begining of flight (before fat has been consumed)
-        spec_pow_start <- sim_results$myofibrils[[i]][1]/(cons$invPower * cons$muscDensity)
-         # sim_results$mechPow[[i]][1] / (sim_results$myofibrils[[i]][1] * sim_results$wing_freq[[i]][1])
+        # mass specific power is at beginning of flight; mechanical power is divided
+        # by the mass of the myofibrils (page 225 Pennycuick 2008)
+        spec_pow_start <- sim_results$mechPow[[i]][1] / sim_results$myofibrils[[i]][1]
 
         # chemical power
         deltaE <- (sim_results$mechPow[[i]][j] / cons$mce) +
@@ -153,14 +153,11 @@
         dummy_wing_freq <-
           .wingbeat.freq(bm = dummy_bm, ws = wing_span[i], wa = wing_area[i], cons)
 
-        # specific work after reduction of fat
-        #dummy_specwork <- dummy_mechPow / (sim_results$myofibrils[[i]][j] * dummy_wing_freq)
-        dummy_spec_pow <- sim_results$myofibrils[[i]][j]/(cons$invPower * cons$muscDensity)
+        #dummy_spec_pow as mechpow/mass myofibrils
+        #dummy_spec_pow <- dummy_mechPow/sim_results$myofibrils[[i]][j]
 
         # amount of protein consumed that restores specific power to initial value
-        #used_protein <-
-        #  -(dummy_mechPow / (dummy_wing_freq * specwork_start)) + sim_results$myofibrils[[i]][j]
-        used_protein <- - (cons$invPower * cons$muscDensity * spec_pow_start) - sim_results$myofibrils[[i]][j]
+        used_protein <- - (dummy_mechPow/spec_pow_start) + sim_results$myofibrils[[i]][j]
 
         # checking if specific work has been restored
         sim_results$spec_work[[i]][j] <-
