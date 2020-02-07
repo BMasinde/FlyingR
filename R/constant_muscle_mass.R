@@ -4,9 +4,10 @@
 # @param data Data as output from .colnames.match
 # @param cons
 # @param speed_control speed control as either
+# @param protein_met percentage of energy attributed to protein
 
 
-.constant.muscle.mass <- function(data, cons, speed_control) {
+.constant.muscle.mass <- function(data, cons, speed_control, protein_met) {
   if (missing(data) == TRUE) {
     stop("Missing data argument")
   }
@@ -27,16 +28,22 @@
 
   wingArea <- data$wingArea
 
+  muscleMass <- data$muscleMass
+
   id <- data$id
 
   name <- data$name
 
   taxon <- data$taxon
 
+  fatFrac <- fatMass/allMass
+  muscleFrac <- muscleMass/allMass
+
   # time marching
 
   simResults <- list(
     bm = rep(list(vector()), nrow(data)),
+    afm = rep(list(vector()), nrow(data)), # airframe mass
     fm = rep(list(vector()), nrow(data)),
     dist = rep(list(vector()), nrow(data)),
     deltaM = rep(list(vector()), nrow(data)),
@@ -54,6 +61,7 @@
       # initial values
       simResults$bm[[i]][1] <- allMass[i]
       simResults$fm[[i]][1] <- fatMass[i]
+      simResults$afm[[i]][1] <- allMass[i] - (fatMass[i] + muscleMass[i])
       currentFM <- simResults$fm[[i]][1]
 
       j <- 1
@@ -83,24 +91,61 @@
           )
         simResults$mechPow[[i]][j] <- power
 
-        # chemical power
-        E <-
-          (power / cons$mce) + .basal.met2(cons, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
+        if (protein_met == 0) {
+          # chemical power
+          E <-
+            (power / cons$mce) + .basal.met2(cons, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
 
-        #increase E by 10% to account for respiratory and heart
-        E <- E + (E * 0.1)
+          # increase E by 10% to account for respiratory and heart
+          E <- E + (E * 0.1)
 
-        simResults$E[[i]][j] <- E
+          simResults$E[[i]][j] <- E
 
-        # update body
-        simResults$deltaM[[i]][j] <- (simResults$E[[i]][j] / cons$eFat) * 360
-        simResults$fm[[i]][j + 1] <- simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
-        simResults$bm[[i]][j + 1] <- simResults$bm[[i]][j] - simResults$deltaM[[i]][j]
+          # update body
+          simResults$deltaM[[i]][j] <-
+            (simResults$E[[i]][j] / cons$eFat) * 360
+          simResults$fm[[i]][j + 1] <-
+            simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
+          simResults$bm[[i]][j + 1] <-
+            simResults$bm[[i]][j] - simResults$deltaM[[i]][j]
 
-        currentFM <- simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
-        simResults$dist[[i]][j] <- simResults$trueSpeed[[i]][j] * 360
-        # increment counter
-        j <- j + 1
+          currentFM <-
+            simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
+          simResults$dist[[i]][j] <-
+            simResults$trueSpeed[[i]][j] * 360
+          # increment counter
+          j <- j + 1
+
+        } else {
+          # chemical power
+          E <-
+            (power / cons$mce) + .basal.met2(cons, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
+
+          # increase E by 10% to account for respiratory and heart
+          E <- E + (E * 0.1)
+
+          # total energy
+          simResults$E[[i]][j] <- E
+
+          # protein used during metabolism
+          EFromProtein <- E * protein_met
+
+          # convert this energy to mass by dividing by enegry content of protein
+          deltaAFM <- EFromProtein / cons$eProtein
+
+          # update body
+          # deltaM is the change in mass (subtracting E attributed to protein)
+          simResults$deltaM[[i]][j] <- ((E -EFromProtein) / cons$eFat) * 360
+          simResults$afm[[i]][j + 1] <- simResults$afm[[i]][j] - deltaAFM
+          simResults$fm[[i]][j + 1] <- simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
+          simResults$bm[[i]][j + 1] <-
+            simResults$afm[[i]][j + 1] + simResults$fm[[i]][j + 1] + muscleMass[i]
+
+          currentFM <- simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
+          simResults$dist[[i]][j] <- simResults$trueSpeed[[i]][j] * 360
+          # increment counter
+          j <- j + 1
+        }
       }
     }
 
@@ -110,6 +155,7 @@
       # initial values
       simResults$bm[[i]][1] <- allMass[i]
       simResults$fm[[i]][1] <- fatMass[i]
+      simResults$afm[[i]][1] <- allMass[i] - (fatMass[i] + muscleMass[i])
       currentFM <- simResults$fm[[i]][1]
 
       j <- 1
@@ -134,24 +180,57 @@
                              bdc = cons$bdc, ppc = cons$ppc)
         simResults$mechPow[[i]][j] <- power
 
-        # chemical power
-        E <-
-          (power / cons$mce) + .basal.met2(cons, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
+        if (protein_met == 0) {
+          # chemical power
+          E <-
+            (power / cons$mce) + .basal.met2(cons, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
 
-        #increase E by 10% to account for respiratory and heart
-        E <- E + (E * 0.1)
+          #increase E by 10% to account for respiratory and heart
+          E <- E + (E * 0.1)
 
-        simResults$E[[i]][j] <- E
+          simResults$E[[i]][j] <- E
 
-        # update body
-        simResults$deltaM[[i]][j] <- (simResults$E[[i]][j] / cons$eFat) * 360
-        simResults$fm[[i]][j + 1] <- simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
-        simResults$bm[[i]][j + 1] <- simResults$bm[[i]][j] - simResults$deltaM[[i]][j]
+          # update body
+          simResults$deltaM[[i]][j] <-
+            (simResults$E[[i]][j] / cons$eFat) * 360
+          simResults$fm[[i]][j + 1] <-
+            simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
+          simResults$bm[[i]][j + 1] <-
+            simResults$bm[[i]][j] - simResults$deltaM[[i]][j]
 
-        currentFM <- simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
-        simResults$dist[[i]][j] <- simResults$trueSpeed[[i]][j] * 360
-        # increment counter
-        j <- j + 1
+          currentFM <-
+            simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
+          simResults$dist[[i]][j] <-
+            simResults$trueSpeed[[i]][j] * 360
+          # increment counter
+          j <- j + 1
+        } else {
+          # chemical power
+          E <-
+            (power / cons$mce) + .basal.met2(cons, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
+
+          #increase E by 10% to account for respiratory and heart
+          E <- E + (E * 0.1)
+
+          simResults$E[[i]][j] <- E
+          # protein used during metabolism
+          EFromProtein <- E * protein_met
+
+          # convert this energy to mass by dividing by enegry content of protein
+          deltaAFM <- EFromProtein / cons$eProtein
+
+          # update body
+          simResults$deltaM[[i]][j] <- ((E -EFromProtein) / cons$eFat) * 360
+          simResults$afm[[i]][j + 1] <- simResults$afm[[i]][j] - deltaAFM
+          simResults$fm[[i]][j + 1] <- simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
+          simResults$bm[[i]][j + 1] <-
+            simResults$afm[[i]][j + 1] + simResults$fm[[i]][j + 1] + muscleMass[i]
+
+          currentFM <- simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
+          simResults$dist[[i]][j] <- simResults$trueSpeed[[i]][j] * 360
+          # increment counter
+          j <- j + 1
+        }
       }
     }
   }
