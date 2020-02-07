@@ -21,6 +21,7 @@
 #'        \emph{constant_speed} is used. \emph{vvmp_constant} is the alternative.
 #'        The former holds the true airspeed constant while the latter holds the
 #'        ratio of true airspeed and minimum power speed constant
+#' @param protein_met Percentage of energy attributed to protein and metabolism
 #'
 #' @details The option *control takes the folowing arguments
 #' \itemize{
@@ -69,7 +70,7 @@
 migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                     fill = TRUE, comment.char = "", ...,
                     data = NULL, settings = list(), method = "cmm",
-                    speed_control = "constant_speed") {
+                    speed_control = "constant_speed", protein_met = 0) {
 
   # object with results
   results <- list(
@@ -95,6 +96,11 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
     stop("Wrong speed control  argument \n", call. = TRUE)
   }
 
+  # min_protein < 0 or > 1 throw error
+  if(protein_met < 0 || protein_met > 1) {
+    stop("min_protein within [0,1] \n", call. = TRUE)
+  }
+
   # process data
   if(missing(file) == FALSE) {
     dataRead <- read.csv(file = file, header = header, sep = sep,quote = quote,
@@ -113,11 +119,11 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   }
 
   if(method == "cmm") {
-    simulation <- .constant.muscle.mass(data, cons, speed_control)
+    simulation <- .constant.muscle.mass(data, cons, speed_control, protein_met)
   } else if(method == "csw") {
-    simulation <- .constant.specific.work(data, cons, speed_control)
+    simulation <- .constant.specific.work(data, cons, speed_control, protein_met)
   } else if(method == "csp") {
-    simulation <-  .constant.specific.power(data, cons, speed_control)
+    simulation <-  .constant.specific.power(data, cons, speed_control, protein_met)
   }
 
   # aggregate dist from simulation to get range in Km
