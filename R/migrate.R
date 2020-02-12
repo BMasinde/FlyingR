@@ -63,7 +63,7 @@
 #' @usage migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
 #'                fill = TRUE, comment.char = "", ...,
 #'                data = NULL, settings = list(), method = "cmm",
-#'                speed_control = "constant_speed")
+#'                speed_control = "constant_speed", protein_met = 0)
 #'
 
 
