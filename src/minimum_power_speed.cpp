@@ -11,8 +11,8 @@ using namespace Rcpp;
 // @export
 
 // [[Rcpp::export(.minpowspeed_cpp)]]
-NumericVector minpowspeed_cpp(NumericVector bm, NumericVector ws, float ipf,
-                              float g, float airDensity, float bdc) {
+NumericVector minpowspeed_cpp(NumericVector bm, NumericVector ws, double ipf,
+                              double g, double airDensity, double bdc) {
   int n = bm.size();
 
   NumericVector vmp(n);

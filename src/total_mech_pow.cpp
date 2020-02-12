@@ -11,8 +11,8 @@ using namespace Rcpp;
 
 // [[Rcpp::export(.total_Mech_Pow_cpp)]]
 NumericVector total_Mech_Pow_cpp(NumericVector bm, NumericVector ws, NumericVector wa,
-                                 NumericVector vt, float g, float airDensity,
-                                 float ipf, float bdc, float ppc){
+                                 NumericVector vt, double g, double airDensity,
+                                 double ipf, double bdc, double ppc){
   NumericVector bodyFrontArea = (0.00813 * pow(bm, 0.666));
 
   NumericVector inducedPower = 2 * ipf * pow((bm * g), 2) / (vt * M_PI * pow(ws, 2) * airDensity);

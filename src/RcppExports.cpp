@@ -6,23 +6,23 @@
 using namespace Rcpp;
 
 // minpowspeed_cpp
-NumericVector minpowspeed_cpp(NumericVector bm, NumericVector ws, float ipf, float g, float airDensity, float bdc);
+NumericVector minpowspeed_cpp(NumericVector bm, NumericVector ws, double ipf, double g, double airDensity, double bdc);
 RcppExport SEXP _flying_minpowspeed_cpp(SEXP bmSEXP, SEXP wsSEXP, SEXP ipfSEXP, SEXP gSEXP, SEXP airDensitySEXP, SEXP bdcSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type bm(bmSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type ws(wsSEXP);
-    Rcpp::traits::input_parameter< float >::type ipf(ipfSEXP);
-    Rcpp::traits::input_parameter< float >::type g(gSEXP);
-    Rcpp::traits::input_parameter< float >::type airDensity(airDensitySEXP);
-    Rcpp::traits::input_parameter< float >::type bdc(bdcSEXP);
+    Rcpp::traits::input_parameter< double >::type ipf(ipfSEXP);
+    Rcpp::traits::input_parameter< double >::type g(gSEXP);
+    Rcpp::traits::input_parameter< double >::type airDensity(airDensitySEXP);
+    Rcpp::traits::input_parameter< double >::type bdc(bdcSEXP);
     rcpp_result_gen = Rcpp::wrap(minpowspeed_cpp(bm, ws, ipf, g, airDensity, bdc));
     return rcpp_result_gen;
 END_RCPP
 }
 // total_Mech_Pow_cpp
-NumericVector total_Mech_Pow_cpp(NumericVector bm, NumericVector ws, NumericVector wa, NumericVector vt, float g, float airDensity, float ipf, float bdc, float ppc);
+NumericVector total_Mech_Pow_cpp(NumericVector bm, NumericVector ws, NumericVector wa, NumericVector vt, double g, double airDensity, double ipf, double bdc, double ppc);
 RcppExport SEXP _flying_total_Mech_Pow_cpp(SEXP bmSEXP, SEXP wsSEXP, SEXP waSEXP, SEXP vtSEXP, SEXP gSEXP, SEXP airDensitySEXP, SEXP ipfSEXP, SEXP bdcSEXP, SEXP ppcSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -31,11 +31,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type ws(wsSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type wa(waSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type vt(vtSEXP);
-    Rcpp::traits::input_parameter< float >::type g(gSEXP);
-    Rcpp::traits::input_parameter< float >::type airDensity(airDensitySEXP);
-    Rcpp::traits::input_parameter< float >::type ipf(ipfSEXP);
-    Rcpp::traits::input_parameter< float >::type bdc(bdcSEXP);
-    Rcpp::traits::input_parameter< float >::type ppc(ppcSEXP);
+    Rcpp::traits::input_parameter< double >::type g(gSEXP);
+    Rcpp::traits::input_parameter< double >::type airDensity(airDensitySEXP);
+    Rcpp::traits::input_parameter< double >::type ipf(ipfSEXP);
+    Rcpp::traits::input_parameter< double >::type bdc(bdcSEXP);
+    Rcpp::traits::input_parameter< double >::type ppc(ppcSEXP);
     rcpp_result_gen = Rcpp::wrap(total_Mech_Pow_cpp(bm, ws, wa, vt, g, airDensity, ipf, bdc, ppc));
     return rcpp_result_gen;
 END_RCPP
