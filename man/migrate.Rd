@@ -7,7 +7,7 @@
 migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                fill = TRUE, comment.char = "", ...,
                data = NULL, settings = list(), method = "cmm",
-               speed_control = "constant_speed")
+               speed_control = "constant_speed", protein_met = 0)
 }
 \arguments{
 \item{file}{The name of the file which the data are to read from}
@@ -36,6 +36,8 @@ migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
 \emph{constant_speed} is used. \emph{vvmp_constant} is the alternative.
 The former holds the true airspeed constant while the latter holds the
 ratio of true airspeed and minimum power speed constant}
+
+\item{protein_met}{Percentage of energy attributed to protein and metabolism}
 }
 \value{
 S3 class object with range estimates based on methods defined and
