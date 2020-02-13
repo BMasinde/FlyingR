@@ -19,8 +19,8 @@ Imports:
     utils,
     Rcpp (>= 1.0.2),
     knitr,
-    rmarkdown,
-    kableExtra
+    kableExtra,
+    rmarkdown
 Suggests: 
     testthat,
     covr

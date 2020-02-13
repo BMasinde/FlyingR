@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 # flying
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/flying)](https://cran.r-project.org/package=flying)
 [![Travis build status](https://travis-ci.org/BMasinde/flight.svg?branch=master)](https://travis-ci.org/BMasinde/flight)
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/BMasinde/flight?branch=master&svg=true)](https://ci.appveyor.com/project/BMasinde/flight)
 [![Coveralls test coverage](https://coveralls.io/repos/github/BMasinde/flight/badge.svg)](https://coveralls.io/r/BMasinde/flight?branch=master)

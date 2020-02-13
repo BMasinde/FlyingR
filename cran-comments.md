@@ -15,12 +15,7 @@
 
 0 errors | 0 warnings 
 
-There were 3 notes
-
-- Possibly mis-spelled words in DESCRIPTION (false warning)
-
-- Examples with CPU (user + system) or elapsed time > 5s (took  5.34 s exactly,
-no redudancy in examples, thus I would like to retain them)
+One note
 
 - In checking for non-standard things in the check directory: found the following
 files/directories: 'flying-Ex_x64.Rout' 'tests_i386' 'tests_x64' 'examples_i386'
@@ -45,6 +40,29 @@ There were two notes
 - Possibly mis-spelled words in DESCRIPTION (false warning)
 
 - Examples with CPU or elapsed time > 5s (5.002 s exactly)
+
+* Debian Linux, R-devel, GCC ASAN/UBSAN
+
+- PREPERROR- I suspsect this is not a problem with the package.
+
+* Oracle Solaris 10, x86, 32 bit, R-patched (experimental)
+
+- ERROR: * checking package dependencies ... ERROR
+Package required but not available: ‘kableExtra’
+
+Package suggested but not available: ‘testthat’
+
+The suggested packages are required for a complete check.
+Checking can be attempted without them by setting the environment
+variable _R_CHECK_FORCE_SUGGESTS_ to a false value.
+
+I suppose this error is not in my control.
+
+## Fixed from v 0.1.1 (Oracle Solaris 10)
+
+* minimum_power_speed.cpp:22:36: warning: ISO C++ says that these are ambiguous, even though the worst conversion for the first is better than the worst conversion for the second:
+
+*  total_mech_pow.cpp:23:55: warning: ISO C++ says that these are ambiguous, even though the worst conversion for the first is better than the worst conversion for the second:
 
 ## Fixed from v 0.1.0 comments
 

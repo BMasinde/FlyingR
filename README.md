@@ -1,15 +1,25 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-flying
-======
+
+# flying
 
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.org/BMasinde/flight.svg?branch=master)](https://travis-ci.org/BMasinde/flight) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/BMasinde/flight?branch=master&svg=true)](https://ci.appveyor.com/project/BMasinde/flight) [![Coveralls test coverage](https://coveralls.io/repos/github/BMasinde/flight/badge.svg)](https://coveralls.io/r/BMasinde/flight?branch=master) <!-- badges: end -->
 
-The package provides methods for predicting flight range of birds based on their physiological characteristics. This is an R implementation of Flight program provided by Pennycuick.
+[![CRAN
+status](https://www.r-pkg.org/badges/version/flying)](https://cran.r-project.org/package=flying)
+[![Travis build
+status](https://travis-ci.org/BMasinde/flight.svg?branch=master)](https://travis-ci.org/BMasinde/flight)
+[![AppVeyor build
+status](https://ci.appveyor.com/api/projects/status/github/BMasinde/flight?branch=master&svg=true)](https://ci.appveyor.com/project/BMasinde/flight)
+[![Coveralls test
+coverage](https://coveralls.io/repos/github/BMasinde/flight/badge.svg)](https://coveralls.io/r/BMasinde/flight?branch=master)
+<!-- badges: end -->
 
-Installation
-------------
+The package provides methods for predicting flight range of birds based
+on their physiological characteristics. This is an R implementation of
+Flight program provided by Pennycuick.
+
+## Installation
 
 Install the development version from [GitHub](https://github.com/) with:
 
@@ -18,8 +28,7 @@ Install the development version from [GitHub](https://github.com/) with:
 devtools::install_github("BMasinde/flight")
 ```
 
-Examples
---------
+## Examples
 
 ### Time-Marching computation
 
@@ -39,7 +48,7 @@ simulation$range
 #>       Regulus regulus      Calidris canutus     Aegypius monachus 
 #>              1134.909              3845.427              3523.496 
 #>      Limosa lapponica           Anas crecca       Hirundo rustica 
-#>             11488.486              3406.054              2987.473 
+#>             11488.485              3406.054              2987.472 
 #>         Cygnus cygnus          Sylvia borin     Luscinia luscinia 
 #>              3097.141              2281.368              1892.490 
 #>       Corvus monedula         Anas penelope   Fregata magnificens 
@@ -47,20 +56,22 @@ simulation$range
 #>      Larus ridibundus      Diomedea exulans   Phalacrocorax carbo 
 #>              5359.893              5519.687              2613.821 
 #>       Gyps rueppellii   Torgos tracheliotus         Ardeotis kori 
-#>              6443.840              5800.438              3918.554 
+#>              6443.839              5800.438              3918.554 
 #>      Sturnus vulgaris     Fringilla coelebs      Carduelis spinus 
 #>              3603.239              2420.191              2262.704 
 #>     Turdus philomelos Calidris tenuirostris     Buteo swainsoni M 
-#>              2712.934              5689.756              5102.483 
+#>              2712.933              5689.756              5102.482 
 #>     Buteo swainsoni F 
 #>              6459.878
 ```
 
-The function also returns the mechanical and chemical power during the simulation
+The function also returns the mechanical and chemical power during the
+simulation
 
 ### Range estimation based on ODE
 
-This function estimates the range based on Pennycuick (1975) Mechanics of Flight where Breguet set of equations are used.
+This function estimates the range based on Pennycuick (1975) Mechanics
+of Flight where Breguet set of equations are used.
 
 ``` r
 ## when estimating range of a single bird
@@ -89,10 +100,16 @@ birds_range$range
 #>                6994.8
 ```
 
-The data
---------
+## The data
 
-*birds* definitions pulled from Flight program in-built datasets and fat mass randomly generated where initially zero. In addition, by default muscle mass was derived as 0.17 fraction of the all-up mass. Users's data should have columns named appropriately. The package looks for columns named *id, name or species.name*, *bodymass or allupmass*, *wingspan, ws*, *wingarea*, *ordo, order* (which is a factored column with levels 1 or 2 passerines and non-passerines respectively) *fatmass, fat.mass, fat\_mass* and lastly *muscle\_mass*.
+*birds* definitions pulled from Flight program in-built datasets and fat
+mass randomly generated where initially zero. In addition, by default
+muscle mass was derived as 0.17 fraction of the all-up mass. Users’s
+data should have columns named appropriately. The package looks for
+columns named *id, name or species.name*, *bodymass or allupmass*,
+*wingspan, ws*, *wingarea*, *ordo, order* (which is a factored column
+with levels 1 or 2 passerines and non-passerines respectively) *fatmass,
+fat.mass, fat\_mass* and lastly *muscle\_mass*.
 
 ``` r
 birds
