@@ -4,110 +4,148 @@ author: "Brian Masinde (brima748)"
 date: "2/6/2020"
 output: pdf_document
 ---
+```{r message=FALSE, warning=FALSE}
+# required libraries
+library(flying)
+library(ggplot2)
+```
 
 # Sensitivity Analysis Simulations
 
-## Trzcinniczek Acrocephalus scirpaceus (Eurasian Reed Wabler)
-From the snippet data provided it a sample of 2160 has mean mass of 0.01175 and 
-fat mass of 0.00049. Assuming that these are uniformly distributed.
+## Acrocephalus scirpaceus (Eurasian Reed Wabler)
+Available data on the Eurasian Reed Wabler has the following relevant 
+information:
+
+* Age of samples (All are immature)
+
+* Fat score (0-8) 
+
+* Samples
+
+* Mean body mass (Kg): This is the all-up body mass
+
+* Fat mass (kg)
+
+* Fat fraction: Fraction of fat mass to all-up mass.
+
+* Average flight height.
+
+* Average wing span
+
+* Average wing area
+
+Note the muscle mass is not included, but can estimated as a fraction as the 
+all-up mass.
+
+So obviously we have point estimates and not the actuall data. Via sampling from 
+sensible distribution with sensible parameters we could investigate the relationship
+between this variables and the output (i.e the range)
 
 
-### Unifromly distributed body mass and fat mass
+
+
+```{r}
+species <- rep("ACR.IRP", times = 8)
+age <- rep("Immature", times = 8)
+fat_score <- 0:7
+mean_mass <- c(0.01127, 0.01152, 0.01152, 0.01246, 0.01246, 0.01335, 0.01335, 0.01421)
+fat_mass <- c(0.00000, 0.00025, 0.00049, 0.00120, 0.00158, 0.00209, 0.00246, 0.00246)
+fat_fraction <- c(0.00, 0.02, 0.04, 0.10, 0.12, 0.16, 0.18, 0.21)
+wing_span_avg <- rep(0.1946, times = 8)
+wing_area_avg <- rep(0.00773, times = 8)
+ACR_species <- data.frame(cbind(species, age, fat_score, mean_mass, fat_mass, fat_fraction))
+
+ACR_species
+```
+
+
+### Relationship between the variables and output (range)
+
+#### Unifrom distributed measurements.
+
 ```{r}
 set.seed(2020)
-acr_irp_body_mass <- sort(runif(100, min = 0.01152, max = 0.01421),
+acr_irp_body_mass <- sort(runif(1000, min = 0.01152, max = 0.01421),
                           decreasing = FALSE)
 
-acr_irp_fat_mass <- sort(runif(100, min = 0.00025138, max = 0.002942),
+acr_irp_fat_mass <- sort(runif(1000, min = 0.00025138, max = 0.002942),
                          decreasing = FALSE)
 
 acr_sim_data <- data.frame(cbind("body mass" = acr_irp_body_mass, 
                                  "fat mass" = acr_irp_fat_mass))
-```
 
-```{r}
-library(ggplot2)
-
-ggplot(acr_sim_data, aes(x = fat.mass, y = body.mass)) +
-  geom_point() +
-  ggtitle("Uniformly genereated data")
-```
-
-```{r message=FALSE, paged.print=FALSE}
-wing.span <- rep(0.1946, 100)
-wing.area <- rep(0.00773, 100)
-taxon <- rep(1, 100)
+wing.span <- sort(runif(n = 1000, min = (0.1946 - 0.00201) ,max = (0.1946 + 0.00201)))
+# assuming wing area and wing span have a linear relationship, using the same scale:
+wing.area <- rep(runif(n = 1000, min = 0.00773 - 0.0001 , max = 0.00773 + 0.0001))
+taxon <- rep(1, 1000)
 muscle.mass <- 0.09 * acr_irp_body_mass
 
 data <- data.frame(cbind(acr_irp_body_mass, acr_irp_fat_mass, wing.span,
                          wing.area, taxon, muscle.mass))
+```
 
-library(flying)
-test_results <- migrate(data = data, method = "cmm", speed_control = "constant_speed")
-
-ggplot(acr_sim_data, aes(x = body.mass, y = test_results$range)) +
+```{r}
+ggplot(data, aes(x = acr_irp_body_mass, y = acr_irp_fat_mass)) +
   geom_point() +
   ggtitle("Uniformly genereated data")
 ```
 
+As expected there is a linear relationship between fat mass and body mass.
+This is because the fat mass is a fraction of the body mass.
+
+From research (Autumn and spring migration of the Reed Warbler Acrocephalus scirpaceus in Egypt—some interesting aspects and questions) wing span of eurasian reed wablers could have a standard deviation of 2.01mm (0.00201)
+
 ```{r}
-plot(density(test_results$range), main = "Range density, uniform body mass and fat mass")
+ggplot(data, aes(x = wing.area, y = wing.span)) +
+  geom_point() +
+  ggtitle("Wing span vs wing area")
 ```
+
+
+```{r}
+ggplot(data, aes(x = wing.span, y = acr_irp_body_mass)) +
+  geom_point() +
+  ggtitle("Wing span vs wing area")
+```
+
+```{r}
+ggplot(data, aes(x = wing.span, y = acr_irp_fat_mass)) +
+  geom_point() +
+  ggtitle("Wing span vs wing area")
+```
+
+```{r message=FALSE, paged.print=FALSE}
+test_results <- migrate(data = data, method = "cmm", speed_control = "constant_speed")
+
+ggplot(data, aes(x = acr_irp_body_mass, y = test_results$range)) +
+  geom_point() +
+  ggtitle("Uniformly genereated data")
+```
+
+
+```{r}
+#plot(density(test_results$range), main = "Range density, uniform body mass and fat mass")
+set.seed(2020)
+ggplot()+
+  geom_density(aes(x = test_results$range), fill = "#66CDAA")+
+  geom_density(aes(x = runif(n = 1000, min = min(test_results$range), max = max(test_results$range)))
+               , fill = "#B0E0E6", alpha = 0.6) +
+  ggtitle(label = "Comparison of the range estimates to a unfirom distribution") +
+  xlab("range (Km)") +
+  ylab("Density")
+```
+
+The range results follow the same distribution as that of the body mass/ fat mass.
+The algorithm "constant muscle mass" depends on fat mass.
+
 
 ###  Gaussian body mass and fat  mass.
 ```{r}
 # normally distributed data
 set.seed(2020)
-acr_irp_body_mass <- sort(rnorm(100, mean = 0.01175, sd = 0.001),
-                          decreasing = FALSE)
+acr_irp_body_mass <- rnorm(1000, mean = 0.01175, sd = 0.001)
 
-acr_irp_fat_mass <- sort(rnorm(100, mean = 0.00049, sd = 0.00001),
-                         decreasing = FALSE)
-
-acr_sim_data <- data.frame(cbind("body mass" = acr_irp_body_mass, 
-                                 "fat mass" = acr_irp_fat_mass))
-
-ggplot(acr_sim_data, aes(x = fat.mass, y = body.mass)) +
-  geom_point() +
-  ggtitle("Normall distributed genereated data")
-```
-
-```{r}
-wing.span <- rep(0.1946, 100)
-wing.area <- rep(0.00773, 100)
-taxon <- rep(1, 100)
-muscle.mass <- 0.09 * acr_irp_body_mass
-
-data <- data.frame(cbind(acr_irp_body_mass, acr_irp_fat_mass, wing.span,
-                         wing.area, taxon, muscle.mass))
-```
-
-
-```{r}
-library(flying)
-test_results <- migrate(data = data, method = "cmm", speed_control = "constant_speed")
-```
-
-
-```{r}
-ggplot(acr_sim_data, aes(x = body.mass, y = test_results$range)) +
-  geom_point() +
-  ggtitle("Range vs body mass")
-```
-
-
-```{r}
-plot(density(test_results$range), main = "Range density, gaussian body mass and fat mass")
-```
-
-### Gaussian body mass and fat mass (with independence, no sorting)
-
-```{r}
-# normally distributed data
-set.seed(2020)
-acr_irp_body_mass <- rnorm(100, mean = 0.01175, sd = 0.001)
-
-acr_irp_fat_frac <- rnorm(100, mean = 0.04170213, sd = 0.00001)
+acr_irp_fat_frac <- rnorm(1000, mean = 0.04170213, sd = 0.00001)
 
 acr_irp_fat_mass <- acr_irp_body_mass * acr_irp_fat_frac
 
@@ -127,17 +165,11 @@ ggplot(acr_sim_data, aes(x = fat.mass, y = body.mass)) +
 test_results <- migrate(data = data, method = "cmm", speed_control = "constant_speed")
 
 ggplot(acr_sim_data, aes(x = body.mass, y = test_results$range)) +
-  geom_line() +
+  #geom_line() +
   geom_point()+
   ggtitle("Range vs body mass")
 ```
 
-```{r}
-ggplot(acr_sim_data, aes(x = fat.mass, y = test_results$range)) +
-  geom_line() +
-  geom_point()+
-  ggtitle("Range vs body mass")
-```
 
 
 ```{r message=FALSE}
@@ -152,6 +184,113 @@ ggplot(acr_sim_data, aes(x = fat.mass, y = test_results$range)) +
 plot(density(test_results$range), main = "Range density, gaussian body mass and fat mass")
 ```
 
+
+
+The data suggests that the bird samples could come from a mixture of distributions
+within the immature demographic.
+
+```{r}
+# sample body mass from a gaussian mixture.
+set.seed(2020)
+avg <- c(827,2160, 180, 97,  94,  51,  25)/3434
+body_mass_mean <- c(0.01152, 0.01175, 0.01246, 0.01246, 0.01335, 0.01373, 0.01421)
+fat_mass_mean <- c(0.00025, 0.00049, 0.00120, 0.00158, 0.00158, 0.00246, 0.00246)
+
+probs <- c(0.241,0.629, 0.0524, 0.0282, 0.0274,  0.0149, 0.00728)
+probs2 <- fat_mass_mean/sum(fat_mass_mean)
+body_mass <- c()
+fat_mass <- c()
+for (i in 1:1000) {
+  # choose which component to sample from
+  comp <- which(rmultinom(1, size = 1, prob = probs) == 1)
+  comp2 <- which(rmultinom(1, size = 1, prob = probs2) == 1)
+  
+  # sanple from gaussin with 10% variation
+  body_mass[i] <- rnorm(1, mean = body_mass_mean[comp], sd = 0.1 *body_mass_mean[comp])
+  fat_mass[i] <- rnorm(1, fat_mass_mean[comp2], sd = 0.1*fat_mass_mean[comp2])
+}
+
+```
+
+```{r}
+ggplot()+
+  geom_density(aes(x = body_mass), fill = "#66CDAA")+
+  #geom_density(aes(x = runif(n = 1000, min = min(test_results$range), max = max(test_results$range)))
+  #             , fill = "#B0E0E6", alpha = 0.6) +
+  ggtitle(label = "Distribution of body mass") +
+  xlab("Body mass") +
+  ylab("Density")
+```
+
+```{r}
+ggplot()+
+  geom_density(aes(x = fat_mass), fill = "#66CDAA")+
+  #geom_density(aes(x = runif(n = 1000, min = min(test_results$range), max = max(test_results$range)))
+  #             , fill = "#B0E0E6", alpha = 0.6) +
+  ggtitle(label = "Distribution of fat mass") +
+  xlab("fat mass") +
+  ylab("Density")
+```
+
+
+```{r}
+# relationship between fat mass and muscle mass
+ggplot() + 
+  geom_point(aes(x = fat_mass, y = body_mass), color = "#C6103F")+
+  ggtitle("Relationship between fat and body mass")+
+  xlab("fat mass")+
+  ylab("body mass")
+```
+
+```{r}
+# wing span from normal distribution
+set.seed(2020)
+wing_span <- rnorm(1000, mean = 0.1946, sd = 0.01 * 0.1946)
+wing_area <- rnorm(1000, mean = 0.00773, sd = 0.01 * 0.00773)
+muscle_mass <- 0.15 * body_mass
+taxon <- rep(1, time = 1000)
+norm_gen_data <- data.frame(cbind(body_mass, fat_mass, wing_span, wing_area,
+                                  muscle_mass, taxon))
+
+results <- migrate(data = norm_gen_data, method = "cmm", 
+                   speed_control = "constant_speed")
+```
+
+```{r}
+# relationship between fat mass and range
+ggplot()+
+  geom_point(aes(x = fat_mass, y = results$range))+
+  ggtitle("Relationship between fat mass and range")+
+  xlab("fat mass") +
+  ylab("range")
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = muscle_mass, y = results$range))+
+  ggtitle("Relationship between muscle mass and range")+
+  xlab("fat mass") +
+  ylab("range")
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = body_mass, y = results$range))+
+  ggtitle("Relationship between body mass and muscle mass")+
+  xlab("body mass") +
+  ylab("range")
+```
+
+
+```{r}
+ggplot()+
+  geom_density(aes(x = results$range))+
+  ggtitle("Distribution of range")+
+  xlab("range") +
+  ylab("density")
+```
+
+
 ### Uncertainty in mechanical conversion efficiency.
 
 Default value in flight is 0.23
@@ -159,7 +298,7 @@ Default value in flight is 0.23
 ```{r}
 # uniform prior 
 set.seed(2020)
-mce <- runif(100, min = 0.229, max = 0.232)
+mce <- runif(100, min = 0.09, max = 0.23)
 
 boxplot(mce, main = "Variation in mechanical conversion efficiency")
 ```
@@ -191,7 +330,7 @@ for (i in 1:length(mce)) {
 }
 
 ggplot() +
-  geom_point(aes(x = mce, y = ranges)) +
+  geom_line(aes(x = mce, y = ranges)) +
   ggtitle("Range vs body mass")
 ```
 
@@ -199,7 +338,7 @@ ggplot() +
 ```{r}
 # uniform prior 
 set.seed(2020)
-mce <- rnorm(100,mean = 0.23, sd = 0.01)
+mce <- rnorm(100,mean = 0.23, sd = 0.02)
 
 boxplot(mce, main = "Variation in mechanical conversion efficiency")
 ```
@@ -227,7 +366,6 @@ for (i in 1:length(mce)) {
 }
 
 ggplot() +
-  geom_point(aes(x = mce, y = ranges)) +
+  geom_line(aes(x = mce, y = ranges)) +
   ggtitle("Range vs mechanical conversion efficiency")
 ```
-

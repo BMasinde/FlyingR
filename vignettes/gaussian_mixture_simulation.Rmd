@@ -1,0 +1,8 @@
+---
+title: "Gaussian mixture simulations"
+author: "Brian Masinde (brima748)"
+date: "2/17/2020"
+output: pdf_document
+---
+
+
