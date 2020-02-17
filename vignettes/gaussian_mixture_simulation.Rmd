@@ -6,3 +6,245 @@ output: pdf_document
 ---
 
 
+```{r message=FALSE, warning=FALSE}
+# required libraries
+library(flying)
+library(ggplot2)
+```
+
+# Simulation from gaussian 
+
+## Acrocephalus scirpaceus (Eurasian Reed Wabler)
+Available data on the Eurasian Reed Wabler has the following relevant 
+information:
+
+* Age of samples (All are immature)
+
+* Fat score (0-8) 
+
+* Samples
+
+* Mean body mass (Kg): This is the all-up body mass
+
+* Fat mass (kg)
+
+* Fat fraction: Fraction of fat mass to all-up mass.
+
+* Average flight height.
+
+* Average wing span
+
+* Average wing area
+
+Note the muscle mass is not included, but can estimated as a fraction as the 
+all-up mass.
+
+So obviously we have point estimates and not the actuall data. Via sampling from 
+sensible distribution with sensible parameters we could investigate the relationship
+between this variables and the output (i.e the range).
+
+```{r}
+species <- rep("ACR.IRP", times = 8)
+age <- rep("Immature", times = 8)
+fat_score <- 0:7
+mean_mass <- c(0.01127, 0.01152, 0.01152, 0.01246, 0.01246, 0.01335, 0.01335, 0.01421)
+fat_mass <- c(0.00000, 0.00025, 0.00049, 0.00120, 0.00158, 0.00209, 0.00246, 0.00246)
+fat_fraction <- c(0.00, 0.02, 0.04, 0.10, 0.12, 0.16, 0.18, 0.21)
+wing_span_avg <- rep(0.1946, times = 8)
+wing_area_avg <- rep(0.00773, times = 8)
+samples <- c(1883,827,2160, 180, 97,  94,  51,  25)
+ACR_species <- data.frame(cbind(species, age, fat_score, mean_mass, fat_mass, fat_fraction))
+
+ACR_species
+```
+
+### Uncertainty in variables
+Uncertainity in the variables is expressed in the standard deviation using 
+percentages so that the scale with the variables is maintained. 
+
+$$
+ sd = 10\% \times X_{ij}
+$$
+
+Because we have sample numbers for body mass and fat mass we sample from a gaussian
+mixtrure.
+
+```{r}
+# sample body mass from a gaussian mixture.
+set.seed(2020)
+
+# number of samples used to get averages excluding row with fat mass = 0
+avg <- c(827,2160, 180, 97,  94,  51,  25)/3434
+body_mass_mean <- c(0.01152, 0.01175, 0.01246, 0.01246, 0.01335, 0.01373, 0.01421)
+fat_mass_mean <- c(0.00025, 0.00049, 0.00120, 0.00158, 0.00158, 0.00246, 0.00246)
+
+probs <- c(0.241,0.629, 0.0524, 0.0282, 0.0274,  0.0149, 0.00728)
+probs2 <- fat_mass_mean/sum(fat_mass_mean)
+body_mass <- c()
+fat_mass <- c()
+for (i in 1:1000) {
+  # choose which component to sample from
+  comp <- which(rmultinom(1, size = 1, prob = probs) == 1)
+  comp2 <- which(rmultinom(1, size = 1, prob = probs2) == 1)
+  
+  # sanple from gaussin with 10% variation
+  body_mass[i] <- rnorm(1, mean = body_mass_mean[comp], sd = 0.1 *body_mass_mean[comp])
+  fat_mass[i] <- rnorm(1, fat_mass_mean[comp2], sd = 0.1*fat_mass_mean[comp2])
+}
+
+wing_span <- rnorm(1000, mean = 0.1946, sd = 0.1 * 0.1946)
+wing_area <- rnorm(1000, mean = 0.00773, sd = 0.1 * 0.00773)
+muscle_mass <- 0.15 * body_mass
+taxon <- rep(1, time = 1000)
+norm_gen_data <- data.frame(cbind(body_mass, fat_mass, wing_span, wing_area,
+                                  muscle_mass, taxon))
+```
+
+
+### Uncertainty in constants
+*  Profile power constant $C_{pro}$ (ppc = 8.4). This can also be adjusted.
+
+*  Energy content of fuel per kg $e$ (eFat = 3.9 * 10 ^ 7)
+
+*  Acceleration due to gravity $g$ (g =  9.81)
+
+*  Mechanical conversion efficiency $\eta$ (mce= 0.23).
+
+*  Induced power factor $k$ (ipf= 1.20)
+
+*  Ventilation and circulation power $R$ (vcp = 1.10)
+
+*  Air density at flight height $\rho$. This can be changed
+according to altitude the bird species is known to fly (airDensity = 1.00). 
+
+*  Body drag coefficient $C_{Db}$(bdc = 0.10)
+
+*  Basal metabolic rate $\Pi_m$ empirical constants
+
+    *  alpha passerines = 6.25; alpha non-passerines = 3.79
+    
+    *  delta passerines = 0.724; delta non-passerines = 0.723
+    
+* Inverse muscle density (muscDensity = 1060)
+
+* protein hydration ratio (phr = 2.2)
+
+We are also uncertain about the value for constants to use. For example, we are 
+not the air density which corresponds to the flight altitude. These simulations
+assume that the flight altitude is already attained. Similarly, the mechanical 
+conversion efficiency is not know for sure.
+We exclude gravity, no uncertainty here.
+
+Challenge here is that we can not simulate from normal distribution. We don't know
+the mean nor the standard deviation. We dont have data from experiments, so we 
+can sample from a uniform distribution over a reasonable $10\% \pm constant$.
+Depending on the simulation some of the constants may not be used. Should we
+expect the methods to figure out that there is no variability from these constants.
+
+```{r}
+set.seed(2020) # setting seed for reproducibility
+# same strategy simulate from uniform distribution
+cons <- list(
+    # profile power constant
+    ppc = 8.4,
+
+    # energy content of fuel per kg
+    eFat = 3.9 * 10^7,
+
+    # energy content of
+    eProtein = 1.8 * 10^7,
+
+    # mechanical conversion efficiency  [0,1]
+    mce = 0.23,
+
+    # induced power factor
+    ipf = 1.20,
+
+    # ventilation and circulation power (Tucker's data)
+    vcp =  1.10,
+
+    # air density at flight height
+    airDensity = 1.00,
+
+    # body drag coefficient
+    bdc = 0.10,
+
+    # metabolism ratteconstant varies btw passerines and non-passerines
+    alpha1 = 6.25, 
+    alpha2 = 3.79,
+    delta1 = 0.724, 
+    delta2 = 0.723,
+
+    # inverse power density of mitochondria
+    invPower= 1.2 * 10 ^-6,
+
+    # ratio V:Vmp
+    speedRatio = 1.2,
+
+    # density of muscle
+    muscDensity = 1060,
+    # protein hydration ratio
+    phr = 2.2
+  )
+
+simulated_constants <- data.frame(matrix(NA, nrow = 1000, ncol = 16))
+
+column_names <- c("ppc", "eFat", "eProtein", "mce", "ipf", "vcp", "airDensity",
+                  "bdc", "alpha1", "alpha2", "delta1", "delta2", "invPower", 
+                  "speedRatio", "muscDensity","phr")
+
+colnames(simulated_constants) <- column_names
+
+for (i in 1:length(cons)) {
+  simulated_constants[, i] <-
+    runif(1000, min = cons[[i]] - 0.1 * cons[[i]] , max = 0.1 * cons[[i]] + cons[[i]])
+}
+
+```
+
+
+```{r}
+ggplot(data = simulated_constants) +
+  geom_density(aes(x = mce))
+```
+
+## Range Simulation using the simulated data
+```{r}
+simulated_range <- list()
+
+for (i in 1:nrow(simulated_constants)) {
+  control <- list(
+    ppc = simulated_constants$ppc[i],
+    eFat = simulated_constants$eFat[i],
+    eProtein = simulated_constants$eProtein[i],
+    mce = simulated_constants$mce[i],
+    vcp = simulated_constants$vcp[i],
+    ipf = simulated_constants$ipf[i],
+    airDensity = simulated_constants$airDensity[i],
+    bdc = simulated_constants$bdc[i],
+    alpha = c(simulated_constants$alpha1[i],simulated_constants$alpha2[i]),
+    delta = c(simulated_constants$delta1[i], simulated_constants$delta2[i]),
+    invPower = simulated_constants$invPower[i],
+    speedRatio = simulated_constants$speedRatio[i],
+    muscDensity = simulated_constants$muscDensity[i],
+    phr = simulated_constants$phr[i]
+  )
+  simulation <- migrate(data = norm_gen_data, method = "cmm",
+                        settings = control, protein_met = 0,
+                        speed_control = "constant_speed")
+  
+  simulated_range[[i]] <- as.vector(simulation$range)
+}
+```
+
+
+```{r}
+ggplot() +
+  geom_line(aes(x = norm_gen_data$fat_mass, y = simulated_range[[22]]))
+```
+
+```{r}
+ggplot() +
+  geom_point(aes(x = simulated_range[[9]], y = simulated_range[[22]]))
+```
+
