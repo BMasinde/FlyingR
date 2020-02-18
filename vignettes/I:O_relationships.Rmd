@@ -1,0 +1,132 @@
+---
+title: "Relationships btw input and output"
+author: "Brian Masinde (brima748)"
+date: "2/18/2020"
+output: pdf_document
+---
+```{r message=FALSE, warning=FALSE}
+# required libraries
+library(flying)
+library(ggplot2)
+library(gridExtra)
+```
+
+# The DATA.
+We have a sample of 28 birds 27 distinct species. We want to investigate the 
+relationship between input and output.
+
+We are going to use the "constant specific work" simulaiton as a benchmark for the 
+rest. Reason, pennycuick 08 says it closely represents real work scenario.
+
+```{r}
+results <- migrate(data = birds, method = "csw", speed_control = "constant_speed")
+```
+
+```{r}
+BMR <- ggplot()+
+  geom_point(aes(x = log(birds$Empty.mass), y = log(results$range)), color = "#145A32")+
+  xlab("All-up mass")+
+  ylab("Range")+
+  ggtitle("Body mass vs range (Log Transformed)")+
+  theme_bw()
+```
+
+
+```{r}
+FMR <- ggplot()+
+  geom_point(aes(x = log(birds$Fat.mass), y = log(results$range)), color = "#145A32")+
+  xlab("Fat mass")+
+  ylab("Range")+
+  ggtitle("Fat mass and range (Log Transformed)")+
+  theme_bw()
+```
+
+```{r}
+MMR <- ggplot()+
+  geom_point(aes(x = log(birds$Muscle.mass), y = log(results$range)), color = "#145A32")+
+  xlab("Muscle mass")+
+  ylab("Range")+
+  ggtitle("Muscle mass vs range (Log Transformed)")+
+  theme_bw()
+```
+
+```{r}
+WSR <- ggplot()+
+  geom_point(aes(x = log(birds$Wing.span), y = log(results$range)), color = "#145A32")+
+  xlab("Wing span")+
+  ylab("Range")+
+  ggtitle("Wing span vs range (Log Transformed)")+
+  theme_bw()
+```
+
+```{r}
+WAR <- ggplot()+
+  geom_point(aes(x = log(birds$Wing.area), y = log(results$range)), color = "#145A32")+
+  xlab("Wing area")+
+  ylab("Range")+
+  ggtitle("Wing area vs range (Log Transformed)")+
+  theme_bw()
+```
+
+```{r}
+grid.arrange(BMR,FMR, WSR, WAR)
+```
+
+
+
+As expected there's a linear relationship between all-up mass and fat mass. This
+is because the fat mass usually not directly measurable is expressed as fraction 
+of the all-up mass.
+```{r}
+FMBM <- ggplot()+
+  geom_point(aes(x = log(birds$Fat.mass), y = log(birds$Empty.mass)), color = "#145A32")+
+  xlab("Fat mass")+
+  ylab("All-up mass")+
+  ggtitle("Body mass and Fat mass (Log Transformed)")+
+  theme_bw()
+```
+
+```{r}
+MMBM <- ggplot()+
+  geom_point(aes(x = log(birds$Muscle.mass), y = log(birds$Empty.mass)), color = "#145A32")+
+  xlab("Muscle mass")+
+  ylab("All-up mass")+
+  ggtitle("Muscle mass and Fat mass (Log Transformed)")+
+  theme_bw()
+```
+
+```{r}
+WSBM <- ggplot()+
+  geom_point(aes(x = log(birds$Wing.span), y = log(birds$Empty.mass)), color = "#145A32")+
+  xlab("Muscle mass")+
+  ylab("All-up mass")+
+  ggtitle("Wing span and Body mass (Log Transformed)")+
+  theme_bw()
+```
+  
+```{r}
+WABM <- ggplot()+
+  geom_point(aes(x = log(birds$Wing.area), y = log(birds$Empty.mass)), color = "#145A32")+
+  xlab("wing area")+
+  ylab("All-up mass")+
+  ggtitle("Wing area vs Body mass (Log Transformed)")+
+  theme_bw()
+```
+
+```{r}
+WAWS <- ggplot()+
+  geom_point(aes(x = log(birds$Wing.area), y = log(birds$Wing.span)), color = "#145A32")+
+  xlab("wing area")+
+  ylab("wing span")+
+  ggtitle("Wing area vs Wing span (Log Transformed)")+
+  theme_bw()
+```
+
+```{r}
+grid.arrange(FMBM, MMBM)
+```
+
+```{r}
+grid.arrange(WSBM, WABM, WAWS)
+```
+
