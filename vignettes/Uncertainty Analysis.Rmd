@@ -1,0 +1,617 @@
+---
+title: "Uncertainty Analysis"
+author: "Brian Masinde (brima748)"
+date: "2/19/2020"
+output: 
+  pdf_document:
+  citation_package: biblatex
+bibliography: references.bib
+---
+```{r}
+library(ggplot2)
+library(flying)
+library(corrplot)
+library(mgcv)
+```
+
+# Uncertainty Analysis in Preset birds.
+
+## Anas Crecca (Eurasian Teal)
+
+### Body Mass (Kg)
+@fox1992seasonal measured the Teal at different times of the year. They present a table
+of samples between adults, immature, males and females. In summary,
+among juvenile males; sample of 3577 had the body mass of $303.6 \pm 0.6$ while
+adult males (999) have the distribution of $320.4 \pm 1.1$, juvinile females
+(2295) $280.4 \pm 0.7$ and adult females $290.6 \pm 1.4$.
+
+This makes it possible to sample from a gaussian mixture distribution.
+
+```{r}
+set.seed(2020)
+anas_crecca_BM_sample <- c()
+
+# sample order (juvenile male, adult male, juvenile female, adult female)
+samples <- c(3577, 999, 2295, 498)
+# probabilities
+probs <- samples/sum(samples)
+# standard deviations
+sd <- c(0.6, 1.1,0.7, 1.4)
+# means of body mass
+body_mass_mean <- c(303.6, 320.4, 280.4, 290.6)
+
+for (i in 1:1000) {
+  # choose which component to sample from
+  comp <- which(rmultinom(1, size = 1, prob = probs) == 1)
+  
+  # sanple from gaussin with 10% variation
+  anas_crecca_BM_sample[i] <- rnorm(1, mean = body_mass_mean[comp], sd = sd)
+}
+```
+
+
+```{r}
+ggplot()+
+  geom_density(aes(x = anas_crecca_BM_sample), fill = "grey")+
+  xlim(265, 330)+
+  theme_classic()+
+  ggtitle("Mixture sample of Anas Crecca Body Mass (grams)")
+```
+
+### Wing Span.
+According to https://www.hbw.com/species/common-teal-anas-crecca (Handbook of the 
+birds of the world) the wing span of the birds could vary from 54 - 62 cm. Sample
+from a uniform distribution.
+
+```{r}
+set.seed(2020)
+anas_crecca_WS_sample <- runif(1000, min = 54, max = 62)
+```
+
+```{r}
+ggplot()+
+  geom_density(aes(x = anas_crecca_WS_sample), fill = "grey")+
+  theme_classic()+
+  ggtitle("Wing Span distirbution Anas crecca")
+```
+
+### Uncertainty in Wing Area.
+Wing area has some sort of linear relationship with the wing span. Can we use 
+linear regrssion to predict wing area?
+
+```{r}
+WAWS <- ggplot()+
+  geom_point(aes(x = log(birds$Wing.area), y = log(birds$Wing.span)), color = "#145A32")+
+  xlab("wing area")+
+  ylab("wing span")+
+  ggtitle("Wing area vs Wing span (Log Transformed)")+
+  theme_bw()
+WAWS
+```
+
+```{r}
+# fitting a linear regression
+lm_wswa <- lm(Wing.area ~ Wing.span, data = birds)
+```
+
+```{r}
+ggplot()+
+  geom_density(aes(x = lm_wswa$residuals))+
+  geom_density(aes(x = rnorm(1000, mean = 5.138344e-18, sd = 0.1513841)))+
+  theme_classic()+
+  xlim(-0.5, 0.5)
+```
+
+```{r}
+plot(lm_wswa)
+```
+
+Not so nice prediction. But we can still use it to predict
+
+```{r}
+anas_crecca_WingS_sample <- data.frame(cbind("Wing.span" = anas_crecca_WS_sample))
+predicted_WA <- predict.lm(object = lm_wswa, anas_crecca_WingS_sample)
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = anas_crecca_WS_sample, y = predicted_WA))+
+  ggtitle("Predicted wing area vs wing span")
+```
+
+### Uncertainty in fat mass
+Suppose that bird could vary in obesity. Usually fat mass is not directly observable.
+Fat scores are widely used. We dont have fat score relationship betweeen the teals.
+Way out we could sample the fat fraction form a uniform distribution. This is better
+because a big bird does not necessariy have to be obesse. During migration,
+birds can have between $50-60\%$  of body mass as fat [@guglielmo2018obese].
+
+```{r}
+# simulating from a uniform distribution.
+set.seed(2020)
+anas_crecca_fat_fraction <- runif(1000, min = 0.2, max = 0.6)
+```
+
+### Uncertainty in muscle mass.
+Again muscle mass is not directly observable but it is a fraction of the body mass.
+Couldnt find a standard for this measurement. So we sample from reasonable uniform
+range. 
+
+```{r}
+# most birds in flight have a musscle fraction of 0.17
+set.seed(2020)
+anas_crecca_muscle_frction <- rnorm(1000, mean = 0.17, sd = 0.01)
+```
+
+```{r}
+ggplot()+
+  geom_density(aes(x= anas_crecca_muscle_frction), fill = "grey")+
+  xlim(0.13, 0.21)+
+  theme_classic()
+```
+
+```{r}
+# aggregate data on anas crecca
+anas_crecca_bodymass <- round((anas_crecca_BM_sample*0.001), 5)
+anas_crecca_wingspan <- round((anas_crecca_WS_sample) * 0.01, 5)
+anas_crecca_wingarea <- round(predicted_WA * 0.01,5)
+anas_crecca_musclemass <- round((anas_crecca_BM_sample * anas_crecca_muscle_frction)*0.001,5)
+anas_crecca_fatmass <- round((anas_crecca_BM_sample * anas_crecca_fat_fraction)*0.001,5)
+species <- rep("Anas Crecca", 1000)
+taxon <-  rep(2, 1000)
+
+anas_crecca <- data.frame(
+  cbind(species,
+        anas_crecca_bodymass,
+        anas_crecca_wingspan,
+        anas_crecca_wingarea,
+       taxon,
+       anas_crecca_musclemass,
+        anas_crecca_fatmass
+  ),
+  stringsAsFactors = FALSE
+)
+
+colnames(anas_crecca) <- c("species","body.mass","wing.span","wing.area","taxon","muscle.mass",
+                           "fat.mass")
+anas_crecca$species <- as.factor(anas_crecca$species)
+anas_crecca$taxon <- as.factor(anas_crecca$taxon)
+anas_crecca$body.mass <- as.numeric(anas_crecca$body.mass)
+anas_crecca$fat.mass <- as.numeric(anas_crecca$fat.mass)
+anas_crecca$wing.span <- as.numeric(anas_crecca$wing.span)
+anas_crecca$wing.area <- as.numeric(anas_crecca$wing.area)
+anas_crecca$muscle.mass <- as.numeric(anas_crecca$muscle.mass)
+
+```
+
+
+
+### Simulate range
+```{r}
+anas_crecca_range <- migrate(data = anas_crecca, method = "csw", speed_control = "constant_speed")
+```
+
+```{r}
+rho <- cor(x = data.frame(cbind(anas_crecca_bodymass, anas_crecca_wingspan, anas_crecca_wingarea,anas_crecca_musclemass, anas_crecca_fatmass, anas_crecca_range$range)))
+corrplot(rho)
+```
+
+```{r}
+ggplot()+
+  geom_density(aes(log(anas_crecca_range$range)), fill = "grey")+
+  xlim(6, 8.9)
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = anas_crecca$fat.mass, y = anas_crecca_range$range))+
+  theme_bw()
+```
+
+## Calidris Tenuirostris
+According to https://www.hbw.com/species/red-knot-calidris-canutus, great knots
+can have body mass distribution anywhere between $85-220g$,but @penny03 observed birds
+with mean body mass o f 233g.
+Reasonable uncertainty uniform distribution
+```{r}
+set.seed(2020)
+red_knot_BM_sample <- runif(1000, min = 0.1, max = 0.233)
+# wing span
+red_knot_WS_sample <- runif(1000, min = 0.45, max = 0.6)
+# wing area
+red_knot_WA_sample <- rnorm(1000, mean = 0.0397, sd = 0.00183)
+
+red_knot_FF_sample <- runif(1000, min = 0.2, max = 0.6)
+
+red_knot_MF_sample <- rnorm(1000, mean = 0.144, sd = 0.01)
+```
+
+@penny03 give mean and sd of wing span and wing area.
+
+## Garden Wabler.
+
+### Uncertainty Analysis
+According to hbw.com garden wabler can range from 16 to 22 grams and upto 37 grams
+prior to migration. Assuming normal distribution with mean around 22 grams with 
+variance.
+```{r}
+set.seed(2020)
+# body mass
+garden_wabler_BM_sample <- round(rnorm(1000, mean = 0.025, sd = 0.001), 5)
+
+# Fat fraction using same strategy 50 -60 %
+garden_wabler_FF_sample <- round(runif(1000, min = 0.2, max = 0.6), 5)
+
+# muscle mass
+garden_wabler_MF_sample <- round(rnorm(1000, mean = 0.144, sd = 0.01), 5)
+
+# pertubate the wing span slightly
+garden_wabler_WS_sample <- round(rnorm(1000, mean = 0.24, sd = 0.001), 5)
+
+# pertubate wing area
+garden_wabler_WA_sample <- round(rnorm(1000, mean = 0.011, sd = 0.001), 5)
+
+species <- rep("Sylvia borin", 1000)
+
+taxon <-  rep(1, 1000)
+```
+
+
+```{r}
+garden_wabler_fat_mass <- garden_wabler_BM_sample * garden_wabler_FF_sample
+garden_wabler_muscle_mass <-garden_wabler_BM_sample*garden_wabler_MF_sample
+
+garden_wabler_data <- data.frame(
+  cbind(
+    garden_wabler_BM_sample,
+    garden_wabler_fat_mass,
+    garden_wabler_muscle_mass,
+    garden_wabler_WS_sample,
+    garden_wabler_WA_sample,
+    species,
+    taxon,deparse.level = 0
+  ),
+  stringsAsFactors = FALSE
+)
+
+colnames(garden_wabler_data) <- c("body.mass","fat.mass","muscle.mass", "wing.span","wing.area",
+                           "species","taxon")
+garden_wabler_data$species <- as.factor(garden_wabler_data$species)
+garden_wabler_data$taxon <- as.factor(garden_wabler_data$taxon)
+garden_wabler_data$body.mass <- as.numeric(garden_wabler_data$body.mass)
+garden_wabler_data$fat.mass <- as.numeric(garden_wabler_data$fat.mass)
+garden_wabler_data$wing.span <- as.numeric(garden_wabler_data$wing.span)
+garden_wabler_data$wing.area <- as.numeric(garden_wabler_data$wing.area)
+garden_wabler_data$muscle.mass <- as.numeric(garden_wabler_data$muscle.mass)
+```
+
+```{r}
+# migrate garden wabler
+garden_wabler_range <- migrate(data = garden_wabler_data, method = "csw", speed_control = "constant_speed")
+```
+```{r}
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$fat.mass, y = garden_wabler_range$range))+
+  theme_bw()
+```
+
+
+```{r}
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$body.mass, y = garden_wabler_range$range))+
+  theme_bw()
+```
+
+
+```{r}
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$muscle.mass, y = garden_wabler_range$range))+
+  theme_bw()
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$wing.span, y = garden_wabler_range$range))+
+  theme_bw()
+```
+
+
+```{r}
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$wing.area, y = garden_wabler_range$range))+
+  theme_bw()
+```
+
+### Sensitivity Analysis
+
+#### Variance Based Method (SOBOL):
+
+```{r}
+expected_value <- function(y,x, r) {
+  # x anyone of the inputs
+  # y estimated range
+  # number of values to take
+  
+  if(length(x) != length(y)) {
+    stop("lenght not equal")
+  }
+  n <- length(y)
+  chunks <- n/r
+  #min_x <- min(x)
+  #max_x <- max(x)
+  #last_x <- min_x
+  #z <-  1# counter
+  predicted <- c() # mean_value
+  for (i in 1:chunks) {
+    predicted[i] <- mean(y[i:r*i])
+  }
+  return(predicted)
+}
+```
+
+```{r}
+preds <- expected_value(garden_wabler_range$range, garden_wabler_data$wing.area, 5)
+```
+
+```{r}
+try_model <- lm(garden_wabler_range$range ~ wing.area + 
+                      wing.area^2,
+                    data = garden_wabler_data)
+
+preds <- predict(try_model)
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$wing.area, y = garden_wabler_range$range))+
+  geom_line(aes(x = garden_wabler_data$wing.area, y = preds), color  = "red")+
+  geom_smooth(aes(x = garden_wabler_data$wing.area, y = garden_wabler_range$range))+
+  theme_bw()
+```
+
+```{r}
+# sobol index of wing area
+
+S_wing_area <- var(preds)/var(garden_wabler_range$range)
+
+S_wing_area
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$fat.mass, y = garden_wabler_range$range))+
+  geom_smooth(aes(x = garden_wabler_data$fat.mass, y = garden_wabler_range$range),
+              span = 0.8)+
+  theme_bw()
+```
+
+```{r}
+fat_range_gam <- lm(formula = garden_wabler_range$range ~ fat.mass + 
+                      fat.mass^2 + fat.mass^3 + fat.mass^4,
+                    data = garden_wabler_data)
+range_pred_fat <- predict(fat_range_gam)
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$fat.mass, y = garden_wabler_range$range))+
+  geom_line(aes(x = garden_wabler_data$fat.mass, y = range_pred_fat), color  = "green")+
+  geom_smooth(aes(x = garden_wabler_data$fat.mass, y = garden_wabler_range$range),
+              span = 0.8)+
+  theme_bw()
+```
+
+```{r}
+gam_model <- gam(formula = garden_wabler_range$range ~ s(fat.mass, bs = 'cs'),
+              data = garden_wabler_data)
+
+pred3 <- predict(gam_model)
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$fat.mass, y = garden_wabler_range$range))+
+  geom_line(aes(x = garden_wabler_data$fat.mass, y = range_pred_fat), color  = "green")+
+  geom_line(aes(x = garden_wabler_data$fat.mass, y =pred3), color  = "red")+
+  #geom_smooth(aes(x = garden_wabler_data$fat.mass, y = garden_wabler_range$range),
+   #           span = 0.8)+
+  theme_bw()
+```
+
+```{r}
+# sobol index of wing area
+# GAM
+S_fat_mass <- var(pred3)/var(garden_wabler_range$range)
+
+S_fat_mass
+```
+
+```{r}
+rho <- cor(x = data.frame(cbind(garden_wabler_data[, -c(6,7)], garden_wabler_range$range)))
+corrplot(rho)
+```
+
+#### Quasi random sampling.
+```{r}
+# example of quasi random sampling
+set.seed(2020)
+x1 <- runif(10, min = 0.1, max = 0.7)
+x2 <- rnorm(10, mean = 0, sd = 1)
+
+d <- as.matrix(cbind(x1,x2))
+
+# generate an N*2d sample matrix each row is a sample point in hyperspace
+# this could be done in a better way
+N2d <- d[, rep(1:ncol(d), 2)]
+
+# first d columns as matrix A
+A <- N2d[ ,1:2]
+
+# remaining d columsn as matrix B
+B <- N2d[ ,3:4]
+
+# build further d N*d matrices Abi
+
+# 1st column = B[,1]
+Ab1 <- as.matrix(cbind(B[ ,1], A[ ,2]))
+Ab2 <- as.matrix(cbind(B[ , 2], A[ ,1]))
+
+
+# N(d+2) number of rows in A, B and dABi
+
+```
+
+```{r}
+# quasi random sampling
+
+# N2d matrix
+d <- 5 # the five variables we are uncertain about
+N2d <- matrix(data = NA, nrow = 10, ncol = 2*d)
+
+# N*(2+d) = 7000 simulations
+
+for (i in 1:nrow(N2d)) {
+  for (j in 1:ncol(N2d)) {
+    distributions <- list(rnorm(1, mean = 0.025, sd = 0.001), # bodymass
+                          runif(1, min = 0.2, max = 0.6), # fat fraction
+                          rnorm(1, mean = 0.144, sd = 0.01), # Muscle fraction
+                          rnorm(1, mean = 0.24, sd = 0.001), # wing span
+                          rnorm(1, mean = 0.011, sd = 0.001) # wing area
+                          )
+    if (j <= d) {
+      N2d[i, j] <- round(distributions[[j]], 5)
+    } else {
+      z <- j %/% 2 # quotient
+      N2d[i, j] <- round(distributions[[z]],5)
+    }
+  }
+}
+
+# replicating variable names
+cnames <- c("body.mass", "fat.frac", "muscle.frac", "wing.span", "wing.area")
+
+cnames <- rep(cnames, 2)
+
+colnames(N2d) <- cnames
+
+# first d columns as A
+A <- N2d[ ,1:d]
+
+# # convert fractions to mass
+# A <- as.matrix(cbind(A, "fat.mass" = A[, "fat.frac"] * A[, "body.mass"]))
+# A <- as.matrix(cbind(A, "muscle.mass" = A[, "muscle.frac"] * A[, "body.mass"]))
+
+# # remove fat.frac and fat.mass
+# A <-  A[, !colnames(A) %in% c("fat.frac", "muscle.frac")]
+# remains d columns as B
+
+B <- N2d[ ,(d+1):(d*2)]
+
+# # convert fractions to mass
+# B <- as.matrix(cbind(B, "fat.mass" = B[, "fat.frac"] * B[, "body.mass"]))
+# B <- as.matrix(cbind(B, "muscle.mass" = B[, "muscle.frac"] * B[, "body.mass"]))
+# 
+# B <- B[, !colnames(B) %in% c("fat.frac", "muscle.frac")]
+
+
+# create Ab_i
+
+AB_sub_i <- list()
+
+for (i in 1:d) {
+  cnme <- colnames(A)[i]
+  AB_sub_i[[i]] <- as.matrix(cbind(A[ ,i], B[, -i])) 
+  colnames(AB_sub_i[[i]])[1] <- cnme
+}
+
+# fractions to masses
+
+for (i in 1:length(AB_sub_i)) {
+  # fat mass
+  AB_sub_i[[i]] <- as.matrix(cbind(AB_sub_i[[i]],
+                                   "fat.mass" = AB_sub_i[[i]][, "fat.frac"] *
+                                     AB_sub_i[[i]][, "body.mass"]))
+  # muscle mass
+  AB_sub_i[[i]] <- as.matrix(cbind(AB_sub_i[[i]],
+                                   "muscle.mass" = AB_sub_i[[i]][, "muscle.frac"] *
+                                     AB_sub_i[[i]][, "body.mass"]))
+  
+  # remove fractions
+  
+  AB_sub_i[[i]] <- AB_sub_i[[i]][, !colnames(AB_sub_i[[i]]) %in% c("fat.frac", "muscle.frac")]
+  
+}
+
+A2 <- as.matrix(cbind(A, "fat.mass" = A[, "fat.frac"] * A[, "body.mass"]))
+
+A2 <- as.matrix(cbind(A2, "muscle.mass" = A[, "muscle.frac"] * A[, "body.mass"]))
+
+# remove fat.frac and fat.mass
+A2 <-  A2[, !colnames(A2) %in% c("fat.frac", "muscle.frac")]
+
+# convert fractions to mass
+B2 <- as.matrix(cbind(B, "fat.mass" = B[, "fat.frac"] * B[, "body.mass"]))
+B2 <- as.matrix(cbind(B2, "muscle.mass" = B[, "muscle.frac"] * B[, "body.mass"]))
+
+B2 <- B2[, !colnames(B2) %in% c("fat.frac", "muscle.frac")]
+
+
+```
+
+```{r}
+par(mfrow = c(2,2))
+for (i in 1:ncol(N2d)) {
+  plot(density(N2d[,i]))
+}
+```
+```{r}
+# replicating variable names
+cnames <- c("body.mass", "fat.mass", "muscle.mass", "wing.span", "wing.area")
+
+
+```
+
+
+## Preset birds
+```{r}
+preset_migration <- migrate(data = birds, method = "csw", speed_control = "constant_speed")
+```
+```{r}
+ggplot()+
+  geom_point(aes(x = birds$Fat.mass, y = preset_migration$range))+
+  geom_smooth(aes(x = birds$Fat.mass, y = preset_migration$range),
+              span = 0.8)+
+  theme_bw()
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = birds$Muscle.mass, y = preset_migration$range))+
+  geom_smooth(aes(x = birds$Muscle.mass, y = preset_migration$range),
+              span = 0.8)+
+  theme_bw()
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = birds$Wing.span, y = preset_migration$range))+
+  geom_smooth(aes(x = birds$Wing.span, y = preset_migration$range),
+              span = 0.8)+
+  theme_bw()
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = birds$Wing.area, y = preset_migration$range))+
+  geom_smooth(aes(x = birds$Wing.area, y = preset_migration$range),
+              span = 0.8)+
+  theme_bw()
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = birds$Wing.area, y = log(preset_migration$range)))+
+  geom_smooth(aes(x = birds$Wing.area, y = log(preset_migration$range)),
+              span = 0.8)+
+  theme_bw()
+```
+
+
+# References
