@@ -9,6 +9,7 @@ output: pdf_document
 library(flying)
 library(ggplot2)
 library(gridExtra)
+library(corrplot)
 ```
 
 # The DATA.
@@ -129,4 +130,15 @@ grid.arrange(FMBM, MMBM)
 ```{r}
 grid.arrange(WSBM, WABM, WAWS)
 ```
+
+## Correlations
+```{r}
+# get correlations
+data <- data.frame(cbind(birds[, -c(1,5)], "range"= as.vector(results$range)))
+corr <- cor(data)
+
+corrplot(corr)
+```
+
+
 
