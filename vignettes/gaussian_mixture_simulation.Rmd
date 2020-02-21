@@ -209,7 +209,7 @@ ggplot(data = simulated_constants) +
 ```
 
 ## Range Simulation using the simulated data
-```{r}
+```{r sim1mill, eval=FALSE}
 simulated_range <- list()
 
 for (i in 1:nrow(simulated_constants)) {
@@ -246,5 +246,101 @@ ggplot() +
 ```{r}
 ggplot() +
   geom_point(aes(x = simulated_range[[9]], y = simulated_range[[22]]))
+```
+
+```{r}
+M <- matrix(data = NA, nrow = 10, ncol = 10)
+
+for (i in 1:nrow(M)) {
+  M[i, ] <- runif(10, min = -5, max = 5)
+}
+
+```
+
+```{r}
+selection <- c()
+x <- 0
+y <- 0
+for (i in 1:1000) {
+  # start 
+  if (i = 1) {
+    x <- sample.int(10, size = 1)
+    y <- sample.int(10, size = 1)
+    selection[i] <- M[x,k]
+  }else {
+    direction <- rmultinom(1, 1, prob = c(0.25,0.25,0.25,0.25))
+    move <- which(direction == 1)
+    
+    if (move == 1) {
+      left <- x-1
+      if (left < 0) {
+        x <- 1
+      }else {
+        x <- x-1
+      }
+    }
+  }
+}
+```
+
+```{r}
+random_walk <- function(n.org, steps, left.p = .5, up.p = .5, plot = TRUE){
+ 
+require(ggplot2)
+ 
+whereto <- matrix(ncol = 2)
+ 
+for(x in 1:n.org){
+walker <- matrix(c(0,0), nrow = steps+1, ncol = 2, byrow = T)
+ 
+for(i in 1:steps){
+# left/right = 1/0
+horizontal <- rbinom(1, 1, left.p)
+ 
+# distance 2
+h.dist <- abs(rnorm(1, 0, 1))
+ 
+# Horizontal Movement
+if(horizontal == 0){
+walker[i+1,1] <- walker[i,1] + h.dist
+}
+if(horizontal == 1){
+walker[i+1,1] <- walker[i,1] - h.dist
+}
+ 
+# up/down = 1/0
+vertical <- rbinom(1, 1, up.p)
+ 
+#distance 2
+v.dist <- abs(rnorm(1, 0, 1))
+ 
+# Vertical Movement
+if(vertical == 1){
+walker[i+1,2] <- walker[i,2] + v.dist
+}
+if(vertical == 0){
+walker[i+1,2] <- walker[i,2] - v.dist
+}
+}
+ 
+whereto <- rbind(whereto, walker)
+}
+ 
+id <- rep(1:n.org, each = 1001)
+colnames(whereto) <- c("x" , "y")
+whereto <- as.data.frame(whereto)
+whereto <- cbind(whereto[2:nrow(whereto),], org = factor(id))
+ 
+if(plot){
+require(ggplot2)
+p <- ggplot(whereto, aes(x = x, y = y, colour = org))
+p <- p + geom_path()
+print(p)
+}
+ 
+return(whereto)
+}
+ 
+rw.test <- random_walk(1, 1000, .5, .5)
 ```
 
