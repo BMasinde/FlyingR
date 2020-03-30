@@ -11,28 +11,28 @@
     ppc = 8.4,
 
     # energy content of fuel per kg
-    eFat = 3.9 * 10^7,
+    #eFat = 3.9 * 10^7,
 
     # energy content of
-    eProtein = 1.8 * 10^7,
+    #eProtein = 1.8 * 10^7,
 
     # accelaration due to gravity
     g = 9.81,
 
     # mechanical conversion efficiency  [0,1]
-    mce = 0.23,
+    #mce = 0.23,
 
     # induced power factor
-    ipf = 1.20,
+    #ipf = 1.20,
 
     # ventilation and circulation power (Tucker's data)
     vcp =  1.10,
 
     # air density at flight height
-    airDensity = 1.00,
+    #airDensity = 1.00,
 
     # body drag coefficient
-    bdc = 0.10,
+    #bdc = 0.10,
 
     # constant varies btw passerines and non-passerines
     alpha = c(6.25, 3.79),
@@ -40,7 +40,7 @@
     delta = c(0.724, 0.723),
 
     # inverse power density of mitochondria
-    invPower= 1.2 * 10 ^-6,
+    #invPower= 1.2 * 10 ^-6,
 
     # ratio V:Vmp
     speedRatio = 1.2,
@@ -55,21 +55,21 @@
   if (missing(settings) == TRUE) {
     # use team of default parameters
     message("## settings not defined. Using default constants.
-            \nDefault airDensity = 1.00 kg m^3 \n")
+            ")
   }else{
     extArgs <- c(
       "ppc",
-      "eFat",
-      "eProtein",
+      #"eFat",
+      #"eProtein",
       "g",
-      "mce",
-      "ipf",
+      #"mce",
+      #"ipf",
       "vcp",
-      "airDensity",
-      "bdc",
+      #"airDensity",
+      #"bdc",
       "alpha",
       "delta",
-      "invPower",
+      #"invPower",
       "speedRatio",
       "muscDensity",
       "phr"
@@ -86,7 +86,7 @@
     }
 
     # throw error wrong argument in settings
-    if(length(cons) > 15){
+    if(length(cons) > 10){
       stop("Wrong argument in settings", call. = FALSE)
     }
 

@@ -54,22 +54,13 @@
 #'
 #' @import Rcpp
 #' @export migrate
-#'
-#' @examples
-#' migrate(data = birds, settings = list(eFat = 3.89*10^7))
-#' migrate(data = birds,  method = "cmm", settings = list(airDensity = 0.905))
-#'
-#'
-#' @usage migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
-#'                fill = TRUE, comment.char = "", ...,
-#'                data = NULL, settings = list(), method = "cmm",
-#'                speed_control = "constant_speed", protein_met = 0)
-#'
+
+
 
 
 migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                     fill = TRUE, comment.char = "", ...,
-                    data = NULL, settings = list(), method = "cmm",
+                    data = NULL, settings = list(), method = "csw",
                     speed_control = "constant_speed", protein_met = 0) {
 
   # object with results
@@ -114,8 +105,22 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   # control constants using default vs supplied
   if(missing(settings) == TRUE) {
     cons <- .control()
+    cons$eFat <- data$eFat
+    cons$eProtein <- data$eProtein
+    cons$mce <- data$mce
+    cons$ipf <- data$ipf
+    cons$invPower <- data$invPower
+    cons$bdc <- data$bdc
+    cons$airDensity <- data$airDensity
   } else {
     cons <- .control(settings)
+    cons$eFat <- data$eFat
+    cons$eProtein <- data$eProtein
+    cons$mce <- data$mce
+    cons$ipf <- data$ipf
+    cons$invPower <- data$invPower
+    cons$bdc <- data$bdc
+    cons$airDensity <- data$airDensity
   }
 
   if(method == "cmm") {

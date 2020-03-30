@@ -20,7 +20,14 @@
     taxon = c(),
     allMass = c(),
     fatMass = c(),
-    muscleMass = c()
+    muscleMass = c(),
+    mce = c(),
+    airDensity = c(),
+    eFat = c(),
+    eProtein = c(),
+    bdc = c(),
+    ipf = c(),
+    invPower = c()
   )
 
 
@@ -45,6 +52,20 @@
 
   variables$muscleMass <- grepl("muscle.mass|musclemass|muscle_mass",
                 ignore.case = TRUE, colNames)
+
+  variables$mce <- grepl("mce", ignore.case = TRUE, colNames)
+
+  variables$airDensity <- grepl("airDensity", ignore.case = TRUE, colNames)
+
+  variables$eFat <- grepl("eFat", ignore.case = TRUE, colNames)
+
+  variables$eProtein <- grepl("eProtein", ignore.case = TRUE, colNames)
+
+  variables$bdc <- grepl("bdc", ignore.case = TRUE, colNames)
+
+  variables$ipf <- grepl("ipf", ignore.case = TRUE, colNames)
+
+  variables$invPower <- grepl("invPower", ignore.case = TRUE, colNames)
 
 
   for (i in 1:length(variables)) {

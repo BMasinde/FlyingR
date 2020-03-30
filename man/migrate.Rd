@@ -4,10 +4,21 @@
 \alias{migrate}
 \title{Range Estimation}
 \usage{
-migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
-               fill = TRUE, comment.char = "", ...,
-               data = NULL, settings = list(), method = "cmm",
-               speed_control = "constant_speed", protein_met = 0)
+migrate(
+  file,
+  header = TRUE,
+  sep = ",",
+  quote = "\\"",
+  dec = ".",
+  fill = TRUE,
+  comment.char = "",
+  ...,
+  data = NULL,
+  settings = list(),
+  method = "csw",
+  speed_control = "constant_speed",
+  protein_met = 0
+)
 }
 \arguments{
 \item{file}{The name of the file which the data are to read from}
@@ -73,12 +84,6 @@ The option *control takes the folowing arguments
    \item muscDensity: Density of the flight muscles.
    \item phr: Protein hydration ratio
 }
-}
-\examples{
-migrate(data = birds, settings = list(eFat = 3.89*10^7))
-migrate(data = birds,  method = "cmm", settings = list(airDensity = 0.905))
-
-
 }
 \author{
 Brian Masinde
