@@ -327,6 +327,8 @@ ggplot()+
 #### Variance Based Method (SOBOL):
 
 ```{r}
+# Dont run
+# expected value at each interval 
 expected_value <- function(y,x, r) {
   # x anyone of the inputs
   # y estimated range
@@ -429,143 +431,226 @@ corrplot(rho)
 ```
 
 #### Quasi random sampling.
+
 ```{r}
-# example of quasi random sampling
 set.seed(2020)
-x1 <- runif(10, min = 0.1, max = 0.7)
-x2 <- rnorm(10, mean = 0, sd = 1)
+# creating a quasi monte carlo random sampling function.
+dists <- list(
+  bm = list(a = rnorm, mean = 0.028, sd = 0.001),
+  ff = list(a = runif, min = 0.5, max = 0.6),
+  mm = list(a = rnorm, mean = 0.17, sd = 0.0004),
+  wa = list(a = rnorm, mean = 0.011, sd = 0.0001),
+  ws = list(a = rnorm, mean = 0.24, sd = 0.0005)
+)
 
-d <- as.matrix(cbind(x1,x2))
-
-# generate an N*2d sample matrix each row is a sample point in hyperspace
-# this could be done in a better way
-N2d <- d[, rep(1:ncol(d), 2)]
-
-# first d columns as matrix A
-A <- N2d[ ,1:2]
-
-# remaining d columsn as matrix B
-B <- N2d[ ,3:4]
-
-# build further d N*d matrices Abi
-
-# 1st column = B[,1]
-Ab1 <- as.matrix(cbind(B[ ,1], A[ ,2]))
-Ab2 <- as.matrix(cbind(B[ , 2], A[ ,1]))
-
-
-# N(d+2) number of rows in A, B and dABi
-
-```
-
-```{r}
-# quasi random sampling
-
-# N2d matrix
-d <- 5 # the five variables we are uncertain about
-N2d <- matrix(data = NA, nrow = 10, ncol = 2*d)
-
-# N*(2+d) = 7000 simulations
-
-for (i in 1:nrow(N2d)) {
-  for (j in 1:ncol(N2d)) {
-    distributions <- list(rnorm(1, mean = 0.025, sd = 0.001), # bodymass
-                          runif(1, min = 0.2, max = 0.6), # fat fraction
-                          rnorm(1, mean = 0.144, sd = 0.01), # Muscle fraction
-                          rnorm(1, mean = 0.24, sd = 0.001), # wing span
-                          rnorm(1, mean = 0.011, sd = 0.001) # wing area
-                          )
-    if (j <= d) {
-      N2d[i, j] <- round(distributions[[j]], 5)
-    } else {
-      z <- j %/% 2 # quotient
-      N2d[i, j] <- round(distributions[[z]],5)
+quasi_mc <- function(N, dists) {
+  d <- length(dists)
+  # N2d matrix
+  N2d <- matrix(data = NA, nrow = N, ncol = 2*d)
+  
+  for (i in 1:nrow(N2d)) {
+    z <- 1
+    for (j in 1:ncol(N2d)) {
+      
+      if (j <= d) {
+        N2d[i, j] <- round(dists[[j]]$a(1, dists[[j]][[2]], dists[[j]][[3]]), 5)
+        #print(i)
+        #print(j)
+        #print(dists[[j]]$a)
+      } else {
+        #z <- j %/% 2 # quotient
+        N2d[i, j] <- round(dists[[z]]$a(1, dists[[z]][[2]], dists[[z]][[3]]), 5)
+        z <- z+1
+      }
     }
   }
-}
-
-# replicating variable names
-cnames <- c("body.mass", "fat.frac", "muscle.frac", "wing.span", "wing.area")
-
-cnames <- rep(cnames, 2)
-
-colnames(N2d) <- cnames
-
-# first d columns as A
-A <- N2d[ ,1:d]
-
-# # convert fractions to mass
-# A <- as.matrix(cbind(A, "fat.mass" = A[, "fat.frac"] * A[, "body.mass"]))
-# A <- as.matrix(cbind(A, "muscle.mass" = A[, "muscle.frac"] * A[, "body.mass"]))
-
-# # remove fat.frac and fat.mass
-# A <-  A[, !colnames(A) %in% c("fat.frac", "muscle.frac")]
-# remains d columns as B
-
-B <- N2d[ ,(d+1):(d*2)]
-
-# # convert fractions to mass
-# B <- as.matrix(cbind(B, "fat.mass" = B[, "fat.frac"] * B[, "body.mass"]))
-# B <- as.matrix(cbind(B, "muscle.mass" = B[, "muscle.frac"] * B[, "body.mass"]))
-# 
-# B <- B[, !colnames(B) %in% c("fat.frac", "muscle.frac")]
-
-
-# create Ab_i
-
-AB_sub_i <- list()
-
-for (i in 1:d) {
-  cnme <- colnames(A)[i]
-  AB_sub_i[[i]] <- as.matrix(cbind(A[ ,i], B[, -i])) 
-  colnames(AB_sub_i[[i]])[1] <- cnme
-}
-
-# fractions to masses
-
-for (i in 1:length(AB_sub_i)) {
-  # fat mass
-  AB_sub_i[[i]] <- as.matrix(cbind(AB_sub_i[[i]],
-                                   "fat.mass" = AB_sub_i[[i]][, "fat.frac"] *
-                                     AB_sub_i[[i]][, "body.mass"]))
-  # muscle mass
-  AB_sub_i[[i]] <- as.matrix(cbind(AB_sub_i[[i]],
-                                   "muscle.mass" = AB_sub_i[[i]][, "muscle.frac"] *
-                                     AB_sub_i[[i]][, "body.mass"]))
   
-  # remove fractions
+  # replicating variable names
+  cnames <- c("body.mass", "fat.frac", "muscle.frac", "wing.area", "wing.span")
+
+  cnames <- rep(cnames, 2)
+
+  colnames(N2d) <- cnames
   
-  AB_sub_i[[i]] <- AB_sub_i[[i]][, !colnames(AB_sub_i[[i]]) %in% c("fat.frac", "muscle.frac")]
+  # first d columns as A
+  A <- N2d[ ,1:d]
+
+  # remains d columns as B
+  B <- N2d[ ,(d+1):(d*2)]
   
-}
+  # create Ab_i
+  AB_sub_i <- list()
 
-A2 <- as.matrix(cbind(A, "fat.mass" = A[, "fat.frac"] * A[, "body.mass"]))
+  for (i in 1:d) {
+    cnme <- colnames(A)[i]
+    AB_sub_i[[i]] <- as.matrix(cbind(A[, i], B[, -i]))
+    colnames(AB_sub_i[[i]])[1] <- cnme
+  }
 
-A2 <- as.matrix(cbind(A2, "muscle.mass" = A[, "muscle.frac"] * A[, "body.mass"]))
+  # fractions to masses
+  for (i in 1:length(AB_sub_i)) {
+    # fat mass
+    AB_sub_i[[i]] <- as.matrix(cbind(AB_sub_i[[i]],
+                                     "fat.mass" = AB_sub_i[[i]][, "fat.frac"] *
+                                       AB_sub_i[[i]][, "body.mass"]))
+    # muscle mass
+    AB_sub_i[[i]] <- as.matrix(cbind(AB_sub_i[[i]],
+                                     "muscle.mass" = AB_sub_i[[i]][, "muscle.frac"] *
+                                       AB_sub_i[[i]][, "body.mass"]))
+    
+    # remove fractions
+    
+    AB_sub_i[[i]] <-
+      AB_sub_i[[i]][, !colnames(AB_sub_i[[i]]) %in% c("fat.frac", "muscle.frac")]
+    
+  }
 
-# remove fat.frac and fat.mass
-A2 <-  A2[, !colnames(A2) %in% c("fat.frac", "muscle.frac")]
+  A2 <- as.matrix(cbind(A, "fat.mass" = round(A[, "fat.frac"] * A[, "body.mass"], 5)))
 
-# convert fractions to mass
-B2 <- as.matrix(cbind(B, "fat.mass" = B[, "fat.frac"] * B[, "body.mass"]))
-B2 <- as.matrix(cbind(B2, "muscle.mass" = B[, "muscle.frac"] * B[, "body.mass"]))
+  A2 <- as.matrix(cbind(A2, "muscle.mass" = round(A[, "muscle.frac"] * A[, "body.mass"],5)))
 
-B2 <- B2[, !colnames(B2) %in% c("fat.frac", "muscle.frac")]
+  # remove fat.frac and fat.mass
+  A2 <-  A2[, !colnames(A2) %in% c("fat.frac", "muscle.frac")]
 
+  # convert fractions to mass
+  B2 <- as.matrix(cbind(B, "fat.mass" = B[, "fat.frac"] * B[, "body.mass"]))
+  B2 <- as.matrix(cbind(B2, "muscle.mass" = B[, "muscle.frac"] * B[, "body.mass"]))
+
+  B2 <- B2[, !colnames(B2) %in% c("fat.frac", "muscle.frac")]
+
+  
+  return(list("N2d" = N2d, "A" = A2, "B" = B2, "AB_sub_i" = AB_sub_i))
+} 
+
+N <- 300
+trial <- quasi_mc(N, dists)
+```
+
+
+```{r}
+# extracting matrices
+A <- trial$A
+
+B <- trial$B
+
+AB_sub_1 <-  trial$AB_sub_i[[1]]
+
+AB_sub_2 <-  trial$AB_sub_i[[2]]
+
+AB_sub_3 <-  trial$AB_sub_i[[3]]
+
+AB_sub_4 <-  trial$AB_sub_i[[4]]
+
+AB_sub_5 <-  trial$AB_sub_i[[5]]
+
+# adding species and taxon
+species <- rep("Sylvia borin", 10)
+
+taxon <-  rep(1, 10)
+
+A <- data.frame(cbind(A, "species" = species, "taxon" = taxon))
+A[ , c(1,2,3,4,5)] <- apply(A[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+A[ , !c(1,2,3,4,5)] <- apply(A[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+
+B <- data.frame(cbind(B, "species" = species, "taxon" = taxon))
+B[ , c(1,2,3,4,5)] <- apply(B[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+B[ , !c(1,2,3,4,5)] <- apply(B[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+
+
+AB_sub_1 <- data.frame(cbind(AB_sub_1, "species" = species, "taxon" = taxon))
+AB_sub_1[ , c(1,2,3,4,5)] <- apply(AB_sub_1[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_1[ , !c(1,2,3,4,5)] <- apply(AB_sub_1[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+
+AB_sub_2 <- data.frame(cbind(AB_sub_2, "species" = species, "taxon" = taxon))
+AB_sub_2[ , c(1,2,3,4,5)] <- apply(AB_sub_2[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_2[ , !c(1,2,3,4,5)] <- apply(AB_sub_2[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+
+AB_sub_3 <- data.frame(cbind(AB_sub_3, "species" = species, "taxon" = taxon))
+AB_sub_3[ , c(1,2,3,4,5)] <- apply(AB_sub_3[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_3[ , !c(1,2,3,4,5)] <- apply(AB_sub_3[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+
+AB_sub_4 <- data.frame(cbind(AB_sub_4, "species" = species, "taxon" = taxon))
+AB_sub_4[ , c(1,2,3,4,5)] <- apply(AB_sub_4[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_4[ , !c(1,2,3,4,5)] <- apply(AB_sub_4[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+
+AB_sub_5 <- data.frame(cbind(AB_sub_5, "species" = species, "taxon" = taxon))
+AB_sub_5[ , c(1,2,3,4,5)] <- apply(AB_sub_5[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_5[ , !c(1,2,3,4,5)] <- apply(AB_sub_5[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
 
 ```
 
 ```{r}
-par(mfrow = c(2,2))
-for (i in 1:ncol(N2d)) {
-  plot(density(N2d[,i]))
+range_A <- migrate(data = A, method = "csw", speed_control = "constant_speed")
+range_B <- migrate(data = B, method = "csw", speed_control = "constant_speed")
+range_AB_sub_1 <- migrate(data = AB_sub_1, method = "csw", speed_control = "constant_speed")
+range_AB_sub_2 <- migrate(data = AB_sub_2, method = "csw", speed_control = "constant_speed")
+range_AB_sub_3 <- migrate(data = AB_sub_3, method = "csw", speed_control = "constant_speed")
+range_AB_sub_4 <- migrate(data = AB_sub_4, method = "csw", speed_control = "constant_speed")
+range_AB_sub_5 <- migrate(data = AB_sub_5, method = "csw", speed_control = "constant_speed")
+```
+
+### First order sensitivity indices
+```{r}
+# approximate sobol indices
+
+sb_index <- log(range_B$range)*(log(range_AB_sub_1$range) - log(range_A$range))
+
+mean(sb_index)
+```
+
+```{r}
+# Total effect index
+1/(2*N)* (sum((log(range_A$range) - log(range_AB_sub_2$range))^2))
+```
+
+
+```{r}
+# numerical estimation of first order indices
+
+first_order_index <- function(rangeA, rangeB, range_AB_sub_i, d) {
+  # store 
+  sb_index <- vector(length = d)
+  
+  for (i in 1:length(range_AB_sub_i)) {
+    
+  }
 }
 ```
+
+
+
+###
 ```{r}
-# replicating variable names
-cnames <- c("body.mass", "fat.mass", "muscle.mass", "wing.span", "wing.area")
+
+```
 
 
+```{r}
+ggplot()+
+  geom_point(aes(x = A$body.mass, range_A$range))
+  geom_smooth(aes(x = A$body.mass, range_A$range))
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = A$fat.mass, range_A$range))+
+  geom_smooth(aes(x = A$fat.mass, range_A$range))
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = A$muscle.mass, range_A$range))+
+  geom_smooth(aes(x = A$muscle.mass, range_A$range))
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = c(A$fat.mass, B$fat.mass, AB_sub_1$fat.mass, 
+                           AB_sub_2$fat.mass, AB_sub_3$fat.mass,
+                           AB_sub_4$fat.mass, AB_sub_5$fat.mass),
+                 y = c(range_A$range, range_B$range, range_AB_sub_1$range,
+                           range_AB_sub_2$range, range_AB_sub_3$range,
+                           range_AB_sub_4$range, range_AB_sub_5$range)))
 ```
 
 

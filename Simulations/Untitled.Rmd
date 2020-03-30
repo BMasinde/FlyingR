@@ -1,0 +1,22 @@
+---
+title: "tiny dists"
+author: "Brian Masinde (brima748)"
+date: "3/2/2020"
+output: pdf_document
+---
+
+```{r}
+set.seed(2020)
+gauss <- rnorm(100, mean = 0 , sd = 1)
+unif <- runif(100, min = 0.5, max = 1)
+beta <- rbeta(100, shape1 = 0.5, shape2 = 0.5)
+beta2 <- rbeta(100, 2, 5)
+
+par(mfrow = c(2,2))
+
+plot(density(gauss), main = "X1", xlab = " ")
+plot(density(unif), main = "X2", xlab = " ")
+plot(density(beta), main = "X3", xlab = " ", xlim = c(0,1))
+plot(density(beta2), main = "X4", xlab = " ", xlim = c(0,0.8))
+```
+

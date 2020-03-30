@@ -1,0 +1,188 @@
+---
+title: "Uncertainty Analysis Garden Wablers"
+author: "Brian Masinde (brima748)"
+date: "3/2/2020"
+output: pdf_document
+---
+```{r}
+library(ggplot2)
+library(readr)
+library(dplyr)
+library(xtable)
+library(gridExtra)
+```
+
+# The DATA
+```{r}
+library(readr)
+
+sylvia_borin_data <- read_delim("sylvia_borin_data.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE)
+
+# remove x4 (extra column not needed)
+
+sylvia_borin_data$X4 <- NULL
+View(sylvia_borin_data)
+```
+
+## Summary table
+```{r}
+sb_data <- sylvia_borin_data
+sb_data$Fat <- as.factor(sb_data$Fat)
+summary_sb_data <- summary(sylvia_borin_data)
+
+# save this summary table to latex
+print.xtable(summary_sb_data, ttype = "latex", file = "summary_sb.tex")
+```
+
+## Distribution of the body mass
+```{r}
+plot(density(sylvia_borin_data$Mass/1000, na.rm = TRUE), 
+     main = "sylvia borin", xlab = "body mass in Kg")
+```
+
+```{r}
+bodymass_distribution <- ggplot(data = sylvia_borin_data)+
+  geom_density(aes(x = Mass), fill = "#66CDAA") +
+  xlab("Body mass (grams)") +
+  theme_minimal()+
+  ggtitle("Body mass distribution")
+  
+ggsave(filename = "bodymass_distribution.png",
+       device = png(), dpi = 300, plot = last_plot(),
+       width = 7, height = 7, units = "cm")
+```
+
+
+```{r}
+summary(sylvia_borin_data$Mass)
+```
+
+From the density plot, the shape exclude uniform distribution. The values have
+to be positive, exclude normal distribution. However, the shape is just about gaussian.
+Distributions that mimick gaussian distribution but non-negative i.e Gamma distribution,
+and Cauchy distribution.
+
+According to \textit{ottosson2005garden} the garden wabler is a classic subject
+for the study of Palaearctic–African bird migration strategies. They state that 
+the true depature mass of the bird might be between 25 and 30 grams.
+
+```{r}
+mean_sylvia_borin <- mean(sylvia_borin_data$Mass, na.rm = TRUE)
+
+mean_sylvia_borin
+```
+
+
+```{r}
+moment_2 <- mean(sylvia_borin_data$Mass^2, na.rm = TRUE)
+
+moment_2
+```
+
+```{r}
+# alpha
+alpha <-  mean_sylvia_borin^2/(mean(moment_2 - mean_sylvia_borin^2, na.rm = TRUE))
+
+alpha
+```
+
+```{r}
+# beta
+beta <- mean_sylvia_borin/(mean(moment_2 - mean_sylvia_borin^2, na.rm = TRUE))
+
+beta
+```
+
+
+```{r}
+sim_gamma <- rgamma(2000, shape = alpha, rate = beta)
+```
+
+
+```{r}
+plot(density(sylvia_borin_data$Mass, na.rm = TRUE))
+lines(density(sim_gamma))
+```
+
+
+## Fat mass.
+\textit{ottosson2005garden} say that 45 -50% of body mass may be fuel reserves
+alone (Autumn). Body mass is positively correlated with fat score (implies there
+might be a correlation with fat mass also).
+
+```{r}
+hist(sylvia_borin_data$Fat)
+#lines(density(sylvia_borin_data$Mass))
+```
+
+```{r}
+# ggplot histogram of fat score.
+fat_score <- ggplot(sb_data, aes(x = Fat, color = Fat, fill = Fat)) +
+  geom_histogram(stat = "count")+
+  theme_minimal()+
+  xlab("Fat score")+
+  ggtitle("Fat score distribution")
+  
+ggsave("fat_score.png", device = png(), dpi = 300, plot = last_plot(),
+       width = 7, height = 7, units = "cm")
+```
+
+```{r}
+wl_distribution <- ggplot(data = sylvia_borin_data)+
+  geom_density(aes(x = Wing), fill = "#66CDAA") +
+  xlab("Wing length (mm)") +
+  theme_minimal()+
+  ggtitle("Wing length distribution")
+  
+# ggsave(filename = "bodymass_distribution.png",
+#        device = png(), dpi = 300, plot = last_plot(),
+#        width = 7, height = 7, units = "cm")
+grid_plt <- grid.arrange(bodymass_distribution, fat_score, wl_distribution,
+                         ncol = 2, nrow = 2)
+ggsave("grid_plt.png", device = png(), dpi = 300, plot = grid_plt,
+       width = 14, height = 14, units = "cm")
+```
+
+
+
+## Wing span
+
+# plot of the wing length
+```{r}
+plot(density(sylvia_borin_data$Wing, na.rm = TRUE), 
+     main = "sylvia borin", xlab = "wing length")
+```
+
+```{r}
+# transform by 2.9
+ws <- sylvia_borin_data$Wing  * 2.9
+
+```
+
+
+## Wing area
+Estimaing wing area from wing length usign linear regression
+
+```{r}
+
+wing_area_sim <- -30.167  + 1.616 * sylvia_borin_data$Wing
+
+plot(density(wing_area_sim, na.rm = TRUE))
+```
+
+```{r}
+
+```
+
+
+## muscle mass
+
+## Flying Altitude
+
+
+## 
+
+
+
+

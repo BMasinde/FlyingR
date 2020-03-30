@@ -68,7 +68,7 @@
 
   if(speed_control == "constant_speed") {
     for (i in 1:nrow(data)) {
-      #i = 2
+      #i = 1
       sim_results$bm[[i]][1] <- all_mass[i]
       sim_results$fm[[i]][1] <- fat_mass[i]
       sim_results$mm[[i]][1] <-  muscle_mass[i]
