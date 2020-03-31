@@ -4,9 +4,18 @@
 \alias{flysim}
 \title{Range Estimation}
 \usage{
-flysim(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
-             fill = TRUE, comment.char = "", ..., data = NULL,
-             settings = list())
+flysim(
+  file,
+  header = TRUE,
+  sep = ",",
+  quote = "\\"",
+  dec = ".",
+  fill = TRUE,
+  comment.char = "",
+  ...,
+  data = NULL,
+  settings = list()
+)
 }
 \arguments{
 \item{file}{Arguments for path to data.}
@@ -58,11 +67,6 @@ required by this function)
    \item delta: Basal metabolism factors in passerines and non passerines
    alpha*bodyMass^delta
 }
-}
-\examples{
-flysim(data = birds, settings = list(eFat = 3.89*10^7))
-flysim(data = birds,  settings = list(airDensity = 0.905))
-
 }
 \author{
 Brian Masinde

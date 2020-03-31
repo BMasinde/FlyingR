@@ -1,0 +1,1086 @@
+---
+title: "UA/SA"
+author: "Brian Masinde (brima748)"
+date: "3/31/2020"
+output: pdf_document
+---
+
+```{r}
+library(ggplot2)
+library(flying)
+library(corrplot)
+library(mgcv)
+library(lhs)
+library(truncdist)
+library(readr)
+```
+
+# Garden wabler.
+
+```{r}
+# laod the data
+sylvia_borin_data <- read_delim("sylvia_borin_data.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE)
+# remove x4 (extra column not needed)
+sylvia_borin_data$X4 <- NULL
+sb_data <- sylvia_borin_data
+sb_data$Fat <- as.factor(sb_data$Fat)
+#View(sylvia_borin_data)
+```
+
+
+```{r}
+# change units in data
+# body mass from grams to kg
+sb_data$Mass <- sb_data$Mass/1000
+# wing from mm to meters
+sb_data$Wing <- sb_data$Wing*0.001
+```
+
+## Unceratainty Analysis (Parameter estimation)
+
+### Body mass (gamma distributed)
+```{r}
+mean_data_bm <- mean(sb_data$Mass, na.rm = TRUE)
+mean_data_bm
+moment_2 <- mean(sb_data$Mass^2, na.rm = TRUE)
+moment_2
+# alpha
+alpha <-  mean_data_bm^2/(mean(moment_2 - mean_data_bm^2, na.rm = TRUE))
+beta <- mean_data_bm/(mean(moment_2 - mean_data_bm^2, na.rm = TRUE))
+cat("alpha" = alpha, "beta" = beta)
+```
+
+```{r}
+set.seed(2020)
+sim_gw_bm <- rgamma(1000, shape = alpha, rate = beta)
+plot(density(sb_data$Mass, na.rm = TRUE))
+lines(density(sim_gw_bm), col = "blue")
+#dev.off()
+```
+
+### Wing span parameter estimation
+```{r}
+gw_ws <- sb_data$Wing * 2.9
+# summary(gw_ws)
+mean_data_ws <- mean(gw_ws, na.rm = T)
+moment_2_ws <- mean(gw_ws^2, na.rm = T)
+alpha_ws <- mean_data_ws^2/(mean(moment_2_ws - mean_data_ws^2, na.rm = TRUE))
+beta_ws <- mean_data_ws/(mean(moment_2_ws - mean_data_ws^2, na.rm = TRUE))
+cat("alpha" = alpha_ws, "beta" = beta_ws)
+```
+
+```{r}
+set.seed(2020)
+sim_gw_ws <- rgamma(1000, shape = alpha_ws, rate = beta_ws)
+plot(density(gw_ws, na.rm = TRUE))
+lines(density(sim_gw_ws), col = "blue")
+#dev.off()
+```
+
+### Wing area
+
+```{r}
+set.seed(2020)
+# add noise to the 
+sim_gm_wa <- rep(0.011, 1000)
+# corrupt 70%
+corrupt <- rbinom(length(sim_gm_wa), 1, 0.9999)
+corrupt <- as.logical(corrupt)
+noise <- rnorm(sum(corrupt),0, sd = sd(sim_gw_ws * 0.01)) # generate the noise to add
+sim_gm_wa[corrupt] <- sim_gm_wa[corrupt] + noise      # about 10% of x has been corrupted
+plot(density(sim_gm_wa))
+```
+
+
+```{r}
+plot(x = sim_gw_ws, y = sim_gm_wa, pch = 16)
+```
+
+
+```{r}
+plot(x = sim_gamma, y = sim_gm_wa, pch = 16)
+```
+
+### Fat mass
+```{r}
+set.seed(2020)
+# fat fraction uniform 0.20 to 0.4
+sim_gw_ff <- runif(1000, min = 0.2, max = 0.4)
+sim_gw_fm <- sim_gw_ff * sim_gw_bm
+plot(density(sim_gw_fm))
+```
+
+### Muscle mass
+
+```{r}
+set.seed(2020)
+# muscle fraction sampling
+sim_gw_mf <- runif(1000, min = 0.1, max = 0.25)
+sim_gw_mm <- sim_gw_bm * sim_gw_mf
+plot(density(sim_gw_mm))
+```
+
+
+According to hbw.com garden wabler can range from 16 to 22 grams and upto 37 grams
+prior to migration. Assuming normal distribution with mean around 22 grams with 
+variance. And upto 50 to 60 percent of as fat fraction.
+Uncertainty analysis is straight-forwad, quantified using mean, variance and 
+quantiles.
+
+```{r sample1, echo=FALSE}
+# set.seed(2020)
+# # body mass
+# garden_wabler_BM_sample <- round(rnorm(1000, mean = 0.025, sd = 0.001), 5)
+# 
+# # Fat fraction using same strategy 50 -60 %
+# garden_wabler_FF_sample <- round(runif(1000, min = 0.2, max = 0.6), 5)
+# 
+# # muscle mass
+# garden_wabler_MF_sample <- round(rnorm(1000, mean = 0.144, sd = 0.01), 5)
+# 
+# # pertubate the wing span slightly
+# garden_wabler_WS_sample <- round(rnorm(1000, mean = 0.24, sd = 0.001), 5)
+# 
+# # pertubate wing area
+# garden_wabler_WA_sample <- round(rnorm(1000, mean = 0.011, sd = 0.001), 5)
+# 
+# species <- rep("Sylvia borin", 1000)
+# 
+# taxon <-  rep(1, 1000)
+```
+
+
+
+
+
+## I/O Relationships
+```{r wrangle1, echo=FALSE}
+# garden_wabler_fat_mass <- garden_wabler_BM_sample * garden_wabler_FF_sample
+# garden_wabler_muscle_mass <-garden_wabler_BM_sample*garden_wabler_MF_sample
+# garden_wabler_data <- data.frame(
+#   cbind(
+#     garden_wabler_BM_sample,
+#     garden_wabler_fat_mass,
+#     garden_wabler_muscle_mass,
+#     garden_wabler_WS_sample,
+#     garden_wabler_WA_sample,
+#     species,
+#     taxon,deparse.level = 0
+#   ),
+#   stringsAsFactors = FALSE
+# )
+# 
+# colnames(garden_wabler_data) <- c("body.mass","fat.mass","muscle.mass", "wing.span","wing.area",
+#                            "species","taxon")
+# garden_wabler_data$species <- as.factor(garden_wabler_data$species)
+# garden_wabler_data$taxon <- as.factor(garden_wabler_data$taxon)
+# garden_wabler_data$body.mass <- as.numeric(garden_wabler_data$body.mass)
+# garden_wabler_data$fat.mass <- as.numeric(garden_wabler_data$fat.mass)
+# garden_wabler_data$wing.span <- as.numeric(garden_wabler_data$wing.span)
+# garden_wabler_data$wing.area <- as.numeric(garden_wabler_data$wing.area)
+# garden_wabler_data$muscle.mass <- as.numeric(garden_wabler_data$muscle.mass)
+```
+
+```{r}
+species <- rep("Sylvia borin", 1000)
+taxon <-  rep(1, 1000)
+garden_wabler_data <- data.frame(
+    round(sim_gw_bm, 6),
+    round(sim_gw_fm, 6),
+    round(sim_gw_mm, 6),
+    round(sim_gw_ws, 6),
+    round(sim_gw_wa, 6),
+    species,
+    taxon,
+  stringsAsFactors = FALSE
+)
+colnames(garden_wabler_data) <-
+  c("body.mass",
+    "fat.mass",
+    "muscle.mass",
+    "wing.span",
+    "wing.area")
+garden_wabler_data$taxon <- as.factor(taxon)
+garden_wabler_data$species <- as.factor(species)
+```
+
+
+```{r mig, echo=FALSE}
+# migrate garden wabler
+garden_wabler_range <- migrate(data = garden_wabler_data, method = "csw", speed_control = "constant_speed")
+```
+
+
+
+
+```{r}
+lm_reg <- lm(garden_wabler_range$range ~ garden_wabler_data$fat.mass)
+pred <- predict(lm_reg)
+x1 <- ggplot()+
+  geom_point(aes(x = garden_wabler_data$fat.mass, y = garden_wabler_range$range),
+             col = "#037f70")+
+  xlab("X1")+ # fat mass
+  ylab("Y")+ # range
+  theme_minimal()+
+  ggtitle("Y vs X1")+
+  geom_line(aes(x = garden_wabler_data$fat.mass , y = pred))+
+  geom_segment(aes(y = 2000, x = 0.00494, xend = 0.007, yend =2000),
+               )+
+  geom_segment(aes(y = 2000, x = 0.007, xend = 0.007, yend =2900),
+               arrow = arrow(length = unit(0.5, "cm")))
+```
+
+
+```{r}
+#ggplot()+
+#  geom_point(aes(x = garden_wabler_data$body.mass, y = garden_wabler_range$range))+
+#  xlab("body mass")+
+#  ylab("range (km)")+
+#  theme_bw()
+lm_reg2 <- lm(garden_wabler_range$range ~ garden_wabler_data$body.mass)
+pred2 <- predict(lm_reg2)
+x2 <- ggplot()+
+  geom_point(aes(x = garden_wabler_data$body.mass, y = garden_wabler_range$range),
+             col = "#037f70")+
+  xlab("X2")+ # fat mass
+  ylab("Y")+ # range
+  theme_minimal()+
+  ggtitle("Y vs X2")+
+  geom_line(aes(x = garden_wabler_data$body.mass , y = pred2))+
+  geom_segment(aes(y = 2000, x = 0.0175, xend = 0.020, yend =2000),
+               )+
+  geom_segment(aes(y = 2000, x = 0.020, xend = 0.020, yend =2400),
+               arrow = arrow(length = unit(0.5, "cm")))+
+  geom_segment(aes(y = 2000, x = 0.0175, xend = 0.0175, yend =2430),
+               arrow = arrow(length = unit(0.5, "cm")))
+```
+
+
+```{r}
+scatter_plot <- grid.arrange(x1, x2,
+                         ncol = 2, nrow = 1)
+ggsave("scatter_plot.png", device = png(), dpi = 300, plot = scatter_plot,
+       width = 14, height = 14, units = "cm")
+```
+
+
+```{r}
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$muscle.mass, y = garden_wabler_range$range))+
+  xlab("muscle mass")+
+  ylab("range (km)")+
+  theme_bw()
+```
+
+```{r}
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$wing.span, y = garden_wabler_range$range))+
+  xlab("wing span")+
+  ylab("range (km)")+
+  theme_bw()
+```
+
+
+```{r}
+ggplot()+
+  geom_point(aes(x = garden_wabler_data$wing.area, y = garden_wabler_range$range))+
+  xlab("wing area")+
+  ylab("range (km)")+
+  theme_bw()
+```
+
+From the scatterplots, it is clear that most of the variance in output (range)
+is attributed from the fat mass. Though this could be because of the large uncertainty placed on the fat fraction. But what about the interactions between the variables. The next section tackles this aspect using Sobol indices.
+
+## Variance Based Sensitivity Analysis
+
+### Learning mean function 
+
+Main idea behind sobol is variance decomposition into summands of increasing 
+dimensionality:
+
+$$
+f(x_1 \dotsc x_k) = f_{0}+ \sum_{i = 1}^{K}f_{i}(x_i + \sum_{1\leq i < j \leq k} f_{ij}(x_i, x_j) + \dotsc + f_{1,2, \dotsc, k}(x_1, \dotsc , x_{k})
+$$
+
+The total variance:
+
+$$
+D = \int_{\Omega^{k}} f^{2}(\textbf{X})d\textbf{X} - f_{0}^2
+$$
+
+While partial variances:
+
+$$
+D_{i1, \dotsc is} = \int_{0}^{1} \dotsc \int_{0}^{1} f^{2}_{i1, \dotsc is}(x_{i1, \dotsc, is}) dx_{i1} \dotsc dx_{is}
+$$
+
+#### First order indices
+##### Fat mass and range
+```{r}
+gam_model <-
+  gam(formula = garden_wabler_range$range ~ s(fat.mass, bs = 'cr'),
+      data = garden_wabler_data)
+pred_gam_fm <- predict(gam_model, se.fit = TRUE)
+UCI <- as.vector(pred_gam_fm$fit + (1.96 * pred_gam_fm$se.fit))
+LCI <- as.vector(pred_gam_fm$fit - (1.96 * pred_gam_fm$se.fit))
+plot_gam_fm <- ggplot() +
+  geom_point(aes(x = garden_wabler_data$fat.mass, y = garden_wabler_range$range
+             ), color = "#2F7F51", size = 0.6) +
+  #geom_line(aes(x = garden_wabler_data$fat.mass, y = range_pred_fat), color  = "green") +
+  geom_line(aes(x = garden_wabler_data$fat.mass, y = pred_gam_fm$fit), color  = "blue", size = 1.5) +
+  geom_line(aes(x = garden_wabler_data$fat.mass, y = LCI), color  = "red",
+            size = 0.2)+
+  geom_line(aes(x = garden_wabler_data$fat.mass, y = UCI), color  = "red",
+            size = 0.2)+
+  theme_minimal()+
+  xlab("fat mass")+
+  ylab("range")+
+  ggtitle("Range vs fat mass (GAM model)")
+  
+ggsave("plot_gam_fm.png", device = png(), dpi = 300, plot = plot_gam_fm,
+       width = 14, height = 10, units = "cm", )  
+dev.off()
+```
+
+```{r}
+# sobol index of fat mass 
+# GAM
+S_fat_mass <- var(pred_gam_fm$fit)/var(garden_wabler_range$range)
+round(S_fat_mass, 4)
+```
+
+#### Body mass and range
+
+```{r}
+# ggplot() +
+#   geom_point(aes(x = garden_wabler_data$body.mass, y = garden_wabler_range$range)) +
+#   geom_smooth(aes(x = garden_wabler_data$body.mass, y = garden_wabler_range$range))+
+#   xlab("body mass") +
+#   ylab("range (km)") +
+#   theme_bw()
+gam_model_bm <-
+  gam(formula = garden_wabler_range$range ~ s(body.mass, bs = 'cr'),
+      data = garden_wabler_data)
+pred_gam_bm <- predict(gam_model_bm, se.fit = TRUE)
+UCI <- as.vector(pred_gam_bm$fit + (1.96 * pred_gam_bm$se.fit))
+LCI <- as.vector(pred_gam_bm$fit - (1.96 * pred_gam_bm$se.fit))
+plot_gam_bm <- ggplot() +
+  geom_point(aes(x = garden_wabler_data$body.mass, y = garden_wabler_range$range
+             ), color = "#2F7F51", size = 0.6) +
+  #geom_line(aes(x = garden_wabler_data$fat.mass, y = range_pred_fat), color  = "green") +
+  geom_line(aes(x = garden_wabler_data$body.mass, y = pred_gam_bm$fit), color  = "blue", size = 1.5) +
+  geom_line(aes(x = garden_wabler_data$body.mass, y = LCI), color  = "red",
+            size = 0.2)+
+  geom_line(aes(x = garden_wabler_data$body.mass, y = UCI), color  = "red",
+            size = 0.2)+
+  theme_minimal()+
+  xlab("body mass")+
+  ylab("range")+
+  ggtitle("Range vs body mass (GAM model)")
+  
+ggsave("plot_gam_bm.png", device = png(), dpi = 300, plot = plot_gam_bm,
+       width = 14, height = 10, units = "cm")
+dev.off()
+```
+
+```{r}
+gam_model_bm <-
+  gam(formula = garden_wabler_range$range ~ s(body.mass, bs = 'cr'),
+      data = garden_wabler_data)
+pred_gam_bm <- predict(gam_model_bm)
+# sobol index of body mass 
+# GAM
+S_body_mass <- var(pred_gam_bm)/var(garden_wabler_range$range)
+round(S_body_mass, 4)
+```
+
+#### wing area
+```{r}
+gam_model_wa <-
+  gam(formula = garden_wabler_range$range ~ s(wing.area, bs = 'cr'),
+      data = garden_wabler_data)
+pred_gam_wa <- predict(gam_model_wa, se.fit = TRUE)
+UCI <- as.vector(pred_gam_wa$fit + (1.96 * pred_gam_wa$se.fit))
+LCI <- as.vector(pred_gam_wa$fit - (1.96 * pred_gam_wa$se.fit))
+plot_gam_wa <- ggplot() +
+  geom_point(aes(x = garden_wabler_data$wing.area, y = garden_wabler_range$range
+             ), color = "#2F7F51", size = 0.6) +
+  #geom_line(aes(x = garden_wabler_data$fat.mass, y = range_pred_fat), color  = "green") +
+  geom_line(aes(x = garden_wabler_data$wing.area, y = pred_gam_wa$fit), color  = "blue", size = 1.5) +
+  geom_line(aes(x = garden_wabler_data$wing.area, y = LCI), color  = "red",
+            size = 0.2)+
+  geom_line(aes(x = garden_wabler_data$wing.area, y = UCI), color  = "red",
+            size = 0.2)+
+  theme_minimal()+
+  xlab("winga area")+
+  ylab("range")+
+  ggtitle("Range vs wing area (GAM model)")
+ggsave("plot_gam_wa.png", device = png(), dpi = 300, plot = plot_gam_wa,
+       width = 14, height = 10, units = "cm")
+dev.off()
+plot_gam_wa
+```
+
+```{r}
+# sobol index of body mass 
+# GAM
+S_wing_area <- var(pred_gam_wa$fit)/var(garden_wabler_range$range)
+S_wing_area
+```
+
+####  Wing span
+```{r}
+gam_model_ws <-
+  gam(formula = garden_wabler_range$range ~ s(wing.span, bs = 'cr'),
+      data = garden_wabler_data)
+pred_gam_ws <- predict(gam_model_ws, se.fit = TRUE)
+UCI <- as.vector(pred_gam_ws$fit + (1.96 * pred_gam_ws$se.fit))
+LCI <- as.vector(pred_gam_ws$fit - (1.96 * pred_gam_ws$se.fit))
+plot_gam_ws <- ggplot() +
+  geom_point(aes(x = garden_wabler_data$wing.span, y = garden_wabler_range$range
+             ), color = "#2F7F51", size = 0.6) +
+  #geom_line(aes(x = garden_wabler_data$fat.mass, y = range_pred_fat), color  = "green") +
+  geom_line(aes(x = garden_wabler_data$wing.span, y = pred_gam_ws$fit), color  = "blue", size = 1.5) +
+  geom_line(aes(x = garden_wabler_data$wing.span, y = LCI), color  = "red",
+            size = 0.2)+
+  geom_line(aes(x = garden_wabler_data$wing.span, y = UCI), color  = "red",
+            size = 0.2)+
+  theme_minimal()+
+  xlab("winga span")+
+  ylab("range")+
+  ggtitle("Range vs wing span(GAM model)")
+ggsave("plot_gam_ws.png", device = png(), dpi = 300, plot = plot_gam_ws,
+       width = 14, height = 10, units = "cm")
+dev.off()
+plot_gam_ws
+```
+
+```{r}
+# sobol index of body mass 
+# GAM
+S_wing_span <- var(pred_gam_ws$fit)/var(garden_wabler_range$range)
+S_wing_span
+```
+
+
+
+
+
+#### Muscle mass 
+```{r}
+ggplot() +
+  geom_point(aes(x = garden_wabler_data$muscle.mass, y = garden_wabler_range$range)) +
+  geom_smooth(aes(x = garden_wabler_data$muscle.mass, y = garden_wabler_range$range))+
+  xlab("body mass") +
+  ylab("range (km)") +
+  theme_bw()
+gam_model_mm <- gam(garden_wabler_range$range ~s(muscle.mass, bs = 'cr'),
+                     data = garden_wabler_data)
+pred_gam_mm <- predict(gam_model_mm, se.fit = TRUE)
+UCI <- as.vector(pred_gam_mm$fit + (1.96 * pred_gam_mm$se.fit))
+LCI <- as.vector(pred_gam_mm$fit - (1.96 * pred_gam_mm$se.fit))
+plot_gam_mm <- ggplot() +
+  geom_point(aes(x = garden_wabler_data$muscle.mass, y = garden_wabler_range$range
+             ), color = "#2F7F51", size = 0.6) +
+  #geom_line(aes(x = garden_wabler_data$fat.mass, y = range_pred_fat), color  = "green") +
+  geom_line(aes(x = garden_wabler_data$muscle.mass, y = pred_gam_mm$fit), color  = "blue", size = 1.5) +
+  geom_line(aes(x = garden_wabler_data$muscle.mass, y = LCI), color  = "red",
+            size = 0.2)+
+  geom_line(aes(x = garden_wabler_data$muscle.mass, y = UCI), color  = "red",
+            size = 0.2)+
+  theme_minimal()+
+  xlab("muscle mass")+
+  ylab("range")+
+  ggtitle("Range vs muscle mass (GAM model)")
+  
+ggsave("plot_gam_mm.png", device = png(), dpi = 300, plot = plot_gam_mm,
+       width = 14, height = 10, units = "cm")
+dev.off()
+plot_gam_mm
+```
+
+Linear regression works well here
+
+```{r}
+# sobol index of muscle mass
+# GAM
+S_muscle_mass <- var(pred_gam_mm$fit)/var(garden_wabler_range$range)
+S_muscle_mass
+```
+
+### Second order indices
+
+#### Wing span and fat mass
+```{r}
+gam_ws_fm <-
+  gam(formula = garden_wabler_range$range ~ s(wing.span, bs = 'cs')+
+        s(fat.mass, bs = 'cs'),
+      data = garden_wabler_data)
+pred_gam_ws_fm <- predict(gam_ws_fm)
+# sobol indix of ws fat mass
+S_ws_fm <- var(pred_gam_ws_fm)/var(garden_wabler_range$range)
+S_ws_fm
+```
+
+#### body mass and fat mass
+```{r}
+gam_bm_fm <-
+  gam(formula = garden_wabler_range$range ~ s(body.mass, bs = 'cs')+
+        s(fat.mass, bs = 'cs'),
+      data = garden_wabler_data)
+pred_gam_bm_fm <- predict(gam_bm_fm)
+# sobol indix of ws fat mass
+S_bm_fm <- var(pred_gam_bm_fm)/var(garden_wabler_range$range)
+S_bm_fm
+```
+
+#### fat mass muscle mass
+```{r}
+gam_fm_mm <-
+  gam(formula = garden_wabler_range$range ~ s(muscle.mass, bs = 'cr')+
+        s(fat.mass, bs = 'cr'),
+      data = garden_wabler_data)
+pred_gam_fm_mm <- predict(gam_fm_mm)
+# sobol indix of ws fat mass
+S_fm_mm <- var(pred_gam_fm_mm)/var(garden_wabler_range$range)
+S_fm_mm
+```
+
+
+#### body mass,  fat mass, wing span
+```{r}
+gam_bm_fm_ws <-
+  gam(formula = garden_wabler_range$range ~ s(body.mass, bs = 'cs')+
+        s(fat.mass, bs = 'cs') + s(wing.span, bs = 'cs'),
+      data = garden_wabler_data)
+pred_gam_bm_fm_ws <- predict(gam_bm_fm_ws)
+# sobol indix of ws fat mass
+S_bm_fm_ws <- var(pred_gam_bm_fm_ws)/var(garden_wabler_range$range)
+S_bm_fm_ws
+```
+
+#### body mass, fat mass, muscle mass
+```{r}
+gam_bm_fm_mm <-
+  gam(formula = garden_wabler_range$range ~ s(body.mass, bs = 'cs')+
+        s(fat.mass, bs = 'cs') + muscle.mass,
+      data = garden_wabler_data)
+pred_gam_bm_fm_mm <- predict(gam_bm_fm_mm)
+# sobol indix of ws fat mass
+S_bm_fm_mm <- var(pred_gam_bm_fm_mm)/var(garden_wabler_range$range)
+S_bm_fm_mm
+```
+
+### Section methods
+```{r}
+require(dplyr) 
+require(tidyr)
+# cbind IO
+IO <- data.frame(cbind("range" = garden_wabler_range$range,
+                       "fat.mass" = garden_wabler_data$fat.mass,
+                       "muscle.mass" = garden_wabler_data$muscle.mass,
+                       "body.mass" = garden_wabler_data$body.mass,
+                       "wing.span" = garden_wabler_data$wing.span,
+                       "wing.area" = garden_wabler_data$wing.area))
+# write a function
+first_indices <- function(data, num_groups) {
+  si <- c()
+  vY <- sd(data[,1])^2
+  for (i in 2:ncol(data)) {
+    # sort the data by column i
+    sort_data <- data[order(data[ ,i]), ] 
+    
+    # divided sorted data into chunks
+    data2 <- sort_data %>%
+    group_by((row_number() - 1) %/% (n() / num_groups)) %>%
+    nest %>% pull(data)
+    
+    # for each of the chunks get mean and variance of Y
+    mu <- lapply(data2, function(x) sum(x[, 1]/nrow(x))) # x[, 1] coz of we want mean of range
+    si <- c(si, var(unlist(mu))/vY)
+  }
+  return(si)
+}
+first_order_sections <- first_indices(data = IO, num_groups= 50)
+names(first_order_sections) <- colnames(IO)[-1]
+round(first_order_sections, 4)
+```
+
+Checking for patterns and convergence at different 
+```{r}
+# convergence 
+sq <- seq(1:500)
+sis <- matrix(ncol = 5, nrow = length(sq))
+for (i in seq_along(sq)) {
+  sis[i, ] <- first_indices(data = IO, num_groups= i)
+}
+sis2 <- sis[-1, ]
+sis2 <- data.frame(sis2)
+colnames(sis2) <- c( "fat.mass", "muscle.mass", "body.mass","wing.span",
+                     "wing.area")
+colors <- c("fat mass" = "black", "muscle mass" = "green", 
+            "body mass" = "blue", "wing span" = "red", "wing area" = "orange",
+            "optimal partitions" = "purple")
+convergence_1ord <- ggplot(data = sis2)+
+  geom_line(aes(x = sq[-1], y = fat.mass, color = "fat mass"))+
+  geom_line(aes(x = sq[-1], y = muscle.mass, color = "muscle mass"))+
+  geom_line(aes(x = sq[-1], y = body.mass, color = "body mass"))+
+  geom_line(aes(x = sq[-1], y = wing.span, color = "wing span"))+
+  geom_line(aes(x = sq[-1], y = wing.area, color = "wing area"))+
+  theme_minimal()+
+  xlab("No. partitions")+
+  ylab("First order indices")+
+  ggtitle("First order indices convergence")+
+  geom_vline(xintercept = 50, linetype="dotted",  color = "purple")+
+  geom_text(x= 55, y = 0.3, label = "optimal partitions", angle=90, vjust = 1.2,
+            text=element_text(size=11))
+  #scale_colour_manual(values = colors)
+ggsave("convergence_1ord.png", device = png(), dpi = 300, plot = convergence_1ord,
+       width = 14, height = 14, units = "cm", )
+```
+
+Partitioning method plot.
+```{r}
+library(latex2exp)
+partitioning <- ggplot()+
+  geom_point(aes(x = garden_wabler_data$wing.span, y = garden_wabler_range$range),
+                 color = "#1E90FF")+
+  xlab("X")+
+  ylab("Y")+
+  theme_minimal()+
+  geom_vline(xintercept = 0.215, linetype="dashed",  color = "#FF6347", size=1.3)+
+  geom_vline(xintercept = 0.219, linetype="dashed",  color = "#FF6347", size=1.3)+
+  #geom_text(x= 0.216, y = 3000, label = TeX("$E[Y|X=x_{[a,b]}]$"),angle=180, vjust = 1.2,
+  #          text=element_text(size=11), parse = TRUE)
+  geom_text(aes(0.218,500, label=(paste(expression("E[Y|X[a,b]]"^"")))),parse = TRUE)+
+  geom_text(aes(0.2145, -1, label = "a",), parse = TRUE, vjust = 2.0)+
+  geom_text(aes(0.22, -1, label = "b",), parse = TRUE, vjust = 1.7)+
+  ggtitle("Output Y vs input X (Illustration)")
+ #annotate("text", x=0.215, y=-0.4, label= "Xa<X<Xb", parse=TRUE)
+ggsave("partitioning.png", device = png(), dpi = 300, plot = partitioning,
+       width = 14, height = 13, units = "cm", )
+```
+
+
+### Quasi Monte Carlo Method.
+This method offers a numerical estimation of the first order and total effects 
+indices.
+
+$$
+\frac{1}{N} \sum_{j = 1}^{N}f(B)_{j}f\bigg((A_{B}^{(i)}) - f(A)_{j}\bigg)
+$$
+$$
+\frac{1}{2N} \sum_{j = 1}^{N}\bigg(f(A)_j - f(A_{B}^{(i)})_j\bigg)^2
+$$
+```{r}
+set.seed(2020)
+# creating a quasi monte carlo random sampling function.
+dists <- list(
+  bm = list(a = rnorm, mean = 0.028, sd = 0.001),
+  ff = list(a = runif, min = 0.5, max = 0.6),
+  mm = list(a = rnorm, mean = 0.17, sd = 0.0004),
+  wa = list(a = rnorm, mean = 0.011, sd = 0.0001),
+  ws = list(a = rnorm, mean = 0.24, sd = 0.0005)
+)
+quasi_mc <- function(N, dists) {
+  d <- length(dists)
+  # N2d matrix
+  N2d <- matrix(data = NA, nrow = N, ncol = 2*d)
+  
+  for (i in 1:nrow(N2d)) {
+    z <- 1
+    for (j in 1:ncol(N2d)) {
+      
+      if (j <= d) {
+        N2d[i, j] <- round(dists[[j]]$a(1, dists[[j]][[2]], dists[[j]][[3]]), 5)
+        #print(i)
+        #print(j)
+        #print(dists[[j]]$a)
+      } else {
+        #z <- j %/% 2 # quotient
+        N2d[i, j] <- round(dists[[z]]$a(1, dists[[z]][[2]], dists[[z]][[3]]), 5)
+        z <- z+1
+      }
+    }
+  }
+  
+  # replicating variable names
+  cnames <- c("body.mass", "fat.frac", "muscle.frac", "wing.area", "wing.span")
+  cnames <- rep(cnames, 2)
+  colnames(N2d) <- cnames
+  
+  # first d columns as A
+  A <- N2d[ ,1:d]
+  # remains d columns as B
+  B <- N2d[ ,(d+1):(d*2)]
+  
+  # create Ab_i
+  AB_sub_i <- list()
+  for (i in 1:d) {
+    cnme <- colnames(A)[i]
+    AB_sub_i[[i]] <- as.matrix(cbind(A[, i], B[, -i]))
+    colnames(AB_sub_i[[i]])[1] <- cnme
+  }
+  # fractions to masses
+  for (i in 1:length(AB_sub_i)) {
+    # fat mass
+    AB_sub_i[[i]] <- as.matrix(cbind(AB_sub_i[[i]],
+                                     "fat.mass" = AB_sub_i[[i]][, "fat.frac"] *
+                                       AB_sub_i[[i]][, "body.mass"]))
+    # muscle mass
+    AB_sub_i[[i]] <- as.matrix(cbind(AB_sub_i[[i]],
+                                     "muscle.mass" = AB_sub_i[[i]][, "muscle.frac"] *
+                                       AB_sub_i[[i]][, "body.mass"]))
+    
+    # remove fractions
+    
+    AB_sub_i[[i]] <-
+      AB_sub_i[[i]][, !colnames(AB_sub_i[[i]]) %in% c("fat.frac", "muscle.frac")]
+    
+  }
+  A2 <- as.matrix(cbind(A, "fat.mass" = round(A[, "fat.frac"] * A[, "body.mass"], 5)))
+  A2 <- as.matrix(cbind(A2, "muscle.mass" = round(A[, "muscle.frac"] * A[, "body.mass"],5)))
+  # remove fat.frac and fat.mass
+  A2 <-  A2[, !colnames(A2) %in% c("fat.frac", "muscle.frac")]
+  # convert fractions to mass
+  B2 <- as.matrix(cbind(B, "fat.mass" = B[, "fat.frac"] * B[, "body.mass"]))
+  B2 <- as.matrix(cbind(B2, "muscle.mass" = B[, "muscle.frac"] * B[, "body.mass"]))
+  B2 <- B2[, !colnames(B2) %in% c("fat.frac", "muscle.frac")]
+  
+  return(list("N2d" = N2d, "A" = A2, "B" = B2, "AB_sub_i" = AB_sub_i))
+} 
+N <- 100
+trial <- quasi_mc(N, dists)
+```
+```{r}
+# extracting matrices
+A <- trial$A
+B <- trial$B
+AB_sub_1 <-  trial$AB_sub_i[[1]]
+AB_sub_2 <-  trial$AB_sub_i[[2]]
+AB_sub_3 <-  trial$AB_sub_i[[3]]
+AB_sub_4 <-  trial$AB_sub_i[[4]]
+AB_sub_5 <-  trial$AB_sub_i[[5]]
+# adding species and taxon
+species <- rep("Sylvia borin", N)
+taxon <-  rep(1, N)
+A <- data.frame(cbind(A, "species" = species, "taxon" = taxon))
+A[ , c(1,2,3,4,5)] <- apply(A[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+A[ , !c(1,2,3,4,5)] <- apply(A[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+B <- data.frame(cbind(B, "species" = species, "taxon" = taxon))
+B[ , c(1,2,3,4,5)] <- apply(B[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+B[ , !c(1,2,3,4,5)] <- apply(B[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+AB_sub_1 <- data.frame(cbind(AB_sub_1, "species" = species, "taxon" = taxon))
+AB_sub_1[ , c(1,2,3,4,5)] <- apply(AB_sub_1[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_1[ , !c(1,2,3,4,5)] <- apply(AB_sub_1[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+AB_sub_2 <- data.frame(cbind(AB_sub_2, "species" = species, "taxon" = taxon))
+AB_sub_2[ , c(1,2,3,4,5)] <- apply(AB_sub_2[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_2[ , !c(1,2,3,4,5)] <- apply(AB_sub_2[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+AB_sub_3 <- data.frame(cbind(AB_sub_3, "species" = species, "taxon" = taxon))
+AB_sub_3[ , c(1,2,3,4,5)] <- apply(AB_sub_3[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_3[ , !c(1,2,3,4,5)] <- apply(AB_sub_3[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+AB_sub_4 <- data.frame(cbind(AB_sub_4, "species" = species, "taxon" = taxon))
+AB_sub_4[ , c(1,2,3,4,5)] <- apply(AB_sub_4[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_4[ , !c(1,2,3,4,5)] <- apply(AB_sub_4[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+AB_sub_5 <- data.frame(cbind(AB_sub_5, "species" = species, "taxon" = taxon))
+AB_sub_5[ , c(1,2,3,4,5)] <- apply(AB_sub_5[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_5[ , !c(1,2,3,4,5)] <- apply(AB_sub_5[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+```
+```{r}
+range_A <- migrate(data = A, method = "csw", speed_control = "constant_speed")
+range_B <- migrate(data = B, method = "csw", speed_control = "constant_speed")
+range_AB_sub_1 <- migrate(data = AB_sub_1, method = "csw", speed_control = "constant_speed")
+range_AB_sub_2 <- migrate(data = AB_sub_2, method = "csw", speed_control = "constant_speed")
+range_AB_sub_3 <- migrate(data = AB_sub_3, method = "csw", speed_control = "constant_speed")
+range_AB_sub_4 <- migrate(data = AB_sub_4, method = "csw", speed_control = "constant_speed")
+range_AB_sub_5 <- migrate(data = AB_sub_5, method = "csw", speed_control = "constant_speed")
+```
+### First order sensitivity indices
+```{r}
+# approximate sobol indices
+sb_index <- log(range_B$range)*(log(range_AB_sub_1$range) - log(range_A$range))
+mean(sb_index)
+```
+```{r}
+# Total effect index
+1/(2*N)* (sum((log(range_A$range) - log(range_AB_sub_2$range))^2))
+```
+### Quasi random sampling
+```{r}
+library(randtoolbox)
+set.seed(2020)
+quasi_sample <- randtoolbox::runif.halton(100, dim = 1, normal = TRUE)
+norm_sample <- rnorm(100, 0, 1)
+samples <- data.frame(quasi_sample, norm_sample)
+```
+```{r}
+x <- seq(1,length(samples$quasi_sample))
+halton_scatterplot <- ggplot(samples)+
+  geom_point(aes(y = quasi_sample, x = x), color = "#0072b2")+
+  theme_minimal()+
+  xlab("Index")+
+  ylab("quasi-pseudrandom")+
+  ggtitle("Halton sequences with normal deviates")+
+  theme(plot.title = element_text(size = 9))
+norm_scatterplot <- ggplot(samples)+
+  geom_point(aes(y = norm_sample, x = x), color = "#009e73")+
+  theme_minimal()+
+  xlab("Index")+
+  ylab("pseudorandom")+
+  ggtitle("Normal distribution N(0,1)")+
+  theme(plot.title = element_text(size = 9))
+halton_scatterplot
+norm_scatterplot
+```
+```{r}
+den_quasi <- ggplot(data = samples)+
+  geom_density(aes(x= quasi_sample), fill = "#0072b2")+
+  xlim(c(-3.6, 3))+
+  theme_minimal()+
+  xlab("quasi-pseudrandom")+
+  ggtitle("Density Halton sequences with normal deviates")+
+  theme(plot.title = element_text(size = 9))
+den_norm <- ggplot(data = samples)+
+  geom_density(aes(x= norm_sample), fill = "#009e73")+
+  xlim(c(-3.6, 3.2))+
+  theme_minimal()+
+  xlab("pseudorandom")+
+  ggtitle("Density Normal distribution N(0,1)")+
+  theme(plot.title = element_text(size = 9))
+```
+```{r}
+discrepancy_scatter_plot <- grid.arrange(halton_scatterplot, norm_scatterplot,
+                             den_quasi, den_norm,
+                         ncol = 2, nrow = 2)
+ggsave("discrepancy_scatter_plot.png", device = png(), dpi = 300, plot = discrepancy_scatter_plot,
+       width = 15, height = 15, units = "cm")
+dev.off()
+```
+```{r}
+# shift the normal distribution from halton to same parameters as the gamma
+# from body mass
+alpha <- 61.21014
+beta <- 3085.333
+mu_bm <- alpha/beta
+sigma_bm <- sqrt(alpha/(beta^2))
+mu_q_sample <- mean(q_sample)
+sigma_q_sample <- sd(q_sample)
+# shift distribution for body mass
+# solving for a
+a <- sqrt(sigma_bm^2/sigma_q_sample^2)
+# solving for b
+b <- mu_bm - a*mu_q_sample
+Y <- a*q_sample +b
+```
+Here we must use the properties of mean and variance of a random variable.
+\begin{equation}
+  E[aX + b] = aE[x] + b
+\end{equation}
+\begin{equation}
+  var(aX + b) = a^2Var(X)
+\end{equation}
+Step 1: finding the coefficients
+\begin{equation}
+  Var(Y) = Var(aX) = a^2Var(X)
+\end{equation}
+Step2: finding the shift
+\begin{equation}
+ E(Y) = E[aX + b] = aE[X] +b
+\end{equation}
+We need to find a  and b
+```{r}
+alpha_ws
+beta_ws
+mu_ws <- alpha_ws/beta_ws
+sigma_ws <- sqrt(alpha_ws/(beta_ws^2))
+mu_q_sample <- mean(q_sample)
+sigma_q_sample <- sd(q_sample)
+# shift distribution for body mass
+# solving for a
+a_ws <- sqrt(sigma_ws^2/sigma_q_sample^2)
+# solving for b
+b_ws <- mu_ws - a*mu_q_sample
+Y <- a_ws*q_sample +b_ws
+```
+```{r}
+# Estimating the gamma parameters of the corrupted
+mean_data_wa <- mean(garden_wabler_data$wing.area, na.rm = T)
+moment_2_wa <- mean(garden_wabler_data$wing.area^2, na.rm = T)
+alpha_wa <- mean_data_wa^2/(mean(moment_2_wa - mean_data_wa^2, na.rm = TRUE))
+beta_wa <- mean_data_wa/(mean(moment_2_wa - mean_data_wa^2, na.rm = TRUE))
+cat("alpha" = alpha_wa, "beta" = beta_wa)
+mu_wa <- alpha_wa/beta_wa
+sigma_wa <- sqrt(alpha_wa/(beta_wa^2))
+mu_q_sample <- mean(q_sample)
+sigma_q_sample <- sd(q_sample)
+# shift distribution for body mass
+# solving for a
+a_wa <- sqrt(sigma_wa^2/sigma_q_sample^2)
+# solving for b
+b_wa <- mu_wa - a*mu_q_sample
+Y <- a_wa*q_sample +b_wa
+```
+### Quasi Monte Carlo with Halton Sequences
+```{r}
+set.seed(2020)
+test1 <- runif.halton(100, dim = 2)
+set.seed(2020)
+# creating a quasi monte carlo random sampling function.
+# dists <- list(
+#   bm = list(a = rnorm, mean = 0.028, sd = 0.001),
+#   ff = list(a = runif, min = 0.5, max = 0.6),
+#   mm = list(a = rnorm, mean = 0.17, sd = 0.0004),
+#   wa = list(a = rnorm, mean = 0.011, sd = 0.0001),
+#   ws = list(a = rnorm, mean = 0.24, sd = 0.0005)
+# )
+quasi_mc_halton <- function(N, bm_par,ff_par, mf_par, wa_par, ws_par) {
+  # number of variable columns
+  d <- 5
+  # N2d matrix
+  N2d <- matrix(data = NA, nrow = N, ncol = 2*d)
+  
+  # replicating variable names
+  cnames <- c("body.mass", "fat.frac", "muscle.frac", "wing.area", "wing.span")
+  
+  cnames <- rep(cnames, 2)
+  colnames(N2d) <- cnames
+  
+  # bell shaped bm, wa, ws
+  norm_halton <- runif.halton(N,dim = 3*2, normal = TRUE)
+  unif_halton <- runif.halton(N, dim = 2*2, normal = FALSE)
+  
+  # it doesnt matter how these are assigned to N2d
+  
+  N2d[, c(1,4,5,6,9,10)] <- norm_halton
+  
+  N2d[, -c(1,4,5,6,9,10)] <- unif_halton
+  
+  
+  # first d columns as A
+  A <- N2d[ ,1:d]
+  # remains d columns as B
+  B <- N2d[ ,(d+1):(d*2)]
+  
+  # transform or shift individual columns
+  # body mass
+  A[, "body.mass"] <- bm_par["a"]*A[, "body.mass"] + bm_par["b"]
+  B[, "body.mass"] <-  bm_par["a"]*B[, "body.mass"] + bm_par["b"]
+  
+  # fat fraction
+  A[, "fat.frac"] <- A[, "fat.frac"]*(ff_par["y"] - ff_par["x"]) + ff_par["x"]
+  B[, "fat.frac"] <- B[, "fat.frac"]*(ff_par["y"] - ff_par["x"]) + ff_par["x"]
+  
+  # muscle fraction
+  A[, "muscle.frac"] <- A[, "muscle.frac"]*(ff_par["y"] - ff_par["x"]) + ff_par["x"]
+  B[, "muscle.frac"] <- B[, "muscle.frac"]*(ff_par["y"] - ff_par["x"]) + ff_par["x"]
+  
+  # wing span
+  A[, "wing.span"] <- ws_par["a"]*A[, "wing.span"] + ws_par["b"]
+  B[, "wing.span"] <- ws_par["a"]*B[, "wing.span"] + ws_par["b"]
+  
+  # wing area
+  A[, "wing.area"] <- wa_par["a"]*A[, "wing.area"] + wa_par["b"]
+  B[, "wing.area"] <- wa_par["a"]*B[, "wing.area"] + wa_par["b"]
+  
+  # create Ab_i
+  AB_sub_i <- list()
+  for (i in 1:d) {
+    cnme <- colnames(A)[i]
+    AB_sub_i[[i]] <- as.matrix(cbind(A[, i], B[, -i]))
+    colnames(AB_sub_i[[i]])[1] <- cnme
+  }
+  # fractions to masses
+  for (i in 1:length(AB_sub_i)) {
+    # fat mass
+    AB_sub_i[[i]] <- as.matrix(cbind(AB_sub_i[[i]],
+                                     "fat.mass" = AB_sub_i[[i]][, "fat.frac"] *
+                                       AB_sub_i[[i]][, "body.mass"]))
+    # muscle mass
+    AB_sub_i[[i]] <- as.matrix(cbind(AB_sub_i[[i]],
+                                     "muscle.mass" = AB_sub_i[[i]][, "muscle.frac"] *
+                                       AB_sub_i[[i]][, "body.mass"]))
+    
+    # remove fractions
+    
+    AB_sub_i[[i]] <-
+      AB_sub_i[[i]][, !colnames(AB_sub_i[[i]]) %in% c("fat.frac", "muscle.frac")]
+    
+  }
+  A2 <- as.matrix(cbind(A, "fat.mass" = round(A[, "fat.frac"] * A[, "body.mass"], 5)))
+  A2 <- as.matrix(cbind(A2, "muscle.mass" = round(A[, "muscle.frac"] * A[, "body.mass"],5)))
+  # remove fat.frac and fat.mass
+  A2 <-  A2[, !colnames(A2) %in% c("fat.frac", "muscle.frac")]
+  # convert fractions to mass
+  B2 <- as.matrix(cbind(B, "fat.mass" = B[, "fat.frac"] * B[, "body.mass"]))
+  B2 <- as.matrix(cbind(B2, "muscle.mass" = B[, "muscle.frac"] * B[, "body.mass"]))
+  B2 <- B2[, !colnames(B2) %in% c("fat.frac", "muscle.frac")]
+  
+  return(list("N2d" = N2d, "A" = A2, "B" = B2, "AB_sub_i" = AB_sub_i))
+} 
+N <- 100
+mf_par = c("x" = 0.1, "y" = 0.25)
+ff_par = c("x" = 0.20, "y" = 0.40)
+bm_par = c("a" = 0.002612552, "b" = 0.01994829)
+ws_par = c("a" = 0.006259444, "b" = 0.227865)
+wa_par = c("a" = 6.235643e-05, "b" = 0.01126299)
+trial <- quasi_mc_halton(N, bm_par,ff_par, mf_par, wa_par, ws_par)
+```
+```{r}
+# extracting matrices
+A <- trial$A
+B <- trial$B
+AB_sub_1 <-  trial$AB_sub_i[[1]]
+AB_sub_2 <-  trial$AB_sub_i[[2]]
+AB_sub_3 <-  trial$AB_sub_i[[3]]
+AB_sub_4 <-  trial$AB_sub_i[[4]]
+AB_sub_5 <-  trial$AB_sub_i[[5]]
+# adding species and taxon
+species <- rep("Sylvia borin", N)
+taxon <-  rep(1, N)
+A <- data.frame(cbind(A, "species" = species, "taxon" = taxon))
+A[ , c(1,2,3,4,5)] <- apply(A[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+A[ , !c(1,2,3,4,5)] <- apply(A[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+B <- data.frame(cbind(B, "species" = species, "taxon" = taxon))
+B[ , c(1,2,3,4,5)] <- apply(B[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+B[ , !c(1,2,3,4,5)] <- apply(B[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+AB_sub_1 <- data.frame(cbind(AB_sub_1, "species" = species, "taxon" = taxon))
+AB_sub_1[ , c(1,2,3,4,5)] <- apply(AB_sub_1[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_1[ , !c(1,2,3,4,5)] <- apply(AB_sub_1[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+AB_sub_2 <- data.frame(cbind(AB_sub_2, "species" = species, "taxon" = taxon))
+AB_sub_2[ , c(1,2,3,4,5)] <- apply(AB_sub_2[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_2[ , !c(1,2,3,4,5)] <- apply(AB_sub_2[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+AB_sub_3 <- data.frame(cbind(AB_sub_3, "species" = species, "taxon" = taxon))
+AB_sub_3[ , c(1,2,3,4,5)] <- apply(AB_sub_3[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_3[ , !c(1,2,3,4,5)] <- apply(AB_sub_3[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+AB_sub_4 <- data.frame(cbind(AB_sub_4, "species" = species, "taxon" = taxon))
+AB_sub_4[ , c(1,2,3,4,5)] <- apply(AB_sub_4[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_4[ , !c(1,2,3,4,5)] <- apply(AB_sub_4[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+AB_sub_5 <- data.frame(cbind(AB_sub_5, "species" = species, "taxon" = taxon))
+AB_sub_5[ , c(1,2,3,4,5)] <- apply(AB_sub_5[ , c(1,2,3,4,5)], 2, function(x) as.numeric(as.character(x)))
+AB_sub_5[ , !c(1,2,3,4,5)] <- apply(AB_sub_5[ ,!c(1,2,3,4,5)], 2, function(x) as.factor(x))
+```
+```{r}
+range_A <- migrate(data = A, method = "csw", speed_control = "constant_speed")
+range_B <- migrate(data = B, method = "csw", speed_control = "constant_speed")
+range_AB_sub_1 <- migrate(data = AB_sub_1, method = "csw", speed_control = "constant_speed")
+range_AB_sub_2 <- migrate(data = AB_sub_2, method = "csw", speed_control = "constant_speed")
+range_AB_sub_3 <- migrate(data = AB_sub_3, method = "csw", speed_control = "constant_speed")
+range_AB_sub_4 <- migrate(data = AB_sub_4, method = "csw", speed_control = "constant_speed")
+range_AB_sub_5 <- migrate(data = AB_sub_5, method = "csw", speed_control = "constant_speed")
+```
+#### First order sensitivity indices
+```{r}
+# approximate sobol indices
+#sb_index <- log(range_B$range)*(log(range_AB_sub_1$range) - log(range_A$range))
+#mean(sb_index)
+f02 <- mean(range_A$range)^2
+numerator <- mean((range_A$range*range_AB_sub_3$range) - f02)
+denom <-mean(range_A$range^2 - f02)
+numerator/denom
+```
+```{r}
+# Total effect index
+1/(2*N)* (sum((log(range_A$range) - log(range_AB_sub_2$range))^2))
+```
