@@ -484,7 +484,7 @@ $$
 $$
 
 
-```{r data, echo = FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r data, echo = FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, eval=FALSE}
 data("birds", package = "flying")
 table2 <- knitr::kable(birds, format = "latex", caption = "Preset birds from Flight program")
 kableExtra::kable_styling(table2, latex_options = "hold_position")
@@ -494,14 +494,14 @@ kableExtra::kable_styling(table2, latex_options = "hold_position")
 \newpage
 
 ## Results based on @penny75
-```{r}
+```{r eval=FALSE}
 results_fixed_wing <- flying::flysim(data = birds) 
 
 # range 
 results_fixed_wing$range
 ```
 
-```{r}
+```{r eval=FALSE}
 # constants used
 results_fixed_wing$constants
 ```
@@ -519,7 +519,7 @@ speed ratio is held constant or true air-speed is held constant. Both of these s
 
 See Table 3 and Table 4 for comparison with 'Flight'.
 
-```{r}
+```{r eval= FALSE}
 # constant speed
 results_cmm_cs <- flying::migrate(data = birds, speed_control = "constant_speed")
 
@@ -527,7 +527,7 @@ results_cmm_cs$range
 ```
 
 
-```{r}
+```{r eval=FALSE}
 # constant ratio between true air-speed and minimum power speed
 results_cmm_cratio <- flying::migrate(data = birds, speed_control = "vvmp_constant")
 
@@ -535,7 +535,7 @@ results_cmm_cratio$range
 ```
 
 \newpage
-```{r tables, echo=FALSE}
+```{r tables, echo=FALSE, eval=FALSE}
 # results simulated from flight true air-speed constant
 flight_cons_speed <- c(3090, 2670, 3702, 1115, 3821, 3519, 11418, 3383, 2922,
                             NA ,2248, 1867, 2031, 5186, 9880, 5308, 5498, 2606, 
@@ -559,14 +559,14 @@ colnames(results_table2) <- c("package_cons_ratio","flight_cons_ratio")
 
 ```
 
-```{r table1, echo=FALSE}
+```{r table1, echo=FALSE, eval=FALSE}
 table3 <- knitr::kable(results_table1, format = "latex", label = "Table 2", caption = "Comparison table constant speed")
 kableExtra::kable_styling(table3, latex_options = "hold_position")
 #results_table1
 ```
 
 \newpage
-```{r table2, echo=FALSE}
+```{r table2, echo=FALSE, eval=FALSE}
 table4 <- knitr::kable(results_table2, format = "latex", label = "Table 3", caption = "Comparison table constant speed ratio")
 kableExtra::kable_styling(table4, latex_options = "hold_position")
 #results_table2
