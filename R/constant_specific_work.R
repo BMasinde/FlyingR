@@ -91,12 +91,23 @@
         sim_results$true_speed[[i]][j] <- sim_results$min_speed[[i]][1] * cons$speedRatio
 
         # mechanical power from power curve holding true air-speed constant
+        # sim_results$mechPow[[i]][j] <-
+        #   .pow.curve(bm = sim_results$bm[[i]][j],
+        #            ws = wing_span[i],
+        #            wa = wing_area[i],
+        #            tas =  sim_results$true_speed[[i]][j], cons = cons)
         sim_results$mechPow[[i]][j] <-
-          .pow.curve(bm = sim_results$bm[[i]][j],
-                   ws = wing_span[i],
-                   wa = wing_area[i],
-                   tas =  sim_results$true_speed[[i]][j], cons = cons)
-
+          .total_Mech_Pow_cpp(
+            bm = sim_results$bm[[i]][j],
+            ws = wing_span[i],
+            wa = wing_area[i],
+            vt = sim_results$true_speed[[i]][j],
+            g = cons$g,
+            airDensity = cons$airDensity[i],
+            ipf = cons$ipf[i],
+            bdc = cons$bdc[i],
+            ppc = cons$ppc
+          )
         # wing frequency
         sim_results$wing_freq[[i]][j] <-
           .wingbeat.freq(bm = sim_results$bm[[i]][j],
@@ -150,8 +161,19 @@
               bdc = cons$bdc[i]
             ) * cons$speedRatio
 
-          dummy_mechPow <- .pow.curve(bm = dummy_bm, ws = wing_span[i],
-                                      wa = wing_area[i], tas = dummy_true_speed, cons = cons)
+          # dummy_mechPow <- .pow.curve(bm = dummy_bm, ws = wing_span[i],
+          #                             wa = wing_area[i], tas = dummy_true_speed, cons = cons)
+          dummy_mechPow <-  .total_Mech_Pow_cpp(
+            bm = dummy_bm,
+            ws = wing_span[i],
+            wa = wing_area[i],
+            vt = dummy_true_speed,
+            g = cons$g,
+            airDensity = cons$airDensity[i],
+            ipf = cons$ipf[i],
+            bdc = cons$bdc[i],
+            ppc = cons$ppc
+          )
 
           # wing frequency
           dummy_wing_freq <-
@@ -209,8 +231,20 @@
               bdc = cons$bdc[i]
             ) * cons$speedRatio
 
-          dummy_mechPow <- .pow.curve(bm = dummy_bm, ws = wing_span[i],
-                                      wa = wing_area[i], tas = dummy_true_speed, cons = cons)
+          # dummy_mechPow <- .pow.curve(bm = dummy_bm, ws = wing_span[i],
+          #                             wa = wing_area[i], tas = dummy_true_speed, cons = cons)
+          dummy_mechPow <- .total_Mech_Pow_cpp(
+            bm = dummy_bm,
+            ws = wing_span[i],
+            wa = wing_area[i],
+            vt = dummy_true_speed,
+            g = cons$g,
+            airDensity = cons$airDensity[i],
+            ipf = cons$ipf[i],
+            bdc = cons$bdc[i],
+            ppc = cons$ppc
+          )
+
 
           # wing frequency
           dummy_wing_freq <-
@@ -275,11 +309,23 @@
         sim_results$true_speed[[i]][j] <- sim_results$min_speed[[i]][j] * cons$speedRatio
 
         # mechanical power from power curve holding true air-speed constant
+        # sim_results$mechPow[[i]][j] <-
+        #   .pow.curve(bm = sim_results$bm[[i]][j],
+        #              ws = wing_span[i],
+        #              wa = wing_area[i],
+        #              tas =  sim_results$true_speed[[i]][j], cons = cons)
         sim_results$mechPow[[i]][j] <-
-          .pow.curve(bm = sim_results$bm[[i]][j],
-                     ws = wing_span[i],
-                     wa = wing_area[i],
-                     tas =  sim_results$true_speed[[i]][j], cons = cons)
+          .total_Mech_Pow_cpp(
+            bm = sim_results$bm[[i]][j],
+            ws = wing_span[i],
+            wa = wing_area[i],
+            vt = sim_results$true_speed[[i]][j],
+            g = cons$g,
+            airDensity = cons$airDensity[i],
+            ipf = cons$ipf[i],
+            bdc = cons$bdc[i],
+            ppc = cons$ppc
+          )
 
         # wing frequency
         sim_results$wing_freq[[i]][j] <-
@@ -333,8 +379,20 @@
             bdc = cons$bdc[i]
           ) * cons$speedRatio
 
-        dummy_mechPow <- .pow.curve(bm = dummy_bm, ws = wing_span[i],
-                                    wa = wing_area[i], tas = dummy_true_speed, cons = cons)
+        # dummy_mechPow <- .pow.curve(bm = dummy_bm, ws = wing_span[i],
+        #                             wa = wing_area[i], tas = dummy_true_speed, cons = cons)
+        dummy_mechPow <-
+          .total_Mech_Pow_cpp(
+            bm = dummy_bm,
+            ws = wing_span[i],
+            wa = wing_area[i],
+            vt = dummy_true_speed,
+            g = cons$g,
+            airDensity = cons$airDensity[i],
+            ipf = cons$ipf[i],
+            bdc = cons$bdc[i],
+            ppc = cons$ppc
+          )
 
         # wing frequency
         dummy_wing_freq <-

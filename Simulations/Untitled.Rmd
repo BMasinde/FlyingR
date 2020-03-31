@@ -1,0 +1,183 @@
+---
+title: "trial"
+author: "Brian Masinde (brima748)"
+date: "3/31/2020"
+output: pdf_document
+---
+```{r}
+library(ggplot2)
+#library(flying)
+library(corrplot)
+library(mgcv)
+library(lhs)
+library(truncdist)
+library(readr)
+```
+
+
+```{r}
+# 
+set.seed(2020)
+# Body mass
+alpha_bm <-  61.21014
+beta_bm <- 3085.333
+sim_gw_bm <- rgamma(200, shape = alpha_bm, rate = beta_bm)
+
+# wing span
+alpha_ws <- 1403.448
+beta_ws <-  6166.202
+sim_gw_ws <- rgamma(200, shape = alpha_ws, rate = beta_ws)
+
+# wing area 
+sim_gw_wa <- rep(0.011, 200)
+# corrupt 70%
+corrupt <- rbinom(length(sim_gw_wa), 1, 0.9999)
+corrupt <- as.logical(corrupt)
+noise <- rnorm(sum(corrupt),0, sd = sd(sim_gw_ws * 0.01)) # generate the noise to add
+sim_gw_wa[corrupt] <- sim_gw_wa[corrupt] + noise      # about 10% of x has been corrupted
+
+
+# fat fraction uniform 0.20 to 0.4
+sim_gw_ff <- runif(200, min = 0.2, max = 0.4)
+sim_gw_fm <- sim_gw_ff * sim_gw_bm
+
+# muscle msss
+sim_gw_mf <- runif(200, min = 0.1, max = 0.25)
+sim_gw_mm <- sim_gw_bm * sim_gw_mf
+
+# species
+species <- rep("Sylvia borin", 200)
+
+# taxon
+taxon <-  rep(1, 200)
+
+# body drag coefficient
+bdc <- rep(0.1, 200)
+
+# dry protein energy density
+eProtein <- round(runif(200, min= 1.68, 1.83), 6) * 10^7
+
+# fat energy density
+eFat <- round(runif(200, min = 3, max = 4), 6) * 10^7
+
+# mechanical conversion efficiency
+mce <- round(runif(200, min = 0.2, max = 0.4), 6)
+
+# induced power factor
+ipf <- runif(200, min = 1.1, 1.2)
+
+# inverse power density in mitochondria
+invPower <- rep(1.2* 10^-6, 200) 
+
+# airDensity
+airDensity <- runif(200, min = 1.11, max = 1.225)
+```
+
+
+```{r}
+species <- rep("Sylvia borin", 200)
+taxon <-  rep(1, 200)
+garden_wabler_data <- data.frame(
+    round(sim_gw_bm, 6),
+    round(sim_gw_fm, 6),
+    round(sim_gw_mm, 6),
+    round(sim_gw_ws, 6),
+    round(sim_gw_wa, 6),
+    round(bdc, 6),
+    eProtein,
+    eFat,
+    mce,
+    round(ipf, 6),
+    invPower,
+    round(airDensity, 6),
+  stringsAsFactors = FALSE
+)
+colnames(garden_wabler_data) <-
+  c("body.mass",
+    "fat.mass",
+    "muscle.mass",
+    "wing.span",
+    "wing.area",
+    "bdc",
+    "eProtein",
+    "eFat",
+    "mce",
+    "ipf",
+    "invPower",
+    "airDensity"
+    )
+garden_wabler_data$taxon <- as.factor(taxon)
+garden_wabler_data$species <- as.factor(species)
+```
+
+
+```{r mig, echo=FALSE}
+# migrate garden wabler
+garden_wabler_range <- migrate(data = garden_wabler_data, method = "csw", speed_control = "constant_speed")
+```
+
+```{r}
+gam_model <-
+  gam(formula = garden_wabler_range$range ~ s(fat.mass, bs = 'cr'),
+      data = garden_wabler_data)
+pred_gam_fm <- predict(gam_model, se.fit = TRUE)
+UCI <- as.vector(pred_gam_fm$fit + (1.96 * pred_gam_fm$se.fit))
+LCI <- as.vector(pred_gam_fm$fit - (1.96 * pred_gam_fm$se.fit))
+plot_gam_fm <- ggplot() +
+  geom_point(aes(x = garden_wabler_data$fat.mass, y = garden_wabler_range$range
+             ), color = "#2F7F51", size = 0.6) +
+  #geom_line(aes(x = garden_wabler_data$fat.mass, y = range_pred_fat), color  = "green") +
+  geom_line(aes(x = garden_wabler_data$fat.mass, y = pred_gam_fm$fit), color  = "blue", size = 1.5) +
+  geom_line(aes(x = garden_wabler_data$fat.mass, y = LCI), color  = "red",
+            size = 0.2)+
+  geom_line(aes(x = garden_wabler_data$fat.mass, y = UCI), color  = "red",
+            size = 0.2)+
+  theme_minimal()+
+  xlab("fat mass")+
+  ylab("range")+
+  ggtitle("Range vs fat mass (GAM model)")
+
+plot_gam_fm
+```
+
+```{r}
+gam_model <-
+  gam(formula = garden_wabler_range$range ~ s(mce, bs = 'cr'),
+      data = garden_wabler_data)
+pred_gam_fm <- predict(gam_model, se.fit = TRUE)
+UCI <- as.vector(pred_gam_fm$fit + (1.96 * pred_gam_fm$se.fit))
+LCI <- as.vector(pred_gam_fm$fit - (1.96 * pred_gam_fm$se.fit))
+plot_gam_fm <- ggplot() +
+  geom_point(aes(x = garden_wabler_data$mce, y = garden_wabler_range$range
+             ), color = "#2F7F51", size = 0.6) +
+  #geom_line(aes(x = garden_wabler_data$fat.mass, y = range_pred_fat), color  = "green") +
+  geom_line(aes(x = garden_wabler_data$mce, y = pred_gam_fm$fit), color  = "blue", size = 1.5) +
+  geom_line(aes(x = garden_wabler_data$mce, y = LCI), color  = "red",
+            size = 0.2)+
+  geom_line(aes(x = garden_wabler_data$mce, y = UCI), color  = "red",
+            size = 0.2)+
+  theme_minimal()+
+  xlab("fat mass")+
+  ylab("range")+
+  ggtitle("Range vs fat mass (GAM model)")
+
+plot_gam_fm
+```
+
+```{r}
+data <- birds
+
+data$mce <- rep(0.23, 28)
+data$airDensity <- rep(1.0, 28)
+data$eFat <- rep(3.9*10^7, 28)
+data$eProtein <- rep(1.8*10^7, 28)
+data$bdc <- rep(0.1, 28)
+data$invPower  <-  rep(1.2 * 10 ^-6, 28)
+data$ipf <- rep(1.20, 28)
+```
+
+
+```{r}
+trial <- migrate(data = data, method = "csw")
+```
+

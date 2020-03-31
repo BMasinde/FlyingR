@@ -148,10 +148,10 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   }
 
   # store the rest of results
-  results$mechPow <- simulation$mechPow
-  results$bodyMass <- simulation$bm
-  results$fatMass <- simulation$fm
-  results$chemPow <- simulation$E
+  #results$mechPow <- simulation$mechPow
+  #results$bodyMass <- simulation$bm
+  #results$fatMass <- simulation$fm
+  #results$chemPow <- simulation$E
 
   # return object of class migrate
   class(results) <- append(class(results), "migrate")
