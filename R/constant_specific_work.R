@@ -76,7 +76,7 @@
       current_fm <- sim_results$fm[[i]][1]
 
       j <- 1
-      while (sim_results$fm[[i]][j] > 0.000001) {
+      while (sim_results$fm[[i]][j] > 0.000001 & is.nan(sim_results$fm[[i]][j]) == FALSE ) {
         # calculate speed
         sim_results$min_speed[[i]][j] <-
           .minpowspeed_cpp(
