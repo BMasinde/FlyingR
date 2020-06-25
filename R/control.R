@@ -6,33 +6,34 @@
     stop("contorl must be a list")
   }
 
-  cons <- list(
+  # default constants
+  constants <- list(
     # profile power constant
-    ppc = 8.4,
+    profPowerConstant = 8.4,
 
     # energy content of fuel per kg
-    eFat = 3.9 * 10^7,
+    fatEnergy = 3.9 * 10^7,
 
-    # energy content of
-    eProtein = 1.8 * 10^7,
+    # energy content of protein
+    proteinEnergy = 1.8 * 10^7,
 
-    # accelaration due to gravity
+    # acceleration due to gravity
     g = 9.81,
 
     # mechanical conversion efficiency  [0,1]
-    mce = 0.23,
+    efficiency = 0.23,
 
     # induced power factor
-    ipf = 1.20,
+    inducedPowerFactor = 1.20,
 
     # ventilation and circulation power (Tucker's data)
-    vcp =  1.10,
+    ventCircPower =  1.10,
 
     # air density at flight height
     airDensity = 1.00,
 
     # body drag coefficient
-    bdc = 0.10,
+    bodyDragCoef = 0.10,
 
     # constant varies btw passerines and non-passerines
     alpha = c(6.25, 3.79),
@@ -40,7 +41,7 @@
     delta = c(0.724, 0.723),
 
     # inverse power density of mitochondria
-    invPower= 1.2 * 10 ^-6,
+    invPower = 1.2 * 10^-6,
 
     # ratio V:Vmp
     speedRatio = 1.2,
@@ -49,52 +50,62 @@
     muscDensity = 1060,
 
     # protein hydration ratio
-    phr = 2.2
+    protHydRatio = 2.2
   )
 
   if (missing(settings) == TRUE) {
-    # use team of default parameters
+    # use team of default constants
     message("## settings not defined. Using default constants.
             \nDefault airDensity = 1.00 kg m^3 \n")
   }else{
-    extArgs <- c(
-      "ppc",
-      "eFat",
-      "eProtein",
+    args <- c(
+      "profPowerConstant",
+      "fatEnergy",
+      "proteinEnergy",
       "g",
-      "mce",
-      "ipf",
-      "vcp",
+      "efficiency",
+      "inducedPowerFactor",
+      "ventCircPower",
       "airDensity",
-      "bdc",
+      "bodyDragCoef",
       "alpha",
       "delta",
       "invPower",
       "speedRatio",
       "muscDensity",
-      "phr"
+      "protHydRatio"
     )
 
-    # match extArgs to user provided
-    given <- which(extArgs %in% names(settings) == TRUE)
+    # match args to user provided
+    usrGiven <- which(args %in% names(settings) == TRUE)
 
 
     # extract names
-    consGive <- extArgs[given]
-    for (i in 1:length(consGive)) {
-      cons[consGive[i]] <- settings[consGive[i]]
+    given <- args[usrGiven]
+    for (i in 1:length(given)) {
+      constants[given[i]] <- settings[given[i]]
     }
 
     # throw error wrong argument in settings
-    if(length(cons) > 15){
+    if (length(constants) > 15) {
       stop("Wrong argument in settings", call. = FALSE)
     }
 
-    if(length(cons$delta) != 2 || length(cons$alpha) != 2) {
+    if (length(constants$delta) != 2 || length(constants$alpha) != 2) {
       stop("In settings, alpha and delta as vectors of length == 2", call. = FALSE)
     }
 
   }
-
-  return(cons)
+  # return object constants and class control
+  class(constants) <- append(class(constants), "control")
+  return(constants)
 }
+
+# print function for control
+print.control <- function(constants) {
+  cat("Constant    ",  "    Value", "\n")
+  for (i in seq_along(constants)) {
+    cat(names(constants)[i], "\t ", constants[[i]], "\n")
+  }
+}
+
