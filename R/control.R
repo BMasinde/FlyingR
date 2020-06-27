@@ -3,7 +3,7 @@
 
   if (missing(settings) == FALSE &&
       is.list(settings) == FALSE) {
-    stop("contorl must be a list")
+    stop("control must be a list")
   }
 
   # default constants
@@ -82,7 +82,7 @@
 
     # extract names
     given <- args[usrGiven]
-    for (i in 1:length(given)) {
+    for (i in seq_len(length(given))) {
       constants[given[i]] <- settings[given[i]]
     }
 
