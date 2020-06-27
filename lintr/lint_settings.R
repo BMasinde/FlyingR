@@ -9,4 +9,6 @@ my_linters <- with_defaults(default = my_linters,
                             +object_name_linter("camelCase"))
 
 # you only need to run this file
-# lint(ctrl_file_path, linters = my_linters)
+#file_path = "/Users/masinde/Documents/R projects/Flight project/flying/R/migrate.R"
+
+lint(file_path, linters = my_linters)
