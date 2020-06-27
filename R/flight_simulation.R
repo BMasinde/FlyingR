@@ -44,7 +44,7 @@
 #' @export flysim
 #'
 #' @examples
-#' flysim(data = birds, settings = list(eFat = 3.89*10^7))
+#' flysim(data = birds, settings = list(fatEnergy = 3.89*10^7))
 #' flysim(data = birds,  settings = list(airDensity = 0.905))
 #'
 #' @usage flysim(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
@@ -92,31 +92,31 @@ flysim <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
 
   # control check
   if (missing(settings) == TRUE) {
-    cons <- .control()
+    constants <- .control()
   } else {
-    cons <- .control(settings)
+    constants <- .control(settings)
   }
 
   results <- list("range" = vector(),
                   #"fuel" = vector(),
                   #"Vmp" = vector(),
                   #"Vmr" = vector(),
-                  "constants" = unlist(cons, use.names = TRUE),
+                  "constants" = unlist(constants, use.names = TRUE),
                   "data" = data
                   )
 
-  results$range <-ifelse( data$taxon == 1, .breguet(bodyMass = data$allMass,
+  results$range <- ifelse( data$taxon == 1, .breguet(bodyMass = data$allMass,
                                                     wingSpan = data$wingSpan,
                                                     fatMass = data$fatMass,
                                                     ordo = data$taxon,
                                                     wingArea = data$wingArea,
-                                                    cons = cons),
+                                                    constants = constants),
       .breguet_adj(bodyMass = data$allMass,
                    wingSpan = data$wingSpan,
                    fatMass = data$fatMass,
                    ordo = data$taxon,
-                   wingArea= data$wingArea,
-                   cons = cons)
+                   wingArea = data$wingArea,
+                   constants = constants)
     )
 
   # results should be named vectors

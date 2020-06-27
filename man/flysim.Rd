@@ -60,7 +60,7 @@ required by this function)
 }
 }
 \examples{
-flysim(data = birds, settings = list(eFat = 3.89*10^7))
+flysim(data = birds, settings = list(fatEnergy = 3.89*10^7))
 flysim(data = birds,  settings = list(airDensity = 0.905))
 
 }

@@ -56,7 +56,7 @@
 #' @export migrate
 #'
 #' @examples
-#' migrate(data = birds, settings = list(eFat = 3.89*10^7))
+#' migrate(data = birds, settings = list(fatEnergy = 3.89*10^7))
 #' migrate(data = birds,  method = "cmm", settings = list(airDensity = 0.905))
 #'
 #'

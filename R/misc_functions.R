@@ -311,7 +311,7 @@
     vt = tas, # holding speed constant
     g = constants$g,
     airDensity = constants$airDensity,
-    inducedPowerFactor = constants$inducedPowerFactor,
+    ipf = constants$inducedPowerFactor,
     bdc = constants$bodyDragCoef,
     ppc = constants$profPowerConstant
   )
