@@ -4,7 +4,8 @@
 \name{birds}
 \alias{birds}
 \title{Sample 28 birds}
-\format{A data frame with 28 observations and 5 variables not counting the
+\format{
+A data frame with 28 observations and 5 variables not counting the
         name.
 
 \describe{
@@ -18,7 +19,8 @@
    squared}
    \item{Muscle.mass}{Mass in Kg. of flight muscles}
 
-}}
+}
+}
 \usage{
 birds
 }

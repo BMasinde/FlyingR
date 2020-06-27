@@ -56,22 +56,22 @@ and Pennycuick (2008).
 \details{
 The option *control takes the folowing arguments
 \itemize{
-   \item ppc: Profile power constant
-   \item eFat: Energy content of fuel from fat
-   \item eProtein: Energy content of protein
+   \item profPowerConstant: Profile power constant
+   \item fatEnergy: Energy content of fuel from fat
+   \item proteinEnergy: Energy content of protein
    \item g: Accelaration due to gravity
-   \item mce: Mechanical conversion efficiency [0,1]
-   \item ipf: Induced power factor
-   \item vcp: Ventilation and circulation power
+   \item efficiency: Mechanical conversion efficiency [0,1]
+   \item inducedPowerFactor: Induced power factor
+   \item ventCircPower: Ventilation and circulation power
    \item airDensity: Air density at cruising altitude
-   \item bdc: Body drag coefficient
+   \item bodyDragCoef: Body drag coefficient
    \item alpha: Basal metabolism factors in passerines and non passerines
    \item delta: Basal metabolism factors in passerines and non passerines
    alpha*bodyMass^delta
    \item invPower
    \item speedRatio: True air speed to minimum power speed ratio
    \item muscDensity: Density of the flight muscles.
-   \item phr: Protein hydration ratio
+   \item protHydRatio: Protein hydration ratio
 }
 }
 \examples{
