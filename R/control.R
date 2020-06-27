@@ -102,10 +102,10 @@
 }
 
 # print function for control
-print.control <- function(constants) {
-  cat("Constant    ",  "    Value", "\n")
-  for (i in seq_along(constants)) {
-    cat(names(constants)[i], "\t ", constants[[i]], "\n")
-  }
-}
+# print.control <- function(constants) {
+#   cat("Constant    ",  "    Value", "\n")
+#   for (i in seq_along(constants)) {
+#     cat(names(constants)[i], "\t ", constants[[i]], "\n")
+#   }
+# }
 
