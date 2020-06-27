@@ -36,8 +36,8 @@
 
   taxon <- data$taxon
 
-  fatFrac <- fatMass/allMass
-  muscleFrac <- muscleMass/allMass
+  fatFrac <- fatMass / allMass
+  muscleFrac <- muscleMass / allMass
 
   # time marching
 
@@ -56,8 +56,7 @@
 
   if (speed_control == "constant_speed") {
 
-    for (i in 1:nrow(data)) {
-      #i <- 1
+    for (i in seq_len(nrow(data))) {
       # initial values
       simResults$bm[[i]][1] <- allMass[i]
       simResults$fm[[i]][1] <- fatMass[i]
@@ -150,7 +149,7 @@
     }
 
   }else {
-    for (i in 1:nrow(data)) {
+    for (i in seq_len(nrow(data))) {
       #i <- 1
       # initial values
       simResults$bm[[i]][1] <- allMass[i]
