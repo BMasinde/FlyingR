@@ -67,7 +67,7 @@
   )
 
   if (speed_control == "constant_speed") {
-    for (i in 1:nrow(data)) {
+    for (i in seq_len(nrow(data))) {
       sim_results$bm[[i]][1] <- all_mass[i]
       sim_results$fm[[i]][1] <- fat_mass[i]
       sim_results$mm[[i]][1] <-  muscle_mass[i]
@@ -159,15 +159,15 @@
           #dummy_spec_pow <- dummy_mechPow/sim_results$myofibrils[[i]][j]
 
           # amount of protein consumed that restores specific power to initial value
-          used_protein <- - (dummy_mechPow/spec_pow_start) + sim_results$myofibrils[[i]][j]
+          used_protein <- -(dummy_mechPow/spec_pow_start) + sim_results$myofibrils[[i]][j]
 
           # checking if specific work has been restored
           sim_results$spec_work[[i]][j] <-
             dummy_mechPow / ((sim_results$myofibrils[[i]][j] - used_protein) * dummy_wing_freq)
 
-          # amount of fule energy released is found by multiplying the mass of dry protein
+          # amount of fuel energy released is found by multiplying the mass of dry protein
           # removed by the energy density of dry protein
-          used_fat_equiv <- (used_protein * constants$eProtein) / constants$fatEnergy
+          used_fat_equiv <- (used_protein * constants$proteinEnergy) / constants$fatEnergy
 
           # adjust body components
           # new fat mass
@@ -252,7 +252,7 @@
       }
     }
   } else {
-    for (i in 1:nrow(data)) {
+    for (i in seq_len(nrow(data))) {
       sim_results$bm[[i]][1] <- all_mass[i]
       sim_results$fm[[i]][1] <- fat_mass[i]
       sim_results$mm[[i]][1] <-  muscle_mass[i]
@@ -356,8 +356,10 @@
         # new fat mass
         sim_results$fm[[i]][j + 1] <-  sim_results$fm[[i]][j] - (used_fat - used_fat_equiv)
         sim_results$myofibrils[[i]][j + 1] <- sim_results$myofibrils[[i]][j] - (used_protein * constants$protHydRatio)
-        sim_results$mm[[i]][j + 1] <- sim_results$mitochondria[[i]][1] + (sim_results$myofibrils[[i]][j] - (used_protein * constants$protHydRatio))
-        sim_results$bm[[i]][j + 1] <- sim_results$bm[[i]][j] - (used_fat - used_fat_equiv) - (used_protein * constants$protHydRatio)
+        sim_results$mm[[i]][j + 1] <-
+          sim_results$mitochondria[[i]][1] + (sim_results$myofibrils[[i]][j] - (used_protein * constants$protHydRatio))
+        sim_results$bm[[i]][j + 1] <-
+          sim_results$bm[[i]][j] - (used_fat - used_fat_equiv) - (used_protein * constants$protHydRatio)
         sim_results$dist[[i]][j] <- sim_results$true_speed[[i]][j] * 360
         j <-  j + 1
 
