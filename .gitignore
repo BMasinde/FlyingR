@@ -9,3 +9,4 @@ doc
 Meta
 *.Rproj
 *.Rproj
+.DS_Store
