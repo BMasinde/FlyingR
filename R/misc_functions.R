@@ -2,7 +2,7 @@
 ################################################################################
 #' @name .met.pow.ratio
 #' @author Brian Masinde
-#' @param cons Constants defined
+#' @param constants Simulation constants supplied
 #' @param m body mass at start/end of flight
 #' @param ws wing span
 #' @param ord Order (passerine or non-passerine)
@@ -15,15 +15,15 @@
 #'              of what the bird is doing.
 
 
-.met.pow.ratio <- function(cons, m, ws, ordo) {
+.met.pow.ratio <- function(constants, m, ws, ordo) {
 
-  a <- ifelse(ordo == 1, cons$alpha[[1]], cons$alpha[[2]])
+  a <- ifelse(ordo == 1, constants$alpha[[1]], constants$alpha[[2]])
 
-  d <- ifelse(ordo == 1, cons$delta[[1]], cons$delta[[2]])
+  d <- ifelse(ordo == 1, constants$delta[[1]], constants$delta[[2]])
 
   num <-
-    6.023 * a * cons$mce * cons$airDensity ^ 0.5 * ws ^ 1.5 * m ^(d - (5 / 3))
-  den <-  cons$ipf ^ (3 / 4) * cons$g ^ (5 / 3)
+    6.023 * a * constants$efficiency * constants$airDensity ^ 0.5 * ws ^ 1.5 * m ^(d - (5 / 3))
+  den <-  constants$inducedPowerFactor ^ (3 / 4) * constants$g ^ (5 / 3)
 
   x2 <- num / den
 
@@ -33,7 +33,7 @@
 ################################################################################
 #' @name .basal.met
 #' @author Brian Masinde
-#' @param cons Constants defined
+#' @param constants Simulation constants supplied
 #' @param mFrame mass of frame
 #' @param mMusc mass of muscle
 #' @param ordo (passerine or non-passerine)
@@ -41,10 +41,10 @@
 #' @description Rate at which fuel energy (not mechanical work) is needed
 #' irrespective of what the bird is doing.
 
-.basal.met <- function(cons, mFrame, mMusc, ordo) {
+.basal.met <- function(constants, mFrame, mMusc, ordo) {
     pbmr <-
-      ifelse(ordo == 1, cons$alpha[[1]], cons$alpha[[2]]) * (mFrame + mMusc) ^
-      ifelse(ordo == 1, cons$delta[[1]], cons$delta[[2]])
+      ifelse(ordo == 1, constants$alpha[[1]], constants$alpha[[2]]) * (mFrame + mMusc) ^
+      ifelse(ordo == 1, constants$delta[[1]], constants$delta[[2]])
 
   return(pbmr)
 }
@@ -52,17 +52,17 @@
 ################################################################################
 #' @name .basal.met2
 #' @author Brian Masinde
-#' @param cons Constants defined
+#' @param constants Simulation constants supplied
 #' @param bodyMass mass of frame
 #' @param fatMass mass of muscle
 #' @param ordo Order (passerine or non-passerine)
 #' @return Pbmr (basal metabolism)
 #' @description Rate at which fuel energy (not mechanical work) is needed
 #' irrespective of what the bird is doing.
-.basal.met2 <- function(cons, bodyMass, fatMass, ordo) {
+.basal.met2 <- function(constants, bodyMass, fatMass, ordo) {
   pbmr <-
-    ifelse(ordo == 1, cons$alpha[[1]], cons$alpha[[2]]) * (bodyMass - fatMass) ^
-    ifelse(ordo == 1, cons$delta[[1]], cons$delta[[2]])
+    ifelse(ordo == 1, constants$alpha[[1]], constants$alpha[[2]]) * (bodyMass - fatMass) ^
+    ifelse(ordo == 1, constants$delta[[1]], constants$delta[[2]])
 
   return(pbmr)
 }
@@ -72,17 +72,17 @@
 #' @author Brian Masinde
 #' @param m all body mass
 #' @param ws wing span
-#' @param cons constants
+#' @param constants Simulation constants supplied
 #' @return Vmp (minimum power speed)
 #' @description Minimum power speed is the minimum speed required for a bird to
 #'              maintain horizontal flight. This formula estimates a starting
 #'              value but the actual value is estimated by simulation.
 
-.min.pow.speed <- function(m, ws, cons) {
-  Vmp <- (0.807 * cons$ipf ^ 0.25 * m ^ 0.5 * cons$g ^ 0.5) /
+.min.pow.speed <- function(m, ws, constants) {
+  Vmp <- (0.807 * constants$inducedPowerFactor ^ 0.25 * m ^ 0.5 * constants$g ^ 0.5) /
             (
-              cons$airDensity ^ 0.5 * ws ^ 0.5 * .body.front.area(m) ^ 0.25 *
-                cons$bdc ^ 0.25
+              constants$airDensity ^ 0.5 * ws ^ 0.5 * .body.front.area(m) ^ 0.25 *
+                constants$bodyDragCoef ^ 0.25
             )
 
   return(Vmp)
@@ -126,8 +126,9 @@
 #' @param rho air density
 #' @description wing beat frequency at specified air density
 #'
-.wingbeat.freq <- function(bm, ws, wa, cons){
-  f <- bm^0.375*cons$g^0.5*ws^(-23/24)*wa^(-1/3)*cons$airDensity^(-3/8)
+.wingbeat.freq <- function(bm, ws, wa, constants){
+  f <- bm^0.375*constants$g^0.5*ws^(-23/24)*wa^(-1/3)*constants$airDensity^(-3/8)
+  return(f)
 }
 
 ################################################################################
@@ -135,18 +136,18 @@
 #' @author Brian Masinde
 #' @param m all up mass
 #' @param ws wing span
-#' @param cons constants
+#' @param constants Simulation constants supplied
 #' @description Speed at which the bird covers the most range. However, it is not
 #'              necessarily the optimal speed because it requires more power to
 #'              maintain this speed. This function gives a lower estimate of the
 #'              speed. In flight this speed is identified when effective lift drag
 #'              ratio ceases to increases.
 
-.max.range.speed <- function(bm, ws, cons) {
-  num <- cons$ipf ^ 0.25 * bm ^ 0.5 * cons$g ^ 0.5
+.max.range.speed <- function(bm, ws, constants) {
+  num <- constants$inducedPowerFactor ^ 0.25 * bm ^ 0.5 * constants$g ^ 0.5
 
   den <-
-    cons$airDensity ^ 0.5 * (cons$bdc * .body.front.area(bm)) ^ 0.25 *
+    constants$airDensity ^ 0.5 * (constants$bodyDragCoef * .body.front.area(bm)) ^ 0.25 *
     .disc.area(ws) ^ 0.25
 
   Vmr <- num / den
@@ -160,7 +161,7 @@
 #' @param m all up mass
 #' @param ws wing span
 #' @param Vt true airspeed
-#' @param cons constants
+#' @param constants Simulation constants supplied
 #' @return induced power in horizontal flight
 #' @description Induced power is rate at which flight muscles have to provide work.
 #'              In the this case, induced power is not considered during hovering
@@ -168,14 +169,17 @@
 #'              a starting point.
 
 
-.induced.pow <- function(m, ws, Vt, cons) {
+.induced.pow <- function(m, ws, Vt, constants) {
   # sapply(Vt, function(x)
   #   if (x <= 0) {
   #     x  <-  0.1
   #     cat("minimum true airspeed zero for some obesrvations")
   #   })
 
-  pind <- (2 * cons$ipf * (m * cons$g) ^ 2) / (Vt * pi * (ws ^ 2) * cons$airDensity)
+  pind <-
+    (
+      2 * constants$inducedPowerFactor * (m * constants$g) ^ 2
+    ) / (Vt * pi * (ws ^ 2) * constants$airDensity)
 
   return(pind)
 }
@@ -185,14 +189,14 @@
 #' @author Brian Masinde
 #' @param Vt true airspeed
 #' @param m all up mass
-#' @param cons constants
+#' @param constants Simulation constants supplied
 #' @return ppar parasite power
 #' @description Parasite power is the rate at which work must be done in order
 #'              to overcome drag of the body. Found by multiplying the speed and
 #'              the body drag coefficient.
 
-.parasite.pow <- function(m, Vt, cons) {
-  ppar <- (cons$airDensity * Vt^3 * .body.front.area(m) * cons$bdc) / 2
+.parasite.pow <- function(m, Vt, constants) {
+  ppar <- (constants$airDensity * Vt^3 * .body.front.area(m) * constants$bodyDragCoef) / 2
 
   return(ppar)
 }
@@ -202,14 +206,14 @@
 #' @author Brian Masinde
 #' @param m all up mass
 #' @param ws wing span
-#' @param cons constants
+#' @param constants Simulation constants supplied
 #' @return  pam (absolute minimum power for an ideal bird to fly at Vmp)
 #' @description Power required for a bird to fly at minimum power speed.
 
-.abs.min.pow <- function(m, ws, cons) {
+.abs.min.pow <- function(m, ws, constants) {
   pam <-
-    (1.05 * (cons$ipf ^ 0.75) * (m ^ 1.5) * (cons$g ^ 1.5) * (.body.front.area(m) ^ 0.25) *
-       cons$bdc^0.25) / ((cons$airDensity) ^ 0.5 * (ws ^ 1.5))
+    (1.05 * (constants$inducedPowerFactor ^ 0.75) * (m ^ 1.5) * (constants$g ^ 1.5) * (.body.front.area(m) ^ 0.25) *
+       constants$bodyDragCoef^0.25) / ((constants$airDensity) ^ 0.5 * (ws ^ 1.5))
 
   return(pam)
 }
@@ -226,10 +230,10 @@
 #'              things being constant. Therefore, it calculated as profile power
 #'              constant (8.4) divided by the aspect ratio.
 
-.prof.pow.ratio <- function(ws, wa, cons) {
+.prof.pow.ratio <- function(ws, wa, constants) {
   # ws = wing span
   # wa = wing area
-  X1 <- cons$ppc / (ws ^ 2 / wa)
+  X1 <- constants$profPowerConstant / (ws ^ 2 / wa)
 
   return(X1)
 }
@@ -263,17 +267,17 @@
 #'               speed.
 
 
-.total.mech.power <- function(m, ws, wa, Vt, cons) {
+.total.mech.power <- function(m, ws, wa, Vt, constants) {
 
   # induced power at starting speed
-  pind <- .induced.pow(m, ws, Vt, cons)
+  pind <- .induced.pow(m, ws, Vt, constants)
 
   # parasite power
-  ppar <- .parasite.pow(m, Vt, cons)
+  ppar <- .parasite.pow(m, Vt, constants)
 
   # profile power
-  x1 <- .prof.pow.ratio(ws, wa, cons)
-  amp <- .abs.min.pow(m, ws, cons)
+  x1 <- .prof.pow.ratio(ws, wa, constants)
+  amp <- .abs.min.pow(m, ws, constants)
   ppr <- .prof.pow(x1, amp)
 
   # total power
@@ -289,7 +293,7 @@
 #' @param ws wing span
 #' @param wa wing area
 #' @param tas true airspeed
-#' @param cons settings
+#' @param constants Simulation constants supplied
 #' @return Total mechanical power using true airspeed
 #' @description In calculating the power curve, the true air-speed is
 #'              estimated where total power is stable. Since we are only interested
@@ -297,19 +301,19 @@
 #'              above the total mechanical power estimated at start of flight.
 #'
 
-.pow.curve <- function(bm, ws, wa, tas, cons) {
-  #cons <- cons
+.pow.curve <- function(bm, ws, wa, tas, constants) {
+  #constants <- constants
   # starting mechanical power
   start_mech_pow <- .total_Mech_Pow_cpp(
     bm = bm,
     ws = ws,
     wa = wa,
     vt = tas, # holding speed constant
-    g = cons$g,
-    airDensity = cons$airDensity,
-    ipf = cons$ipf,
-    bdc = cons$bdc,
-    ppc = cons$ppc
+    g = constants$g,
+    airDensity = constants$airDensity,
+    inducedPowerFactor = constants$inducedPowerFactor,
+    bdc = constants$bodyDragCoef,
+    ppc = constants$profPowerConstant
   )
 
   # reduce tas slightly
@@ -327,11 +331,11 @@
         wa = wa,
         vt = true_speed,
         # holding speed constant
-        g = cons$g,
-        airDensity = cons$airDensity,
-        ipf = cons$ipf,
-        bdc = cons$bdc,
-        ppc = cons$ppc
+        g = constants$g,
+        airDensity = constants$airDensity,
+        ipf = constants$inducedPowerFactor,
+        bdc = constants$bodyDragCoef,
+        ppc = constants$profPowerConstant
       )
     }
   }

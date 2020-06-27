@@ -2,21 +2,21 @@
 # @author Brain Masinde.
 # @name .constant.muscle.mass
 # @param data Data as output from .colnames.match
-# @param cons
+# @param constants
 # @param speed_control speed control as either
 # @param protein_met percentage of energy attributed to protein
 
 
-.constant.muscle.mass <- function(data, cons, speed_control, protein_met) {
+.constant.muscle.mass <- function(data, constants, speed_control, protein_met) {
   if (missing(data) == TRUE) {
     stop("Missing data argument")
   }
 
-  if(missing(cons) == TRUE) {
+  if (missing(constants) == TRUE) {
     stop("Missing constants")
   }
 
-  if(missing(speed_control) == TRUE) {
+  if (missing(speed_control) == TRUE) {
     stop("Missing speed control method")
   }
 
@@ -68,10 +68,10 @@
       while (currentFM > 0.000001) {
         # find speed and power
         simResults$minSpeed[[i]][j] <-
-          .minpowspeed_cpp(bm = simResults$bm[[i]][j], ws = wingSpan[i], ipf = cons$ipf,
-                          g = cons$g, airDensity = cons$airDensity, bdc = cons$bdc)
+          .minpowspeed_cpp(bm = simResults$bm[[i]][j], ws = wingSpan[i], ipf = constants$inducedPowerFactor,
+                          g = constants$g, airDensity = constants$airDensity, bdc = constants$bodyDragCoef)
         #  constant speed always
-        simResults$trueSpeed[[i]][j] <- simResults$minSpeed[[i]][1] * cons$speedRatio
+        simResults$trueSpeed[[i]][j] <- simResults$minSpeed[[i]][1] * constants$speedRatio
 
         simResults$rvvmp[[i]][j] <-
           simResults$trueSpeed[[i]][j] / simResults$minSpeed[[i]][j]
@@ -83,18 +83,18 @@
             ws = wingSpan[i],
             wa = wingArea[i],
             vt = simResults$trueSpeed[[i]][j],
-            g = cons$g,
-            airDensity = cons$airDensity,
-            ipf = cons$ipf,
-            bdc = cons$bdc,
-            ppc = cons$ppc
+            g = constants$g,
+            airDensity = constants$airDensity,
+            ipf = constants$inducedPowerFactor,
+            bdc = constants$bodyDragCoef,
+            ppc = constants$profPowerConstant
           )
         simResults$mechPow[[i]][j] <- power
 
         if (protein_met == 0) {
           # chemical power
           E <-
-            (power / cons$mce) + .basal.met2(cons, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
+            (power / constants$efficiency) + .basal.met2(constants, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
 
           # increase E by 10% to account for respiratory and heart
           E <- E + (E * 0.1)
@@ -103,7 +103,7 @@
 
           # update body
           simResults$deltaM[[i]][j] <-
-            (simResults$E[[i]][j] / cons$eFat) * 360
+            (simResults$E[[i]][j] / constants$fatEnergy) * 360
           simResults$fm[[i]][j + 1] <-
             simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
           simResults$bm[[i]][j + 1] <-
@@ -119,7 +119,7 @@
         } else {
           # chemical power
           E <-
-            (power / cons$mce) + .basal.met2(cons, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
+            (power / constants$efficiency) + .basal.met2(constants, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
 
           # increase E by 10% to account for respiratory and heart
           E <- E + (E * 0.1)
@@ -131,11 +131,11 @@
           EFromProtein <- E * protein_met
 
           # convert this energy to mass by dividing by enegry content of protein
-          deltaAFM <- EFromProtein / cons$eProtein
+          deltaAFM <- EFromProtein / constants$proteinEnergy
 
           # update body
           # deltaM is the change in mass (subtracting E attributed to protein)
-          simResults$deltaM[[i]][j] <- ((E -EFromProtein) / cons$eFat) * 360
+          simResults$deltaM[[i]][j] <- ((E - EFromProtein) / constants$fatEnergy) * 360
           simResults$afm[[i]][j + 1] <- simResults$afm[[i]][j] - deltaAFM
           simResults$fm[[i]][j + 1] <- simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
           simResults$bm[[i]][j + 1] <-
@@ -162,28 +162,28 @@
       while (currentFM > 0.000001) {
         # find speed and power
         simResults$minSpeed[[i]][j] <-
-          .minpowspeed_cpp(bm = simResults$bm[[i]][j], ws = wingSpan[i], ipf = cons$ipf,
-                          g = cons$g, airDensity = cons$airDensity, bdc = cons$bdc)
+          .minpowspeed_cpp(bm = simResults$bm[[i]][j], ws = wingSpan[i], ipf = constants$inducedPowerFactor,
+                          g = constants$g, airDensity = constants$airDensity, bdc = constants$bodyDragCoef)
         # constant true-speed to minimum power speed always
-        simResults$trueSpeed[[i]][j] <- simResults$minSpeed[[i]][j] * cons$speedRatio
+        simResults$trueSpeed[[i]][j] <- simResults$minSpeed[[i]][j] * constants$speedRatio
 
         simResults$rvvmp[[i]][j] <-
           simResults$trueSpeed[[i]][j] / simResults$minSpeed[[i]][j]
 
         # mechanical power
         power <-
-          .total_Mech_Pow_cpp(bm =simResults$bm[[i]][j],
+          .total_Mech_Pow_cpp(bm = simResults$bm[[i]][j],
                              ws = wingSpan[i],
                              wa = wingArea[i],
                              vt = simResults$trueSpeed[[i]][j],
-                             g = cons$g, airDensity = cons$airDensity, ipf = cons$ipf,
-                             bdc = cons$bdc, ppc = cons$ppc)
+                             g = constants$g, airDensity = constants$airDensity, ipf = constants$inducedPowerFactor,
+                             bdc = constants$bodyDragCoef, ppc = constants$profPowerConstant)
         simResults$mechPow[[i]][j] <- power
 
         if (protein_met == 0) {
           # chemical power
           E <-
-            (power / cons$mce) + .basal.met2(cons, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
+            (power / constants$efficiency) + .basal.met2(constants, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
 
           #increase E by 10% to account for respiratory and heart
           E <- E + (E * 0.1)
@@ -192,7 +192,7 @@
 
           # update body
           simResults$deltaM[[i]][j] <-
-            (simResults$E[[i]][j] / cons$eFat) * 360
+            (simResults$E[[i]][j] / constants$fatEnergy) * 360
           simResults$fm[[i]][j + 1] <-
             simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
           simResults$bm[[i]][j + 1] <-
@@ -207,7 +207,7 @@
         } else {
           # chemical power
           E <-
-            (power / cons$mce) + .basal.met2(cons, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
+            (power / constants$efficiency) + .basal.met2(constants, simResults$bm[[i]][j], simResults$fm[[i]][j], taxon[i])
 
           #increase E by 10% to account for respiratory and heart
           E <- E + (E * 0.1)
@@ -217,10 +217,10 @@
           EFromProtein <- E * protein_met
 
           # convert this energy to mass by dividing by enegry content of protein
-          deltaAFM <- EFromProtein / cons$eProtein
+          deltaAFM <- EFromProtein / constants$proteinEnergy
 
           # update body
-          simResults$deltaM[[i]][j] <- ((E -EFromProtein) / cons$eFat) * 360
+          simResults$deltaM[[i]][j] <- ((E - EFromProtein) / constants$fatEnergy) * 360
           simResults$afm[[i]][j + 1] <- simResults$afm[[i]][j] - deltaAFM
           simResults$fm[[i]][j + 1] <- simResults$fm[[i]][j] - simResults$deltaM[[i]][j]
           simResults$bm[[i]][j + 1] <-

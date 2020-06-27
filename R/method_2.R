@@ -15,18 +15,18 @@
 #              end of flight is used as proxy for engine burn.
 
 #' @importFrom utils tail
-.breguet_adj <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, cons) {
+.breguet_adj <- function(bodyMass, wingSpan, fatMass, ordo, wingArea, constants) {
   ##############################################################################
   # fat fraction
   fatFrac <- fatMass/bodyMass
 
   ## lift:drag end of flight ###################################################
   # m2 mass end of flight
-  #bodyMassEnd <- bodyMass - (fatMass * cons$consume)
+  #bodyMassEnd <- bodyMass - (fatMass * constants$consume)
   bodyMassEnd <- bodyMass - fatMass
 
   # x2
-  metPowRatioEnd <- .met.pow.ratio(cons, bodyMassEnd, wingSpan, ordo)
+  metPowRatioEnd <- .met.pow.ratio(constants, bodyMassEnd, wingSpan, ordo)
 
   # x1:ppcons/Aspect ratio + x2:mpratio check for D ----------------------------
   # Aspect ratio = wingSpan^2 / wingArea
@@ -35,11 +35,11 @@
   # round off to 2 digits
   table2 <- .gen.table2()
 
-  # dFactorEnd <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) +
+  # dFactorEnd <- sapply(round((constants$ppcons / (wingSpan^2/wingArea)) +
   #                              metPowRatioEnd, 2), .interpolate, table2)
   dFactorEnd <-
     sapply(round((
-      .prof.pow.ratio(ws = wingSpan, wa = wingArea, cons) + metPowRatioEnd
+      .prof.pow.ratio(ws = wingSpan, wa = wingArea, constants) + metPowRatioEnd
     ),
     2), .interpolate, table2)
 
@@ -52,10 +52,11 @@
   diskArea <- 0.25 * pi * (wingSpan ^ 2)
 
   # flat-plate area
-  flatPlateAreaEnd <- 0.00813 * (bodyMassEnd ^ 0.666) * cons$bdc
+  flatPlateAreaEnd <- 0.00813 * (bodyMassEnd ^ 0.666) * constants$bodyDragCoef
 
   # lift drag ratio at begining of flight
-  liftDragEnd <- dFactorEnd / (cons$ipf ^ 0.5 * cons$vcp) * ((diskArea / flatPlateAreaEnd) ^ 0.5)
+  liftDragEnd <-
+    dFactorEnd / (constants$inducedPowerFactor ^ 0.5 * constants$ventCircPower) * ((diskArea / flatPlateAreaEnd) ^ 0.5)
 
 
   ## lift:drag ratio start of flight ###########################################
@@ -63,12 +64,12 @@
   # start
   metPowRatioStart <- metPowRatioEnd / ((1 / (1 - fatFrac)) ^ 1.75)
 
-  # dFactorStart <- sapply(round((cons$ppcons / (wingSpan^2/wingArea)) +
+  # dFactorStart <- sapply(round((constants$ppcons / (wingSpan^2/wingArea)) +
   #                                metPowRatioStart, 2), .interpolate, table2)
 
   dFactorStart <-
     sapply(round((
-      .prof.pow.ratio(ws = wingSpan, wa = wingArea, cons) + metPowRatioStart
+      .prof.pow.ratio(ws = wingSpan, wa = wingArea, constants) + metPowRatioStart
     ),
     2), .interpolate, table2)
 
@@ -76,13 +77,13 @@
   #                                metPowRatioStart, 2), .interpolate, table2)
 
   liftDragStart <-
-    (dFactorStart / ((cons$ipf ^ 0.5) * cons$vcp)) *
+    (dFactorStart / ((constants$inducedPowerFactor ^ 0.5) * constants$ventCircPower)) *
     (((diskArea / flatPlateAreaEnd) ^ 0.5) / ((bodyMass / bodyMassEnd) ^ 0.5))
 
 
   ## Range in km ###############################################################
   kmRange <-
-    ((cons$eFat * cons$mce) / cons$g) *
+    ((constants$fatEnergy * constants$efficiency) / constants$g) *
     apply(cbind(liftDragStart, liftDragEnd), 1, mean) *
     log(1 / (1 - fatFrac)) / 1000
 
