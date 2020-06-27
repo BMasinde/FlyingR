@@ -103,7 +103,7 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
 
   # process data
   if (missing(file) == FALSE) {
-    dataRead <- read.csv(file = file, header = header, sep = sep,quote = quote,
+    dataRead <- read.csv(file = file, header = header, sep = sep, quote = quote,
                          dec = dec, fill = fill, comment.char,
                          stringsAsFactors = FALSE, ...)
     data <- .colnames.match(dataRead)
@@ -130,17 +130,17 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   }
 
   # aggregate dist from simulation to get range in Km
-  results$range <- sapply(simulation$dist, function(x) sum(x)/1000)
+  results$range <- sapply(simulation$dist, function(x) sum(x) / 1000)
 
   # range as named vectors
   if (!is.null(data$name)) {
     names(results$range) <- as.vector(data$name)
-    for (i in 1:length(simulation)) {
+    for (i in seq_len(length(simulation))) {
         names(simulation[[i]]) <- as.vector(data$name)
     }
   } else {
     names(results$range) <- as.vector(data$ID)
-    for (i in 1:length(simulation)) {
+    for (i in seq_len(length(simulation))) {
       names(simulation[[i]]) <- as.vector(data$ID)
     }
   }
@@ -156,4 +156,3 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   return(results)
 
 }
-
