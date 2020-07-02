@@ -1,7 +1,7 @@
 Package: flying
 Type: Package
 Title: Simulation of Bird Flight Range
-Version: 0.1.3
+Version: 0.2.0
 Authors@R: c(person(family = "Masinde", given = "Brian", role = c("aut", "cre"),
            email= "masindeb@live.com"), person(family = "Bartoszek", given = "Krzysztof",
            role = c("ctb", "ths"), email= "krzbar@protonmail.ch"))
