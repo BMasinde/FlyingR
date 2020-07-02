@@ -22,8 +22,9 @@
   d <- ifelse(ordo == 1, constants$delta[[1]], constants$delta[[2]])
 
   num <-
-    6.023 * a * constants$efficiency * constants$airDensity ^ 0.5 * ws ^ 1.5 * m ^(d - (5 / 3))
-  den <-  constants$inducedPowerFactor ^ (3 / 4) * constants$g ^ (5 / 3)
+    6.023 * a * constants$efficiency * constants$airDensity ^ 0.5 * ws ^ 1.5 * m ^ (d - (5 / 3))
+  den <-
+    constants$inducedPowerFactor ^ (3 / 4) * constants$g ^ (5 / 3)
 
   x2 <- num / den
 
@@ -114,6 +115,7 @@
 #'
 .disc.area <- function(ws) {
   Sd <- (pi*(ws^2))/4
+  return(Sd)
 }
 
 ################################################################################
@@ -299,10 +301,8 @@
 #'              estimated where total power is stable. Since we are only interested
 #'              in the mechanical power where it is stable the estimation ends slightly
 #'              above the total mechanical power estimated at start of flight.
-#'
 
 .pow.curve <- function(bm, ws, wa, tas, constants) {
-  #constants <- constants
   # starting mechanical power
   start_mech_pow <- .total_Mech_Pow_cpp(
     bm = bm,
