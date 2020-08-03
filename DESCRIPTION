@@ -42,5 +42,6 @@ Collate:
     'flight_simulation.R'
     'flying.R'
     'migrate.R'
+    'stopover_mass_calculator.R'
     'zzz.R'
 LinkingTo: Rcpp

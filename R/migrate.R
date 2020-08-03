@@ -5,7 +5,6 @@
 #' @author Brian Masinde
 #'
 #' @name migrate
-#'
 #' @param file The name of the file which the data are to read from
 #' @param header Logical. If TRUE use first row as column headers
 #' @param sep separator
