@@ -9,31 +9,31 @@
   # default constants
   constants <- list(
     # profile power constant
-    profPowerConstant = 8.4,
+    ppc = 8.4,
 
     # energy content of fuel per kg
-    fatEnergy = 3.9 * 10^7,
+    fed = 3.9 * 10^7,
 
     # energy content of protein
-    proteinEnergy = 1.8 * 10^7,
+    ped = 1.8 * 10^7,
 
     # acceleration due to gravity
     g = 9.81,
 
     # mechanical conversion efficiency  [0,1]
-    efficiency = 0.23,
+    mce = 0.23,
 
     # induced power factor
-    inducedPowerFactor = 1.20,
+    ipf = 1.20,
 
     # ventilation and circulation power (Tucker's data)
-    ventCircPower =  1.10,
+    vcp =  1.10,
 
     # air density at flight height
     airDensity = 1.00,
 
     # body drag coefficient
-    bodyDragCoef = 0.10,
+    bdc = 0.10,
 
     # constant varies btw passerines and non-passerines
     alpha = c(6.25, 3.79),
@@ -41,7 +41,7 @@
     delta = c(0.724, 0.723),
 
     # inverse power density of mitochondria
-    invPower = 1.2 * 10^-6,
+    mipd = 1.2 * 10^-6,
 
     # ratio V:Vmp
     speedRatio = 1.2,
@@ -50,7 +50,7 @@
     muscDensity = 1060,
 
     # protein hydration ratio
-    protHydRatio = 2.2
+    phr = 2.2
   )
 
   if (missing(settings) == TRUE) {
@@ -59,9 +59,9 @@
             \nDefault airDensity = 1.00 kg m^3 \n")
   }else{
     args <- c(
-      "profPowerConstant",
-      "fatEnergy",
-      "proteinEnergy",
+      "ppc",
+      "fed",
+      "ped",
       "g",
       "efficiency",
       "inducedPowerFactor",
