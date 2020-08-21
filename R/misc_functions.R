@@ -10,7 +10,7 @@
 #' @description Metabolic power ratio is a ratio between mechanical power and
 #'              the absolute minimum power. The mechanical power is a factor of
 #'              basal metabolic rate, which differs between passerines and
-#'              non-passerines, and the mechanical conversion efficiency $\etta$.
+#'              non-passerines, and the mechanical conversion mce $\etta$.
 #'              Basal metabolism is assumed to be needed at all times irrespective
 #'              of what the bird is doing.
 
@@ -22,9 +22,9 @@
   d <- ifelse(ordo == 1, constants$delta[[1]], constants$delta[[2]])
 
   num <-
-    6.023 * a * constants$efficiency * constants$airDensity ^ 0.5 * ws ^ 1.5 * m ^ (d - (5 / 3))
+    6.023 * a * constants$mce * constants$airDensity ^ 0.5 * ws ^ 1.5 * m ^ (d - (5 / 3))
   den <-
-    constants$inducedPowerFactor ^ (3 / 4) * constants$g ^ (5 / 3)
+    constants$ipf ^ (3 / 4) * constants$g ^ (5 / 3)
 
   x2 <- num / den
 
@@ -80,7 +80,7 @@
 #'              value but the actual value is estimated by simulation.
 
 .min.pow.speed <- function(m, ws, constants) {
-  Vmp <- (0.807 * constants$inducedPowerFactor ^ 0.25 * m ^ 0.5 * constants$g ^ 0.5) /
+  Vmp <- (0.807 * constants$ipf ^ 0.25 * m ^ 0.5 * constants$g ^ 0.5) /
             (
               constants$airDensity ^ 0.5 * ws ^ 0.5 * .body.front.area(m) ^ 0.25 *
                 constants$bodyDragCoef ^ 0.25
@@ -146,7 +146,7 @@
 #'              ratio ceases to increases.
 
 .max.range.speed <- function(bm, ws, constants) {
-  num <- constants$inducedPowerFactor ^ 0.25 * bm ^ 0.5 * constants$g ^ 0.5
+  num <- constants$ipf ^ 0.25 * bm ^ 0.5 * constants$g ^ 0.5
 
   den <-
     constants$airDensity ^ 0.5 * (constants$bodyDragCoef * .body.front.area(bm)) ^ 0.25 *
@@ -180,7 +180,7 @@
 
   pind <-
     (
-      2 * constants$inducedPowerFactor * (m * constants$g) ^ 2
+      2 * constants$ipf * (m * constants$g) ^ 2
     ) / (Vt * pi * (ws ^ 2) * constants$airDensity)
 
   return(pind)
@@ -214,7 +214,7 @@
 
 .abs.min.pow <- function(m, ws, constants) {
   pam <-
-    (1.05 * (constants$inducedPowerFactor ^ 0.75) * (m ^ 1.5) * (constants$g ^ 1.5) * (.body.front.area(m) ^ 0.25) *
+    (1.05 * (constants$ipf ^ 0.75) * (m ^ 1.5) * (constants$g ^ 1.5) * (.body.front.area(m) ^ 0.25) *
        constants$bodyDragCoef^0.25) / ((constants$airDensity) ^ 0.5 * (ws ^ 1.5))
 
   return(pam)
@@ -235,7 +235,7 @@
 .prof.pow.ratio <- function(ws, wa, constants) {
   # ws = wing span
   # wa = wing area
-  X1 <- constants$profPowerConstant / (ws ^ 2 / wa)
+  X1 <- constants$ppc / (ws ^ 2 / wa)
 
   return(X1)
 }
@@ -311,9 +311,9 @@
     vt = tas, # holding speed constant
     g = constants$g,
     airDensity = constants$airDensity,
-    ipf = constants$inducedPowerFactor,
+    ipf = constants$ipf,
     bdc = constants$bodyDragCoef,
-    ppc = constants$profPowerConstant
+    ppc = constants$ppc
   )
 
   # reduce tas slightly
@@ -333,9 +333,9 @@
         # holding speed constant
         g = constants$g,
         airDensity = constants$airDensity,
-        ipf = constants$inducedPowerFactor,
+        ipf = constants$ipf,
         bdc = constants$bodyDragCoef,
-        ppc = constants$profPowerConstant
+        ppc = constants$ppc
       )
     }
   }
