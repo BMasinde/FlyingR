@@ -1,11 +1,10 @@
 #' @title Range Estimation
-#' @description  Practical range estimation of birds using methods in Pennycuick (1998)
-#' and Pennycuick (2008).
+#' @description  Practical range estimation of birds using methods in Pennycuick (2008).
 #'
 #' @author Brian Masinde
 #'
 #' @name migrate
-#' @param file The name of the file which the data are to read from
+#' @param file Path to file where data resides.
 #' @param header Logical. If TRUE use first row as column headers
 #' @param sep separator
 #' @param quote The set of quoting characters. see read.csv
@@ -13,33 +12,37 @@
 #' @param fill See read.csv
 #' @param comment.char For more details see read.csv
 #' @param ... further arguments see read.csv
-#' @param data A data frame
-#' @param settings A list for re-defining constants. See details
+#' @param data A data frame with required columns: body mass, fat mass, etc.
+#' @param settings A list for re-defining constants. See details for these with
+#' default values from Pennycuick(2008) and Pennycuick(1998).
 #' @param method Methods for fuel management
 #' @param speed_control One of two speed control methods. By default
-#'        \emph{constant_speed} is used. \emph{vvmp_constant} is the alternative.
+#'        \emph{1} is used. \emph{0} is the alternative.
 #'        The former holds the true airspeed constant while the latter holds the
-#'        ratio of true airspeed and minimum power speed constant
-#' @param protein_met Percentage of energy attributed to protein and metabolism
+#'        ratio of true airspeed and minimum power speed constant.
+#' @param protein_met Percentage of energy attributed to protein and metabolism.
+#'        Default value is 5 percent (0.05).
 #'
-#' @details The option *control takes the folowing arguments
+#' @details The option *control takes the following arguments
 #' \itemize{
-#'    \item profPowerConstant: Profile power constant
-#'    \item fatEnergy: Energy content of fuel from fat
-#'    \item proteinEnergy: Energy content of protein
+#'    \item ppc: Profile power constant
+#'    \item fed: Energy content of fuel from fat
+#'    \item ped: Energy content of protein
 #'    \item g: Accelaration due to gravity
-#'    \item efficiency: Mechanical conversion efficiency [0,1]
-#'    \item inducedPowerFactor: Induced power factor
-#'    \item ventCircPower: Ventilation and circulation power
+#'    \item mce: Mechanical conversion efficiency [0,1]. Efficiency at which
+#'    mechanical power is converted to chemical power. Recommended value of 0.23.
+#'    \item ipf: Induced power factor
+#'    \item vcp: Ventilation and circulation power
 #'    \item airDensity: Air density at cruising altitude
-#'    \item bodyDragCoef: Body drag coefficient
+#'    \item bdc: Body drag coefficient
 #'    \item alpha: Basal metabolism factors in passerines and non passerines
 #'    \item delta: Basal metabolism factors in passerines and non passerines
-#'    alpha*bodyMass^delta
-#'    \item invPower
+#'    alpha*bodyMass^delta.
+#'    \item mipd: Inverse power density of the mitochondria. Default value of
+#'    1.2E-06.
 #'    \item speedRatio: True air speed to minimum power speed ratio
 #'    \item muscDensity: Density of the flight muscles.
-#'    \item protHydRatio: Protein hydration ratio
+#'    \item phr: Protein hydration ratio. Default value of 2.2
 #'}
 #' @include control.R input_match.R misc_functions.R constant_muscle_mass.R
 #' @return S3 class object with range estimates based on methods defined and
@@ -55,21 +58,21 @@
 #' @export migrate
 #'
 #' @examples
-#' migrate(data = birds, settings = list(fatEnergy = 3.89*10^7))
+#' migrate(data = birds, settings = list(fed = 3.89*10^7))
 #' migrate(data = birds,  method = "cmm", settings = list(airDensity = 0.905))
 #'
 #'
 #' @usage migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
 #'                fill = TRUE, comment.char = "", ...,
 #'                data = NULL, settings = list(), method = "cmm",
-#'                speed_control = "constant_speed", protein_met = 0)
+#'                speed_control = 1, protein_met = 0)
 #'
 
 
 migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                     fill = TRUE, comment.char = "", ...,
                     data = NULL, settings = list(), method = "cmm",
-                    speed_control = "constant_speed", protein_met = 0) {
+                    speed_control = 1, protein_met = 0) {
 
   # object with results
   results <- list(
@@ -91,8 +94,8 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
     stop("Both path and data given. Function needs only one of the two \n", call. = TRUE)
   }
 
-  if (speed_control != "constant_speed" & speed_control != "vvmp_constant") {
-    stop("Wrong speed control  argument \n", call. = TRUE)
+  if (speed_control != 1 && speed_control != 0) {
+    stop("speed control should either be 1 or 0")
   }
 
   # min_protein < 0 or > 1 throw error
@@ -155,3 +158,5 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   return(results)
 
 }
+
+
