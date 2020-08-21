@@ -7,7 +7,7 @@
 # @param ordo Passerine (1) or non-passerine (2)
 # @param wingArea Wing area
 # @param ctrl A list of re-definition of constants (i.e *airDensity*,
-#             *consume*, *enegry e*, *mechanical efficiency n*).
+#             *consume*, *enegry e*, *mechanical mce n*).
 # @importFrom utils tail
 # @include misc_functions.R lookup_table2.R
 # @description Practical range estimation using Breguet equation for fixed wing
@@ -52,11 +52,11 @@
   diskArea <- 0.25 * pi * (wingSpan ^ 2)
 
   # flat-plate area
-  flatPlateAreaEnd <- 0.00813 * (bodyMassEnd ^ 0.666) * constants$bodyDragCoef
+  flatPlateAreaEnd <- 0.00813 * (bodyMassEnd ^ 0.666) * constants$bdf
 
   # lift drag ratio at begining of flight
   liftDragEnd <-
-    dFactorEnd / (constants$inducedPowerFactor ^ 0.5 * constants$ventCircPower) * ((diskArea / flatPlateAreaEnd) ^ 0.5)
+    dFactorEnd / (constants$ipf ^ 0.5 * constants$ventCircPower) * ((diskArea / flatPlateAreaEnd) ^ 0.5)
 
 
   ## lift:drag ratio start of flight ###########################################
@@ -77,13 +77,13 @@
   #                                metPowRatioStart, 2), .interpolate, table2)
 
   liftDragStart <-
-    (dFactorStart / ((constants$inducedPowerFactor ^ 0.5) * constants$ventCircPower)) *
+    (dFactorStart / ((constants$ipf ^ 0.5) * constants$ventCircPower)) *
     (((diskArea / flatPlateAreaEnd) ^ 0.5) / ((bodyMass / bodyMassEnd) ^ 0.5))
 
 
   ## Range in km ###############################################################
   kmRange <-
-    ((constants$fatEnergy * constants$efficiency) / constants$g) *
+    ((constants$fatEnergy * constants$mce) / constants$g) *
     apply(cbind(liftDragStart, liftDragEnd), 1, mean) *
     log(1 / (1 - fatFrac)) / 1000
 

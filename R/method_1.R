@@ -7,7 +7,7 @@
 # @param ordo Passerine (1) or non-passerine (2)
 # @param wingArea area of wing
 # @param constants A list of re-definition of constants (i.e *airDensity*,
-#             *consume*, *enegry e*, *mechanical efficiency n*).
+#             *consume*, *enegry e*, *mechanical mce n*).
 # @importFrom utils tail
 # @return List with range (in km), constants used and fat fraction
 # @include misc_functions.R lookup_table2.R
@@ -44,10 +44,10 @@
   diskArea <- 0.25 * pi * (wingSpan ^ 2)
 
   # flat-plate area
-  flatPlateArea <- 0.00813 * (bodyMass ^ 0.666) * constants$bodyDragCoef
+  flatPlateArea <- 0.00813 * (bodyMass ^ 0.666) * constants$bdf
 
   # lift drag ratio at beginning of flight
-  liftDragRatio <- (dFactor / ((constants$inducedPowerFactor ^ 0.5) * constants$ventCircPower)) *
+  liftDragRatio <- (dFactor / ((constants$ipf ^ 0.5) * constants$vcp)) *
     ((diskArea / flatPlateArea) ^ 0.5)
 
   # increase by 10F%
@@ -55,7 +55,7 @@
 
   # range in kilometres
   kmRange <-
-    ((constants$fatEnergy * constants$efficiency) / constants$g) * liftDragRatio *
+    ((constants$fatEnergy * constants$mce) / constants$g) * liftDragRatio *
     log(1 / (1 - fatFrac))/1000
 
   return(round(kmRange, 1))
