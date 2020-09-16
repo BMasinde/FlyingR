@@ -521,7 +521,7 @@ See Table 3 and Table 4 for comparison with 'Flight'.
 
 ```{r}
 # constant speed
-results_cmm_cs <- flying::migrate(data = birds, speed_control = "constant_speed")
+results_cmm_cs <- flying::migrate(data = birds, speed_control = 1)
 
 results_cmm_cs$range
 ```
@@ -529,7 +529,7 @@ results_cmm_cs$range
 
 ```{r}
 # constant ratio between true air-speed and minimum power speed
-results_cmm_cratio <- flying::migrate(data = birds, speed_control = "vvmp_constant")
+results_cmm_cratio <- flying::migrate(data = birds, speed_control = 0)
 
 results_cmm_cratio$range
 ```
