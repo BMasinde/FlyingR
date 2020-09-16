@@ -6,6 +6,8 @@
 # @param speed_control speed control as either
 
 .constant.specific.work <- function(data, constants, speed_control, protein_met) {
+
+# defensives ###################################################################
   if (missing(data) == TRUE) {
     stop("Missing data argument", call. = FALSE)
   }
@@ -26,9 +28,9 @@
   if (is.null(data$muscleMass)) {
     stop("Muscle mass column missing", call.FALSE = TRUE)
   }
-
+################################################################################
   # number of observations
-  n <- nrow(ddata
+  n <- nrow(data)
 
   allMass <- data$allMass
 
@@ -47,316 +49,678 @@
 
   muscleFraction <- muscleMass/allMass
 
-  frame_mass <- allMass*(1 - fatFraction - muscleFraction)
+  #airframeMass <- allMass - (fatMass + muscleMass) # airframe mass
 
-  # time marching
+# time marching ################################################################
 
-  sim_results <- list(
-    bm = rep(list(vector()), nrow(data)),
-    fm = rep(list(vector()), nrow(data)),
-    mm = rep(list(vector()), nrow(data)),
-    afm = rep(list(vector()), nrow(data)),
-    mitochondria = rep(list(vector()), nrow(data)),
-    myofibrils = rep(list(vector()), nrow(data)),
-    dist = rep(list(vector()), nrow(data)),
-    #delta_m = rep(list(vector()), nrow(data)),
-    mechPow = rep(list(vector()), nrow(data)),
-    chemPow = rep(list(vector()), nrow(data)),
-    min_speed = rep(list(vector()), nrow(data)),
-    true_speed = rep(list(vector()), nrow(data)),
-    speed_ratio = rep(list(vector()), nrow(data)),
-    wing_freq = rep(list(vector()), nrow(data)),
-    spec_work = rep(list(vector()), nrow(data))
+  # basal metabolic constants
+  alphaPasserines <- constants$alpha[1]
+  alphaNonPasserines <- constants$alpha[2]
+  deltaPasserines <- constants$delta[1]
+  deltaNonPasserines <- constants$delta[2]
+
+  results <- list(
+    distance = vector(length = n),
+    allUpMass = vector(length = n),
+    fatMass = vector(length = n),
+    muscleMass = vector(length = n),
+    startMinSpeed = vector(length = n),
+    endMinSpeed = vector(length = n)
   )
 
-  if (speed_control == 1) {
+  if (speed_control == 1 && protein_met == 0) {
     for (i in seq_len(nrow(data))) {
-      #i = 2
-      sim_results$bm[[i]][1] <- allMass[i]
-      sim_results$fm[[i]][1] <- fatMass[i]
-      sim_results$mm[[i]][1] <-  muscleMass[i]
-      sim_results$afm[[i]][1] <- allMass[i] - (fatMass[i] + muscleMass[i])
-      current_fm <- sim_results$fm[[i]][1]
+      # things to keep track of ################################################
+      bm <- allMass[i]
+      fm <- fatMass[i]
+      mm <- muscleMass[i]
+      airframeMass <- allMass[i] - (fatMass[i] + muscleMass[i]) # airframe mass
+      dist <- 0
+
+      # true start speed
+      startMinSpeed <- .minpowspeed_cpp(
+        bm = bm,
+        ws = wingSpan[i],
+        ipf = constants$ipf,
+        g = constants$g,
+        airDensity = constants$airDensity,
+        bdc = constants$bdc
+      )
+
+      # we want to hold true speed constant
+      trueSpeed <- startMinSpeed * constants$speedRatio
+
+      mechPower <-
+        .pow.curve(
+          bm = bm,
+          ws = wingSpan[i],
+          wa = wingArea[i],
+          tas =  trueSpeed,
+          constants = constants
+        )
+
+      wingFreq <-
+        .wingbeat.freq(bm = bm,
+                       ws = wingSpan[i],
+                       wa = wingArea[i],
+                       constants)
+      # subdivide muscle mass into respective components #######################
+      myofibrils <-
+        muscleMass[i] * (1 - constants$mipd * (mechPower /
+                                                 muscleMass[i]) * constants$muscDensity)
+      mitochondria <- muscleMass[i] - myofibrils
+
+      # specific work at start of flight #######################################
+      specWorkStart <- mechPower / (myofibrils * wingFreq)
+
+      # return starting minimum power speed ####################################
+      results$startMinSpeed[i] <- startMinSpeed
 
       j <- 1
-      while (sim_results$fm[[i]][j] > 0.000001) {
-        # calculate speed
-        sim_results$min_speed[[i]][j] <-
-          .minpowspeed_cpp(
-            bm = sim_results$bm[[i]][j],
-            ws =wingSpan[i],
-            ipf = constants$ipf,
-            g = constants$g,
-            airDensity = constants$airDensity,
-            bdc = constants$bdf
+      while (fm > 0.000001) {
+        # mechanical power from power curve holding true air-speed constant ####
+        mechPower <-
+          .pow.curve(
+            bm = bm,
+            # changes from previous J iteration
+            ws = wingSpan[i],
+            wa = wingArea[i],
+            tas =  trueSpeed,
+            constants = constants
           )
-        # true speed (constant speed always)
-        sim_results$true_speed[[i]][j] <- sim_results$min_speed[[i]][1] * constants$speedRatio
-
-        # mechanical power from power curve holding true air-speed constant
-        sim_results$mechPow[[i]][j] <-
-          .pow.curve(bm = sim_results$bm[[i]][j],
-                   ws =wingSpan[i],
-                   wa = wingArea[i],
-                   tas =  sim_results$true_speed[[i]][j], constants = constants)
 
         # wing frequency
-        sim_results$wing_freq[[i]][j] <-
-          .wingbeat.freq(bm = sim_results$bm[[i]][j],
-                         ws =wingSpan[i],
+        wingFreq <-
+          .wingbeat.freq(bm = bm,
+                         # changes from previous J iteration
+                         ws = wingSpan[i],
                          wa = wingArea[i],
                          constants)
 
-        # subdivide muscle mass into mitochondria and myofibrils
-        sim_results$myofibrils[[i]][1] <-
-          sim_results$mm[[i]][1] * (1 - constants$mipd * (sim_results$mechPow[[i]][1] /
-                                                           sim_results$mm[[i]][1]) * constants$muscDensity)
-        sim_results$mitochondria[[i]][j] <-
-          sim_results$mm[[i]][1] - sim_results$myofibrils[[i]][1]
-
-        # specific power at begining of flight (before fat has been consumed)
-        specwork_start <-
-          sim_results$mechPow[[i]][1] / (sim_results$myofibrils[[i]][1] * sim_results$wing_freq[[i]][1])
-
-        # chemical power
-        deltaE <- (sim_results$mechPow[[i]][j] / constants$mce) +
-          .basal.met(
-            constants = constants,
-            mFrame = frame_mass[i],
-            mMusc = sim_results$mm[[i]][j],
-            ordo = taxon[i]
+        # chemical power #######################################################
+        chemPower <- (mechPower / constants$mce) +
+          .basal_metabolic_pow(
+            airframeMass, # doesn't change from previous J iteration
+            mm, # changes from previous J iteration
+            taxon[i],
+            alphaPasserines,
+            alphaNonPasserines,
+            deltaPasserines,
+            deltaNonPasserines
           )
 
-        # increase deltaE by 10% respiratory
-        sim_results$chemPow[[i]][j] <- deltaE + (deltaE * 0.1)
-
-        if (protein_met == 0) {
-          # fat consumed in the interval?
-          used_fat <- sim_results$chemPow[[i]][j] / constants$fed * 360
-
-          #Reduce body composition by this consumed fat and determine what amount
-          # of protein to consume to achieve specific power at start of flight
-          dummy_bm <- sim_results$bm[[i]][j] - used_fat
-          dummy_fm <- sim_results$fm[[i]][j] - used_fat
-
-          # because of this reduction minimum speed, mechanical power, and
-          # wing frequency reduce
-
-          dummy_true_speed <-
-            .minpowspeed_cpp(
-              bm = dummy_bm,
-              ws =wingSpan[i],
-              ipf = constants$ipf,
-              g = constants$g,
-              airDensity = constants$airDensity,
-              bdc = constants$bdf
-            ) * constants$speedRatio
-
-          dummy_mechPow <- .pow.curve(bm = dummy_bm, ws =wingSpan[i],
-                                      wa = wingArea[i], tas = dummy_true_speed, constants = constants)
-
-          # wing frequency
-          dummy_wing_freq <-
-            .wingbeat.freq(bm = dummy_bm, ws =wingSpan[i], wa = wingArea[i], constants)
-
-          # specific work after reduction of fat
-          dummy_specwork <- dummy_mechPow / (sim_results$myofibrils[[i]][j] * dummy_wing_freq)
-
-          # amount of protein consumed that restores specific work to initial value
-          used_protein <-
-            -(dummy_mechPow / (dummy_wing_freq * specwork_start)) + sim_results$myofibrils[[i]][j]
-
-          # checking if specific work has been restored
-          sim_results$spec_work[[i]][j] <-
-            dummy_mechPow / ((sim_results$myofibrils[[i]][j] - used_protein) * dummy_wing_freq)
-
-          # amount of fule energy released is found by multiplying the mass of dry protein
-          # removed by the energy density of dry protein
-          used_fat_equiv <- (used_protein * constants$ped) / constants$fed
-
-          # adjust body components
-          # new fat mass
-          sim_results$fm[[i]][j+1] <-  sim_results$fm[[i]][j] - (used_fat - used_fat_equiv)
-          sim_results$myofibrils[[i]][j+1] <- sim_results$myofibrils[[i]][j] - (used_protein * constants$phr)
-          sim_results$mm[[i]][j+1] <- sim_results$mitochondria[[i]][1] + (sim_results$myofibrils[[i]][j] - (used_protein *constants$phr))
-          sim_results$bm[[i]][j+1] <- sim_results$bm[[i]][j] - (used_fat - used_fat_equiv) - (used_protein *constants$phr)
-          sim_results$dist[[i]][j] <- sim_results$true_speed[[i]][j] * 360
-          j <-  j + 1
-        } else {
-          # protein requried for metabolic pathways
-          EFromProtein <- sim_results$chemPow[[i]][j] * protein_met
-
-          # fat consumed in the interval?
-          used_fat <- (sim_results$chemPow[[i]][j] - EFromProtein)  / constants$fed * 360
-
-          #Reduce body composition by this consumed fat and determine what amount
-          # of protein to consume to achieve specific power at start of flight
-          dummy_fm <- sim_results$fm[[i]][j] - used_fat
-          dummy_bm <-
-            (sim_results$afm[[i]][j] - (EFromProtein / constants$ped)) + dummy_fm + sim_results$mm[[i]][j]
-
-          dummy_true_speed <-
-            .minpowspeed_cpp(
-              bm = dummy_bm,
-              ws =wingSpan[i],
-              ipf = constants$ipf,
-              g = constants$g,
-              airDensity = constants$airDensity,
-              bdc = constants$bdf
-            ) * constants$speedRatio
-
-          dummy_mechPow <- .pow.curve(bm = dummy_bm, ws =wingSpan[i],
-                                      wa = wingArea[i], tas = dummy_true_speed, constants = constants)
-
-          # wing frequency
-          dummy_wing_freq <-
-            .wingbeat.freq(bm = dummy_bm, ws =wingSpan[i], wa = wingArea[i], constants)
-
-          # specific work after reduction of fat
-          dummy_specwork <- dummy_mechPow / (sim_results$myofibrils[[i]][j] * dummy_wing_freq)
-
-          # amount of protein consumed that restores specific work to initial value
-          used_protein <-
-            -(dummy_mechPow / (dummy_wing_freq * specwork_start)) + sim_results$myofibrils[[i]][j]
-
-          # checking if specific work has been restored
-          sim_results$spec_work[[i]][j] <-
-            dummy_mechPow / ((sim_results$myofibrils[[i]][j] - used_protein) * dummy_wing_freq)
-
-          # amount of fule energy released is found by multiplying the mass of dry protein
-          # removed by the energy density of dry protein
-          used_fat_equiv <- (used_protein * constants$ped) / constants$fed
-
-          # adjust body components
-          # new fat mass
-          sim_results$fm[[i]][j+1] <-  sim_results$fm[[i]][j] - (used_fat - used_fat_equiv)
-          sim_results$myofibrils[[i]][j+1] <- sim_results$myofibrils[[i]][j] - (used_protein * constants$phr)
-          sim_results$mm[[i]][j + 1] <-
-            sim_results$mitochondria[[i]][1] + (sim_results$myofibrils[[i]][j] - (used_protein *
-                                                                                    constants$phr))
-          sim_results$afm[[i]][j+1] <- sim_results$afm[[i]][j] - (EFromProtein / constants$ped)
-          sim_results$bm[[i]][j + 1] <-
-            sim_results$bm[[i]][j] - (used_fat - used_fat_equiv) - (used_protein *
-                                                                      constants$phr) - (EFromProtein / constants$ped)
-          sim_results$dist[[i]][j] <- sim_results$true_speed[[i]][j] * 360
-          j <-  j + 1
-        }
-      }
-    }
-  }else {
-    for (i in seq_len(nrow(data))) {
-      #i = 1
-      sim_results$bm[[i]][1] <- allMass[i]
-      sim_results$fm[[i]][1] <- fatMass[i]
-      sim_results$mm[[i]][1] <-  muscleMass[i]
-      current_fm <- sim_results$fm[[i]][1]
-
-      j <- 1
-      while (sim_results$fm[[i]][j] > 0.000001) {
-        # calculate speed
-        sim_results$min_speed[[i]][j] <-
-          .minpowspeed_cpp(
-            bm = sim_results$bm[[i]][j],
-            ws =wingSpan[i],
-            ipf = constants$ipf,
-            g = constants$g,
-            airDensity = constants$airDensity,
-            bdc = constants$bdf
-          )
-        # true speed not constant
-        sim_results$true_speed[[i]][j] <- sim_results$min_speed[[i]][j] * constants$speedRatio
-
-        # mechanical power from power curve holding true air-speed constant
-        sim_results$mechPow[[i]][j] <-
-          .pow.curve(bm = sim_results$bm[[i]][j],
-                     ws =wingSpan[i],
-                     wa = wingArea[i],
-                     tas =  sim_results$true_speed[[i]][j], constants = constants)
-
-        # wing frequency
-        sim_results$wing_freq[[i]][j] <-
-          .wingbeat.freq(bm = sim_results$bm[[i]][j],
-                         ws =wingSpan[i],
-                         wa = wingArea[i],
-                         constants)
-
-        # subdivide muscle mass into mitochondria and myofibrils
-        sim_results$myofibrils[[i]][1] <-
-          sim_results$mm[[i]][1] * (1 - constants$mipd * (sim_results$mechPow[[i]][1] /
-                                                           sim_results$mm[[i]][1]) * constants$muscDensity)
-        sim_results$mitochondria[[i]][j] <-
-          sim_results$mm[[i]][1] - sim_results$myofibrils[[i]][1]
-
-        # specific power at begining of flight (before fat has been consumed)
-        specwork_start <-
-          sim_results$mechPow[[i]][1] / (sim_results$myofibrils[[i]][1] * sim_results$wing_freq[[i]][1])
-
-        # chemical power
-        deltaE <- (sim_results$mechPow[[i]][j] / constants$mce) +
-          .basal.met(
-            constants = constants,
-            mFrame = frame_mass[i],
-            mMusc = sim_results$mm[[i]][j],
-            ordo = taxon[i]
-          )
-
-        # increase deltaE by 10% respiratory
-        sim_results$chemPow[[i]][j] <- deltaE + (deltaE * 0.1)
+        # increase chemical power by 10% to account for heart and respiratory
+        chemPower <- chemPower + (chemPower * 0.1)
 
         # fat consumed in the interval?
-        used_fat <- sim_results$chemPow[[i]][j] / constants$fed * 360
+        usedFat <- chemPower / constants$fed * 360
 
         #Reduce body composition by this consumed fat and determine what amount
         # of protein to consume to achieve specific power at start of flight
-        dummy_bm <- sim_results$bm[[i]][j] - used_fat
-        dummy_fm <- sim_results$fm[[i]][j] - used_fat
+        bmDummy <- bm - usedFat
+        fmDummy <- fm - usedFat
+
+        # because of this reduction minimum speed, mechanical power, and
+        # wing frequency reduce
+        trueSpeedDummy <-
+          .minpowspeed_cpp(
+            bm = bmDummy,
+            ws = wingSpan[i],
+            ipf = constants$ipf,
+            g = constants$g,
+            airDensity = constants$airDensity,
+            bdc = constants$bdc
+          ) * constants$speedRatio
+
+        mechPowerDummy <-
+          .pow.curve(
+            bm = bmDummy,
+            ws = wingSpan[i],
+            wa = wingArea[i],
+            tas = trueSpeedDummy,
+            constants = constants
+          )
+
+        # wing frequency
+        wingFreqDummy <-
+          .wingbeat.freq(bm = bmDummy,
+                         ws = wingSpan[i],
+                         wa = wingArea[i],
+                         constants)
+
+        # amount of protein consumed that restores specific work to initial value
+        usedProtein <-
+          -(mechPowerDummy / (wingFreqDummy * specWorkStart)) + myofibrils
+
+        # amount of fuel energy released is found by multiplying the mass of dry protein
+        # removed by the energy density of dry protein
+        usedFatEquiv <-
+          (usedProtein * constants$ped) / constants$fed
+
+        # update body measurements #############################################
+        fm <- fm - (usedFat - usedFatEquiv)
+        #cat("current fat mass = ", fm, sep = " ", "\n")
+        # adjustment of needed for myofibrils?
+        myofibrils <- myofibrils - (usedProtein * constants$phr)
+        mm <- mitochondria + myofibrils
+
+        # have to subtract the fat equivalent and water lost in the process
+        bm <- bm - (usedFat - usedFatEquiv) - (usedProtein * constants$phr)
+
+        # distance increment ###################################################
+        dist <- dist + trueSpeed * 360
+
+        # increase counter
+        j <-  j + 1
+        #cat("current iteration", j, sep = " ", "\n")
+      }
+      results$distance[i] <- dist
+      results$allUpMass[i] <- bm
+      results$fatMass[i] <- fm
+      results$muscleMass[i] <- mm
+      results$endMinSpeed[i] <- .minpowspeed_cpp(
+        bm = bm,
+        ws = wingSpan[i],
+        ipf = constants$ipf,
+        g = constants$g,
+        airDensity = constants$airDensity,
+        bdc = constants$bdc
+      )
+    }
+  }  else if (speed_control == 1 && protein_met > 0) {
+    for (i in seq_len(nrow(data))) {
+      # things to keep track of ################################################
+      bm <- allMass[i]
+      fm <- fatMass[i]
+      mm <- muscleMass[i]
+      airframeMass <- allMass[i] - (fatMass[i] + muscleMass[i])
+      dist <- 0
+
+      # true start speed
+      startMinSpeed <- .minpowspeed_cpp(
+        bm = bm,
+        ws = wingSpan[i],
+        ipf = constants$ipf,
+        g = constants$g,
+        airDensity = constants$airDensity,
+        bdc = constants$bdc
+      )
+
+      # we want to hold true speed constant
+      trueSpeed <- startMinSpeed * constants$speedRatio
+
+      mechPower <-
+        .pow.curve(
+          bm = bm,
+          ws = wingSpan[i],
+          wa = wingArea[i],
+          tas =  trueSpeed,
+          constants = constants
+        )
+
+      wingFreq <-
+        .wingbeat.freq(bm = bm,
+                       ws = wingSpan[i],
+                       wa = wingArea[i],
+                       constants)
+      # subdivide muscle mass into respective components #######################
+      myofibrils <-
+        muscleMass[i] * (1 - constants$mipd * (mechPower /
+                                                 muscleMass[i]) * constants$muscDensity)
+      mitochondria <- muscleMass[i] - myofibrils
+
+      # specific work at start of flight #######################################
+      specWorkStart <- mechPower / (myofibrils * wingFreq)
+
+      # return starting minimum power speed ####################################
+      results$startMinSpeed[i] <- startMinSpeed
+
+      j <- 1
+      while (fm > 0.000001) {
+        # mechanical power from power curve holding true air-speed constant
+        mechPower <-
+          .pow.curve(
+            bm = bm,
+            ws = wingSpan[i],
+            wa = wingArea[i],
+            tas =  trueSpeed,
+            constants = constants
+          )
+        #cat("mech power within while", mechPower, sep = " ", "\n")
+        # wing frequency
+        wingFreq <-
+          .wingbeat.freq(bm = bm,
+                         ws = wingSpan[i],
+                         wa = wingArea[i],
+                         constants)
+
+        # chemical power #######################################################
+        chemPower <- (mechPower / constants$mce) +
+          .basal_metabolic_pow(
+            airframeMass, # doesn't change from previous J iteration
+            mm, # changes from previous J iteration
+            taxon[i],
+            alphaPasserines,
+            alphaNonPasserines,
+            deltaPasserines,
+            deltaNonPasserines
+          )
+
+        # increase chemPower by 10% respiratory
+        chemPower <- chemPower + (chemPower * 0.1)
+
+        #cat("chem power within while", chemPower, sep = " ", "\n")
+
+        # energy that should be attributed to protein
+        EFromProtein <- chemPower * protein_met
+
+        # fat consumed in the interval?
+        #usedFat <- ((chemPower - EFromProtein)  / constants$fed) * 360
+        usedFat <- (chemPower  / constants$fed) * 360
+        #Reduce body composition by this consumed fat and determine what amount
+        # of protein to consume to achieve specific power at start of flight
+        bmDummy <- bm - usedFat
+
+
+        #cat("expected change in bm", bmDummy, sep = " ", "\n")
+        # because of this reduction minimum speed, mechanical power, and
+        # wing frequency reduce
+
+        trueSpeedDummy <-
+          .minpowspeed_cpp(
+            bm = bmDummy,
+            ws = wingSpan[i],
+            ipf = constants$ipf,
+            g = constants$g,
+            airDensity = constants$airDensity,
+            bdc = constants$bdc
+          ) * constants$speedRatio
+
+        mechPowerDummy <-
+          .pow.curve(
+            bm = bmDummy,
+            ws = wingSpan[i],
+            wa = wingArea[i],
+            tas = trueSpeedDummy,
+            constants = constants
+          )
+
+        wingFreqDummy <-
+          .wingbeat.freq(bm = bmDummy,
+                         ws = wingSpan[i],
+                         wa = wingArea[i],
+                         constants)
+
+        # amount of protein consumed that restores specific work to initial value
+        usedProtein <-
+          -(mechPowerDummy / (wingFreqDummy * specWorkStart)) + myofibrils
+
+        # amount of fuel energy released is found by multiplying the mass of dry protein
+        # removed by the energy density of dry protein
+        usedFatEquiv <-
+          (usedProtein * constants$ped) / constants$fed
+
+        # adjust body components ###############################################
+        fm <- fm - (usedFat - usedFatEquiv)
+
+        myofibrils <- myofibrils - (usedProtein * constants$phr)
+        mm <- mitochondria + myofibrils
+        airframeMass <- airframeMass - ((EFromProtein/constants$ped) * 360 * constants$phr)
+        cat("airframe mass", airframeMass, sep = " ", "\n")
+        #bm <- bm - (usedFat - usedFatEquiv) - (usedProtein * constants$phr) - (EFromProtein/constants$ped)
+
+        bm <- airframeMass + mm + fm
+
+        # distance increment ###################################################
+        dist <- dist + trueSpeed * 360
+        #cat("distance", dist, sep = " ", "\n")
+
+        # increase counter
+        j <-  j + 1
+        #cat("iteration", j, sep = " ", "\n")
+      }
+      results$distance[i] <- dist
+      results$allUpMass[i] <- bm
+      results$fatMass[i] <- fm
+      results$muscleMass[i] <- mm
+      results$endMinSpeed[i] <- .minpowspeed_cpp(
+        bm = bm,
+        ws = wingSpan[i],
+        ipf = constants$ipf,
+        g = constants$g,
+        airDensity = constants$airDensity,
+        bdc = constants$bdc
+      )
+    } # closes for loop
+  } else if (speed_control == 0 && protein_met == 0) {
+    for (variable in vector) {
+      # things to keep track of ################################################
+      bm <- allMass[i]
+      fm <- fatMass[i]
+      mm <- muscleMass[i]
+      airframeMass <- allMass[i] - (fatMass[i] + muscleMass[i]) # airframe mass
+      dist <- 0
+
+      # true start speed
+      startMinSpeed <- .minpowspeed_cpp(
+        bm = bm,
+        ws = wingSpan[i],
+        ipf = constants$ipf,
+        g = constants$g,
+        airDensity = constants$airDensity,
+        bdc = constants$bdc
+      )
+
+      # we want to hold ratio of minimum power speed and true speed constant
+      trueSpeed <- startMinSpeed * constants$speedRatio
+
+      mechPower <-
+        .pow.curve(
+          bm = bm,
+          ws = wingSpan[i],
+          wa = wingArea[i],
+          tas =  trueSpeed,
+          constants = constants
+        )
+
+      wingFreq <-
+        .wingbeat.freq(bm = bm,
+                       ws = wingSpan[i],
+                       wa = wingArea[i],
+                       constants)
+      # subdivide muscle mass into respective components #######################
+      myofibrils <-
+        muscleMass[i] * (1 - constants$mipd * (mechPower /
+                                                 muscleMass[i]) * constants$muscDensity)
+      mitochondria <- muscleMass[i] - myofibrils
+
+      # specific work at start of flight #######################################
+      specWorkStart <- mechPower / (myofibrils * wingFreq)
+
+      # return starting minimum power speed ####################################
+      results$startMinSpeed[i] <- startMinSpeed
+
+      j <- 1
+      while (fm > 0.0001) {
+        # hold ratio of minimum power speed and true airspeed constant
+        # true start speed
+        minSpeed <- .minpowspeed_cpp(
+          bm = bm, # bm changes after each J iteration
+          ws = wingSpan[i],
+          ipf = constants$ipf,
+          g = constants$g,
+          airDensity = constants$airDensity,
+          bdc = constants$bdc
+        )
+
+        # we want to hold ratio of minimum power speed and true speed constant
+        trueSpeed <- minSpeed * constants$speedRatio
+
+        # mechanical power from power curve holding true air-speed constant ####
+        mechPower <-
+          .pow.curve(
+            bm = bm,
+            # changes from previous J iteration
+            ws = wingSpan[i],
+            wa = wingArea[i],
+            tas =  trueSpeed,
+            constants = constants
+          )
+
+        # wing frequency
+        wingFreq <-
+          .wingbeat.freq(bm = bm,
+                         # changes from previous J iteration
+                         ws = wingSpan[i],
+                         wa = wingArea[i],
+                         constants)
+
+        # chemical power #######################################################
+        chemPower <- (mechPower / constants$mce) +
+          .basal_metabolic_pow(
+            airframeMass,
+            # doesn't change from previous J iteration
+            mm,
+            # changes from previous J iteration
+            taxon[i],
+            alphaPasserines,
+            alphaNonPasserines,
+            deltaPasserines,
+            deltaNonPasserines
+          )
+
+        # increase chemical power by 10% to account for heart and respiratory
+        chemPower <- chemPower + (chemPower * 0.1)
+
+        # fat consumed in the interval?
+        usedFat <- chemPower / constants$fed * 360
+
+        #Reduce body composition by this consumed fat and determine what amount
+        # of protein to consume to achieve specific power at start of flight
+        bmDummy <- bm - usedFat
+        fmDummy <- fm - usedFat
+
+        # because of this reduction minimum speed, mechanical power, and
+        # wing frequency reduce
+        trueSpeedDummy <-
+          .minpowspeed_cpp(
+            bm = bmDummy,
+            ws = wingSpan[i],
+            ipf = constants$ipf,
+            g = constants$g,
+            airDensity = constants$airDensity,
+            bdc = constants$bdc
+          ) * constants$speedRatio
+
+        mechPowerDummy <-
+          .pow.curve(
+            bm = bmDummy,
+            ws = wingSpan[i],
+            wa = wingArea[i],
+            tas = trueSpeedDummy,
+            constants = constants
+          )
+
+        # wing frequency
+        wingFreqDummy <-
+          .wingbeat.freq(bm = bmDummy,
+                         ws = wingSpan[i],
+                         wa = wingArea[i],
+                         constants)
+
+        # amount of protein consumed that restores specific work to initial value
+        usedProtein <-
+          -(mechPowerDummy / (wingFreqDummy * specWorkStart)) + myofibrils
+
+        # amount of fuel energy released is found by multiplying the mass of dry protein
+        # removed by the energy density of dry protein
+        usedFatEquiv <-
+          (usedProtein * constants$ped) / constants$fed
+
+        # update body measurements #############################################
+        fm <- fm - (usedFat - usedFatEquiv)
+
+        # adjustment of needed for myofibrils?
+        #myofibrils <- myofibrils - (usedProtein * constants$phr)
+        mm <- mitochondria + myofibrils
+        #bm <- bm - (usedFat - usedFatEquiv) - (usedProtein * constants$phr)
+        bm <- bm - (usedFat - usedFatEquiv)
+
+        # distance increment ###################################################
+        dist <- dist + trueSpeed * 360
+
+        # increase counter
+        j <-  j + 1
+      }
+      results$distance[i] <- dist
+      results$allUpMass[i] <- bm
+      results$fatMass[i] <- fm
+      results$muscleMass[i] <- mm
+      results$endMinSpeed[i] <- .minpowspeed_cpp(
+        bm = bm,
+        ws = wingSpan[i],
+        ipf = constants$ipf,
+        g = constants$g,
+        airDensity = constants$airDensity,
+        bdc = constants$bdc
+      )
+    } # closes for loop (iterates over rows of species)
+  } else if (speed_control == 0 && protein_met > 0) {
+    for (variable in vector) {
+      # things to keep track of ################################################
+      bm <- allMass[i]
+      fm <- fatMass[i]
+      mm <- muscleMass[i]
+      airframeMass <- allMass[i] - (fatMass[i] + muscleMass[i]) # airframe mass
+      dist <- 0
+
+      # true start speed
+      startMinSpeed <- .minpowspeed_cpp(
+        bm = bm,
+        ws = wingSpan[i],
+        ipf = constants$ipf,
+        g = constants$g,
+        airDensity = constants$airDensity,
+        bdc = constants$bdc
+      )
+
+      # we want to hold true speed constant
+      trueSpeed <- startMinSpeed * constants$speedRatio
+
+      mechPower <-
+        .pow.curve(
+          bm = bm,
+          ws = wingSpan[i],
+          wa = wingArea[i],
+          tas =  trueSpeed,
+          constants = constants
+        )
+
+      wingFreq <-
+        .wingbeat.freq(bm = bm,
+                       ws = wingSpan[i],
+                       wa = wingArea[i],
+                       constants)
+      # subdivide muscle mass into respective components #######################
+      myofibrils <-
+        muscleMass[i] * (1 - constants$mipd * (mechPower /
+                                                 muscleMass[i]) * constants$muscDensity)
+      mitochondria <- muscleMass[i] - myofibrils
+
+      # specific work at start of flight #######################################
+      specWorkStart <- mechPower / (myofibrils * wingFreq)
+
+      # return starting minimum power speed ####################################
+      results$startMinSpeed[i] <- startMinSpeed
+
+      j <- 1
+      while (fm > 0.000001) {
+        # mechanical power from power curve holding true air-speed constant
+        mechPower <-
+          .pow.curve(
+            bm = bm,
+            ws = wingSpan[i],
+            wa = wingArea[i],
+            tas =  trueSpeed,
+            constants = constants
+          )
+
+        # wing frequency
+        wingFreq <-
+          .wingbeat.freq(bm = bm,
+                         ws = wingSpan[i],
+                         wa = wingArea[i],
+                         constants)
+
+        # chemical power #######################################################
+        chemPower <- (mechPower / constants$mce) +
+          .basal_metabolic_pow(
+            airframeMass = airframeMass, # doesn't change from previous J iteration
+            muscleMass = mm, # changes from previous J iteration
+            taxon = taxon[i],
+            alphaPasserines = alphaPasserines,
+            alphaNonPasserines = alphaNonPasserines,
+            deltaPasserines = deltaPasserines,
+            deltaNonPasserines = deltaNonPasserines
+          )
+
+        # increase chemPower by 10% respiratory
+        chemPower <- chemPower + (chemPower * 0.1)
+
+        # energy that should be attributed to protein
+        EFromProtein <- chemPower * protein_met
+
+        # fat consumed in the interval?
+        usedFat <- (chemPower - EFromProtein)  / constants$fed * 360
+
+        #Reduce body composition by this consumed fat and determine what amount
+        # of protein to consume to achieve specific power at start of flight
+        bmDummy <- bm - usedFat
+        fmDummy <- fm - usedFat
 
         # because of this reduction minimum speed, mechanical power, and
         # wing frequency reduce
 
-        dummy_true_speed <-
+        trueSpeedDummy <-
           .minpowspeed_cpp(
-            bm = dummy_bm,
-            ws =wingSpan[i],
+            bm = bmDummy,
+            ws = wingSpan[i],
             ipf = constants$ipf,
             g = constants$g,
             airDensity = constants$airDensity,
-            bdc = constants$bdf
+            bdc = constants$bdc
           ) * constants$speedRatio
 
-        dummy_mechPow <- .pow.curve(bm = dummy_bm, ws =wingSpan[i],
-                                    wa = wingArea[i], tas = dummy_true_speed, constants = constants)
+        mechPowerDummy <-
+          .pow.curve(
+            bm = bmDummy,
+            ws = wingSpan[i],
+            wa = wingArea[i],
+            tas = trueSpeedDummy,
+            constants = constants
+          )
 
-        # wing frequency
-        dummy_wing_freq <-
-          .wingbeat.freq(bm = dummy_bm, ws =wingSpan[i], wa = wingArea[i], constants)
-
-        # specific work after reduction of fat
-        dummy_specwork <- dummy_mechPow / (sim_results$myofibrils[[i]][j] * dummy_wing_freq)
+        wingFreqDummy <-
+          .wingbeat.freq(bm = bmDummy,
+                         ws = wingSpan[i],
+                         wa = wingArea[i],
+                         constants)
 
         # amount of protein consumed that restores specific work to initial value
-        used_protein <-
-          -(dummy_mechPow / (dummy_wing_freq * specwork_start)) + sim_results$myofibrils[[i]][j]
-
-        # checking if specific work has been restored
-        sim_results$spec_work[[i]][j] <-
-          dummy_mechPow / ((sim_results$myofibrils[[i]][j] - used_protein) * dummy_wing_freq)
+        usedProtein <-
+          -(mechPowerDummy / (wingFreqDummy * specWorkStart)) + myofibrils
 
         # amount of fuel energy released is found by multiplying the mass of dry protein
         # removed by the energy density of dry protein
-        used_fat_equiv <- (used_protein * constants$ped) / constants$fed
+        usedFatEquiv <- (usedProtein * constants$ped) / constants$fed
 
-        # adjust body components
-        # new fat mass
-        sim_results$fm[[i]][j + 1] <-  sim_results$fm[[i]][j] - (used_fat - used_fat_equiv)
-        sim_results$myofibrils[[i]][j + 1] <- sim_results$myofibrils[[i]][j] - (used_protein * constants$phr)
-        sim_results$mm[[i]][j + 1] <- sim_results$mitochondria[[i]][1] + (sim_results$myofibrils[[i]][j] - (used_protein * constants$phr))
-        sim_results$bm[[i]][j + 1] <- sim_results$bm[[i]][j] - (used_fat - used_fat_equiv) - (used_protein * constants$phr)
-        sim_results$dist[[i]][j] <- sim_results$true_speed[[i]][j] * 360
+        # distance increment ###################################################
+        dist <- dist + trueSpeed * 360
+
+        # adjust body components ###############################################
+        fm <- fm - (usedFat - usedFatEquiv)
+        myofibrils <- myofibrils - (usedProtein - constants$phr)
+        mm <- mitochondria + myofibrils
+        bm <- bm - (usedFat - usedFatEquiv) - (usedProtein * constants$phr)
+
+        # distance increment ###################################################
+        dist <- dist + trueSpeed * 360
+        # increase counter
         j <-  j + 1
-
       }
+      results$distance[i] <- dist
+      results$allUpMass[i] <- bm
+      results$fatMass[i] <- fm
+      results$muscleMass[i] <- mm
+      results$endMinSpeed[i] <- .minpowspeed_cpp(
+        bm = bm,
+        ws = wingSpan[i],
+        ipf = constants$ipf,
+        g = constants$g,
+        airDensity = constants$airDensity,
+        bdc = constants$bdc
+      )
     }
-  }
-  return(sim_results)
+  } # closes conditioning speed_control and protein_met
+  return(results)
 }
