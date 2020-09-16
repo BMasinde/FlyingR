@@ -83,7 +83,7 @@
   Vmp <- (0.807 * constants$ipf ^ 0.25 * m ^ 0.5 * constants$g ^ 0.5) /
             (
               constants$airDensity ^ 0.5 * ws ^ 0.5 * .body.front.area(m) ^ 0.25 *
-                constants$bodyDragCoef ^ 0.25
+                constants$bdc ^ 0.25
             )
 
   return(Vmp)
@@ -149,7 +149,7 @@
   num <- constants$ipf ^ 0.25 * bm ^ 0.5 * constants$g ^ 0.5
 
   den <-
-    constants$airDensity ^ 0.5 * (constants$bodyDragCoef * .body.front.area(bm)) ^ 0.25 *
+    constants$airDensity ^ 0.5 * (constants$bdc * .body.front.area(bm)) ^ 0.25 *
     .disc.area(ws) ^ 0.25
 
   Vmr <- num / den
@@ -198,7 +198,7 @@
 #'              the body drag coefficient.
 
 .parasite.pow <- function(m, Vt, constants) {
-  ppar <- (constants$airDensity * Vt^3 * .body.front.area(m) * constants$bodyDragCoef) / 2
+  ppar <- (constants$airDensity * Vt^3 * .body.front.area(m) * constants$bdc) / 2
 
   return(ppar)
 }
@@ -215,7 +215,7 @@
 .abs.min.pow <- function(m, ws, constants) {
   pam <-
     (1.05 * (constants$ipf ^ 0.75) * (m ^ 1.5) * (constants$g ^ 1.5) * (.body.front.area(m) ^ 0.25) *
-       constants$bodyDragCoef^0.25) / ((constants$airDensity) ^ 0.5 * (ws ^ 1.5))
+       constants$bdc^0.25) / ((constants$airDensity) ^ 0.5 * (ws ^ 1.5))
 
   return(pam)
 }
@@ -312,7 +312,7 @@
     g = constants$g,
     airDensity = constants$airDensity,
     ipf = constants$ipf,
-    bdc = constants$bodyDragCoef,
+    bdc = constants$bdc,
     ppc = constants$ppc
   )
 
@@ -334,7 +334,7 @@
         g = constants$g,
         airDensity = constants$airDensity,
         ipf = constants$ipf,
-        bdc = constants$bodyDragCoef,
+        bdc = constants$bdc,
         ppc = constants$ppc
       )
     }
