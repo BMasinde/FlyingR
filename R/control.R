@@ -24,7 +24,7 @@
     mce = 0.23,
 
     # induced power factor
-    ipf = 1.20,
+    ipf = 1.2,
 
     # ventilation and circulation power (Tucker's data)
     vcp =  1.10,
