@@ -5,6 +5,23 @@
 
 using namespace Rcpp;
 
+// basal_metabolic_pow
+double basal_metabolic_pow(double airframeMass, double muscleMass, int taxon, double alphaPasserines, double alphaNonPasserines, double deltaPasserines, double deltaNonPasserines);
+RcppExport SEXP _flying_basal_metabolic_pow(SEXP airframeMassSEXP, SEXP muscleMassSEXP, SEXP taxonSEXP, SEXP alphaPasserinesSEXP, SEXP alphaNonPasserinesSEXP, SEXP deltaPasserinesSEXP, SEXP deltaNonPasserinesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type airframeMass(airframeMassSEXP);
+    Rcpp::traits::input_parameter< double >::type muscleMass(muscleMassSEXP);
+    Rcpp::traits::input_parameter< int >::type taxon(taxonSEXP);
+    Rcpp::traits::input_parameter< double >::type alphaPasserines(alphaPasserinesSEXP);
+    Rcpp::traits::input_parameter< double >::type alphaNonPasserines(alphaNonPasserinesSEXP);
+    Rcpp::traits::input_parameter< double >::type deltaPasserines(deltaPasserinesSEXP);
+    Rcpp::traits::input_parameter< double >::type deltaNonPasserines(deltaNonPasserinesSEXP);
+    rcpp_result_gen = Rcpp::wrap(basal_metabolic_pow(airframeMass, muscleMass, taxon, alphaPasserines, alphaNonPasserines, deltaPasserines, deltaNonPasserines));
+    return rcpp_result_gen;
+END_RCPP
+}
 // minpowspeed_cpp
 NumericVector minpowspeed_cpp(NumericVector bm, NumericVector ws, double ipf, double g, double airDensity, double bdc);
 RcppExport SEXP _flying_minpowspeed_cpp(SEXP bmSEXP, SEXP wsSEXP, SEXP ipfSEXP, SEXP gSEXP, SEXP airDensitySEXP, SEXP bdcSEXP) {
@@ -22,15 +39,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // total_Mech_Pow_cpp
-NumericVector total_Mech_Pow_cpp(NumericVector bm, NumericVector ws, NumericVector wa, NumericVector vt, double g, double airDensity, double ipf, double bdc, double ppc);
+double total_Mech_Pow_cpp(double bm, double ws, double wa, double vt, double g, double airDensity, double ipf, double bdc, double ppc);
 RcppExport SEXP _flying_total_Mech_Pow_cpp(SEXP bmSEXP, SEXP wsSEXP, SEXP waSEXP, SEXP vtSEXP, SEXP gSEXP, SEXP airDensitySEXP, SEXP ipfSEXP, SEXP bdcSEXP, SEXP ppcSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type bm(bmSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type ws(wsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wa(waSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vt(vtSEXP);
+    Rcpp::traits::input_parameter< double >::type bm(bmSEXP);
+    Rcpp::traits::input_parameter< double >::type ws(wsSEXP);
+    Rcpp::traits::input_parameter< double >::type wa(waSEXP);
+    Rcpp::traits::input_parameter< double >::type vt(vtSEXP);
     Rcpp::traits::input_parameter< double >::type g(gSEXP);
     Rcpp::traits::input_parameter< double >::type airDensity(airDensitySEXP);
     Rcpp::traits::input_parameter< double >::type ipf(ipfSEXP);
@@ -42,6 +59,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_flying_basal_metabolic_pow", (DL_FUNC) &_flying_basal_metabolic_pow, 7},
     {"_flying_minpowspeed_cpp", (DL_FUNC) &_flying_minpowspeed_cpp, 6},
     {"_flying_total_Mech_Pow_cpp", (DL_FUNC) &_flying_total_Mech_Pow_cpp, 9},
     {NULL, NULL, 0}
