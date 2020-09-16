@@ -1,18 +1,18 @@
-#' @title Stopover mass calculator
-#' @description During stop-overs birds replenish fat mass. Using simplifications
-#' from Lindstöm 1991.
-#' @name stopover.mass.calculator
-#' @param file The name of the file which the data are to read from
-#' @param header Logical. If TRUE use first row as column headers
-#' @param sep separator
-#' @param quote The set of quoting characters. see read.csv
-#' @param dec The character used in the file for decimal points
-#' @param fill See read.csv
-#' @param comment.char For more details see read.csv
-#' @param ... further arguments see read.csv
-#' @param data A data frame
-#' @param duration Days spent at stopover
-#' @return body mass, fat mass, fat fraction,
+# @title Stopover mass calculator
+# @description During stop-overs birds replenish fat mass. Using simplifications
+# from Lindstöm 1991.
+# @name stopover.mass.calculator
+# @param file The name of the file which the data are to read from
+# @param header Logical. If TRUE use first row as column headers
+# @param sep separator
+# @param quote The set of quoting characters. see read.csv
+# @param dec The character used in the file for decimal points
+# @param fill See read.csv
+# @param comment.char For more details see read.csv
+# @param ... further arguments see read.csv
+# @param data A data frame
+# @param duration Days spent at stopover
+# @return body mass, fat mass, fat fraction,
 
 # SOURCE #######################################################################
 # Lindström, Å. (1991). Maximum Fat Deposition Rates in Migrating Birds.
@@ -20,57 +20,72 @@
 # 12-19. doi:10.2307/3676616
 ################################################################################
 
-stopover.mass.calculator <-
-  function(file,
-           header = TRUE,
-           sep = ",",
-           quote = "\"",
-           dec = ".",
-           fill = TRUE,
-           comment.char = "",
-           ...,
-           data = NULL,
-           duration = 1L) {
-    # check file and data are not given together
-    if (missing(file) == TRUE & is.null(data) == TRUE) {
-      stop("Data not found \n", call. = TRUE)
-    }
+# stopover.mass.calculator <-
+#   function(file,
+#            header = TRUE,
+#            sep = ",",
+#            quote = "\"",
+#            dec = ".",
+#            fill = TRUE,
+#            comment.char = "",
+#            ...,
+#            data = NULL,
+#            duration = 1L) {
+#     # check file and data are not given together
+#     if (missing(file) == TRUE & is.null(data) == TRUE) {
+#       stop("Data not found \n", call. = TRUE)
+#     }
+#
+#     # check duration is an non-zero integer
+#     if (is.integer(duration) == FALSE | duration == 0) {
+#       stop("duration is a non-integer, see doc \n")
+#     }
+#
+#     # if file is given read.csv
+#     if (missing(file) == FALSE) {
+#       dataRead <- read.csv(file = file, header = header, sep = sep, quote = quote,
+#                            dec = dec, fill = fill, comment.char,
+#                            stringsAsFactors = FALSE, ...)
+#       data <- .colnames.match(dataRead)
+#     } else {
+#       data <- .colnames.match(data)
+#     }
+#
+#     # Get lean mass
+#     leanMass <- data$allMass - data$fatMass
+#
+#     # maximum fat deposition rate based on order
+#     maxFatDepositionRate <-
+#       ifelse(data$taxon == 1, 2.22 * leanMass ^ (-0.27), 2.80 * leanMass ^ (-0.27))
+#
+#     # check maxFatDepositionRate is not less than zero and not greater than hundred
+#     if (any(maxFatDepositionRate < 0) | any(maxFatDepositionRate > 100)) {
+#       warning("Maximum fat deposition rate contains values out of bounds [0,1]")
+#     }
+#
+#     fatMassGained <- leanMass * (maxFatDepositionRate/100) * duration
+#
+#     data$allMass <- data$allMass + fatMassGained
+#     data$fatMass <- data$fatMass + fatMassGained
+#
+#     return(data)
+#   }
 
-    # check duration is an non-zero integer
-    if (is.integer(duration) == FALSE | duration == 0) {
-      stop("duration is a non-integer, see doc \n")
-    }
+# Method of object migrate #####################################################
+# stopover mass calculator for results from function migrate
+################################################################################
 
-    # if file is given read.csv
-    if (missing(file) == FALSE) {
-      dataRead <- read.csv(file = file, header = header, sep = sep, quote = quote,
-                           dec = dec, fill = fill, comment.char,
-                           stringsAsFactors = FALSE, ...)
-      data <- .colnames.match(dataRead)
-    } else {
-      data <- .colnames.match(data)
-    }
-
-    # Get lean mass
-    leanMass <- data$allMass - data$fatMass
-
-    # maximum fat deposition rate based on order
-    maxFatDepositionRate <-
-      ifelse(data$taxon == 1, 2.22 * leanMass ^ (-0.27), 2.80 * leanMass ^ (-0.27))
-
-    # check maxFatDepositionRate is not less than zero and not greater than hundred
-    if (any(maxFatDepositionRate < 0) | any(maxFatDepositionRate > 100)) {
-      warning("Maximum fat deposition rate contains values out of bounds [0,1]")
-    }
-
-    fatMassGained <- leanMass * (maxFatDepositionRate/100) * duration
-
-    data$allMass <- data$allMass + fatMassGained
-    data$fatMass <- data$fatMass + fatMassGained
-
-    return(data)
-  }
-
+# stopover.mass.calculator.migrate <-
+#   function(migrate_obj, duration = 1L) {
+#     # migrate_obj is of class migrate?
+#     if (class(migrate_obj) != migrate) {
+#       stop("migrate_obj should be results from function migrate")
+#     }
+#
+#     # get lean mass
+#
+#     return(migrate_obj)
+#   }
 # SAMPLE RESULTS FROM FLIGHT ###################################################
 # garden warbler
 # fatMass = 0.0066
