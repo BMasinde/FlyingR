@@ -2,7 +2,7 @@
 # @author Brian Masinde
 # @name .colnames.match
 # @param data
-# @return data returns processed data
+# @return data returns columns as a list data
 
 .colnames.match <- function(data) {
   # data should be a dataframe
@@ -76,7 +76,7 @@
   if (sum(duplicated(data$name)) != 0) {
     dups <- duplicated(data$name)
     for (i in 1:length(dups)) {
-      if(dups[i] == TRUE) {
+      if (dups[i] == TRUE) {
         data$name[i] <- paste(data$name[i], i, sep = "_")
       }
     }
@@ -91,7 +91,7 @@
   }
 
   # check factors in taxon
-  if(any(data$taxon != 1 & data$taxon != 2)) {
+  if (any(data$taxon != 1 & data$taxon != 2)) {
     stop("taxon column values 1 or 2", call. = FALSE)
   }
 
