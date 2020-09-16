@@ -5,6 +5,12 @@ data <- data("birds")
 
 test_that("out of bounds protein_met throws error", {
   expect_error(migtate(data = data, method = "cmm",
-                       speed_control = "constant_speed", protein_met = 1.2
+                       speed_control = 1, protein_met = 1.2
                                     ))
+})
+
+test_that("speed control is binary", {
+  expect_error(migtate(data = data, method = "cmm",
+                       speed_control = "constant_speed", protein_met = 1.2
+  ))
 })
