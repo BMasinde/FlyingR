@@ -47,7 +47,7 @@ The option *settings takes the arguments (those particulary
 required by this function)
 \itemize{
    \item ppc: Profile power constant
-   \item eFat: Energy content of fuel from fat
+   \item fed: Energy content of fuel from fat
    \item g: Accelaration due to gravity
    \item mce: Mechanical conversion efficiency [0,1]
    \item ipf: Induced power factor

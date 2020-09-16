@@ -7,10 +7,10 @@
 migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                fill = TRUE, comment.char = "", ...,
                data = NULL, settings = list(), method = "cmm",
-               speed_control = "constant_speed", protein_met = 0)
+               speed_control = 1, protein_met = 0)
 }
 \arguments{
-\item{file}{The name of the file which the data are to read from}
+\item{file}{Path to file where data resides.}
 
 \item{header}{Logical. If TRUE use first row as column headers}
 
@@ -26,18 +26,20 @@ migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
 
 \item{...}{further arguments see read.csv}
 
-\item{data}{A data frame}
+\item{data}{A data frame with required columns: body mass, fat mass, etc.}
 
-\item{settings}{A list for re-defining constants. See details}
+\item{settings}{A list for re-defining constants. See details for these with
+default values from Pennycuick(2008) and Pennycuick(1998).}
 
 \item{method}{Methods for fuel management}
 
 \item{speed_control}{One of two speed control methods. By default
-\emph{constant_speed} is used. \emph{vvmp_constant} is the alternative.
+\emph{1} is used. \emph{0} is the alternative.
 The former holds the true airspeed constant while the latter holds the
-ratio of true airspeed and minimum power speed constant}
+ratio of true airspeed and minimum power speed constant.}
 
-\item{protein_met}{Percentage of energy attributed to protein and metabolism}
+\item{protein_met}{Percentage of energy attributed to protein from metabolism.
+Default value is 5 percent (0.05).}
 }
 \value{
 S3 class object with range estimates based on methods defined and
@@ -50,32 +52,32 @@ S3 class object with range estimates based on methods defined and
 }
 }
 \description{
-Practical range estimation of birds using methods in Pennycuick (1998)
-and Pennycuick (2008).
+Practical range estimation of birds using methods in Pennycuick (2008).
 }
 \details{
-The option *control takes the folowing arguments
+The option *control takes the following arguments
 \itemize{
-   \item profPowerConstant: Profile power constant
-   \item fatEnergy: Energy content of fuel from fat
-   \item proteinEnergy: Energy content of protein
-   \item g: Accelaration due to gravity
-   \item efficiency: Mechanical conversion efficiency [0,1]
-   \item inducedPowerFactor: Induced power factor
-   \item ventCircPower: Ventilation and circulation power
-   \item airDensity: Air density at cruising altitude
-   \item bodyDragCoef: Body drag coefficient
-   \item alpha: Basal metabolism factors in passerines and non passerines
-   \item delta: Basal metabolism factors in passerines and non passerines
-   alpha*bodyMass^delta
-   \item invPower
-   \item speedRatio: True air speed to minimum power speed ratio
-   \item muscDensity: Density of the flight muscles.
-   \item protHydRatio: Protein hydration ratio
+   \item ppc: Profile power constant (8.4)
+   \item fed: Energy content of fuel from fat (3.9E+07)
+   \item ped: Energy content of protein (1.8E+07)
+   \item g: Accelaration due to gravity (9.81)
+   \item mce: Mechanical conversion efficiency [0,1]. Efficiency at which
+   mechanical power is converted to chemical power. (0.23)
+   \item ipf: Induced power factor (1.2)
+   \item vcp: Ventilation and circulation power (1.1)
+   \item airDensity: Air density at cruising altitude (1.00)
+   \item bdc: Body drag coefficient (0.1)
+   \item alpha: Basal metabolism factors in passerines and non passerines (6.25, 3.79)
+   \item delta: Basal metabolism factors in passerines and non passerines (0.724, 0.723)
+   alpha*bodyMass^delta.
+   \item mipd: Inverse power density of the mitochondria. (1.2E-06)
+   \item speedRatio: True air speed to minimum power speed ratio (1.2)
+   \item muscDensity: Density of the flight muscles. (1060)
+   \item phr: Protein hydration ratio. (2.2)
 }
 }
 \examples{
-migrate(data = birds, settings = list(fatEnergy = 3.89*10^7))
+migrate(data = birds, settings = list(fed = 3.89*10^7))
 migrate(data = birds,  method = "cmm", settings = list(airDensity = 0.905))
 
 
