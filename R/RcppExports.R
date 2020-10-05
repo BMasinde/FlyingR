@@ -9,6 +9,10 @@
     .Call('_flying_minpowspeed_cpp', PACKAGE = 'flying', bm, ws, ipf, g, airDensity, bdc)
 }
 
+.mechanical_power <- function(bm, ws, wa, tas, g, airDensity, ipf, bdc, ppc) {
+    .Call('_flying_power_curve', PACKAGE = 'flying', bm, ws, wa, tas, g, airDensity, ipf, bdc, ppc)
+}
+
 .total_Mech_Pow_cpp <- function(bm, ws, wa, vt, g, airDensity, ipf, bdc, ppc) {
     .Call('_flying_total_Mech_Pow_cpp', PACKAGE = 'flying', bm, ws, wa, vt, g, airDensity, ipf, bdc, ppc)
 }
