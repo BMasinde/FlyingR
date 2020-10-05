@@ -134,7 +134,7 @@
 }
 
 ################################################################################
-#' @name .max.range.speed
+#' @name .max.range.speed-depricated
 #' @author Brian Masinde
 #' @param m all up mass
 #' @param ws wing span
@@ -146,6 +146,7 @@
 #'              ratio ceases to increases.
 
 .max.range.speed <- function(bm, ws, constants) {
+  .Deprecated(.minpowspeed_cpp)
   num <- constants$ipf ^ 0.25 * bm ^ 0.5 * constants$g ^ 0.5
 
   den <-
@@ -257,7 +258,7 @@
 }
 
 ################################################################################
-#' @name .total.mech.power
+#' @name .total.mech.power-depticated
 #' @author Brian Masinde
 #' @inheritParams .induced.pow
 #' @inheritParams .parasite.pow
@@ -267,10 +268,11 @@
 #'              Induced, parasite, and profile power are summed to get the total
 #'              power at a certain speed. Usually starts from minimum power
 #'               speed.
-
+#' @keywords internal
+NULL
 
 .total.mech.power <- function(m, ws, wa, Vt, constants) {
-
+  .Deprecated(.mechanical_power)
   # induced power at starting speed
   pind <- .induced.pow(m, ws, Vt, constants)
 
@@ -289,7 +291,7 @@
 }
 
 ################################################################################
-#' @name .pow.curve
+#' @name .pow.curve-depricated
 #' @author Brian Masinde
 #' @param bm all-up body mass
 #' @param ws wing span
@@ -301,8 +303,11 @@
 #'              estimated where total power is stable. Since we are only interested
 #'              in the mechanical power where it is stable the estimation ends slightly
 #'              above the total mechanical power estimated at start of flight.
+#'              #' @keywords internal
+NULL
 
 .pow.curve <- function(bm, ws, wa, tas, constants) {
+  .Deprecated(.mechanical_power)
   # starting mechanical power
   start_mech_pow <- .total_Mech_Pow_cpp(
     bm = bm,
@@ -315,16 +320,17 @@
     bdc = constants$bdc,
     ppc = constants$ppc
   )
+  cat("starting mechanical pwr", start_mech_pow, sep = " ", "\n")
 
   # reduce tas slightly
-  true_speed <- tas * 0.8
+  true_speed <- tas * 0.5
   current_mech_pow <- 0  # power curve estimate of mechanical power
   repeat {
     if ((current_mech_pow > start_mech_pow) == TRUE) {
       break
     } else{
       true_speed <- true_speed + 0.1
-
+      cat("true airspeed", true_speed, sep = " ", "\n")
       current_mech_pow <- .total_Mech_Pow_cpp(
         bm = bm,
         ws = ws,
@@ -337,7 +343,108 @@
         bdc = constants$bdc,
         ppc = constants$ppc
       )
+
+      cat("current mech power", current_mech_pow, sep = " ", "\n")
     }
   }
   return(current_mech_pow)
 }
+
+################################################################################
+#' @name .pow_curve-depricated
+#' @author Brian Masinde
+#' @param bm all-up body mass
+#' @param ws wing span
+#' @param wa wing area
+#' @param tas true airspeed
+#' @param constants Simulation constants supplied
+#' @return Total mechanical power using true airspeed
+#' @description In calculating the power curve, the true air-speed is
+#'              estimated where total power is stable. Since we are only interested
+#'              in the mechanical power where it is stable the estimation ends slightly
+#'              above the total mechanical power estimated at start of flight.
+#'              #' @keywords internal
+NULL
+.pow_curve <- function(bm, ws, wa, tas, constants) {
+  .Deprecated(.mechanical_power)
+  # starting mechanical power
+  start_mech_pow <- .total_Mech_Pow_cpp(
+    bm = bm,
+    ws = ws,
+    wa = wa,
+    vt = tas, # holding speed constant
+    g = constants$g,
+    airDensity = constants$airDensity,
+    ipf = constants$ipf,
+    bdc = constants$bdc,
+    ppc = constants$ppc
+  )
+  cat("starting mechanical pwr", start_mech_pow, sep = " ", "\n")
+
+  # reduce tas slightly
+  tas1 <- tas * 0.5
+  current_mech_pow <- c()  # power curve estimate o
+  tas2 <- c()
+  tas2[1] <- tas1
+  for (i in 2:100) {
+    tas2[i] <- tas2[i - 1] + 0.1
+  }
+
+  for (i in 1:100) {
+    current_mech_pow[i] <- .total_Mech_Pow_cpp(
+      bm = bm,
+      ws = ws,
+      wa = wa,
+      vt = tas2[i], # holding speed constant
+      g = constants$g,
+      airDensity = constants$airDensity,
+      ipf = constants$ipf,
+      bdc = constants$bdc,
+      ppc = constants$ppc
+    )
+  }
+
+  return(list(tas2, current_mech_pow))
+}
+
+# .pow_curve2 <- function(bm, ws, wa, tas, constants) {
+#   # reduce tas slightly
+#   tas2 <- tas * 0.5
+#   # starting mechanical power
+#   start_mech_pow <- .total_Mech_Pow_cpp(
+#     bm = bm,
+#     ws = ws,
+#     wa = wa,
+#     vt = tas2, # holding speed constant
+#     g = constants$g,
+#     airDensity = constants$airDensity,
+#     ipf = constants$ipf,
+#     bdc = constants$bdc,
+#     ppc = constants$ppc
+#   )
+#   cat("starting mechanical pwr", start_mech_pow, sep = " ", "\n")
+#   cat("starting speed", tas2, sep = " ", "\n")
+#
+#   #prev_mech_pow <- start_mech_pow
+#   new_mech_pow <- Inf
+#   eps <-  0.001
+#   current_tas <- tas2
+#   while (abs(new_mech_pow - start_mech_pow) > eps) {
+#     start_mech_pow <- new_mech_pow
+#     # increase tas by 0.1
+#     current_tas <- current_tas + 0.1
+#     new_mech_pow <- .total_Mech_Pow_cpp(
+#       bm = bm,
+#       ws = ws,
+#       wa = wa,
+#       vt = current_tas, # holding speed constant
+#       g = constants$g,
+#       airDensity = constants$airDensity,
+#       ipf = constants$ipf,
+#       bdc = constants$bdc,
+#       ppc = constants$ppc
+#     )
+#     cat("new mech power", new_mech_pow, sep = " ", "\n")
+#   }
+#   return(list(new_mech_pow, current_tas))
+# }
