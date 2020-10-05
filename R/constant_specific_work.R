@@ -91,12 +91,16 @@
       trueSpeed <- startMinSpeed * constants$speedRatio
 
       mechPower <-
-        .pow.curve(
+        .mechanical_power(
           bm = bm,
           ws = wingSpan[i],
           wa = wingArea[i],
           tas =  trueSpeed,
-          constants = constants
+          g = constants$g,
+          airDensity = constants$airDensity,
+          ipf = constants$ipf,
+          bdc = constants$bdc,
+          ppc = constants$ppc
         )
 
       wingFreq <-
@@ -120,13 +124,17 @@
       while (fm > 0.000001) {
         # mechanical power from power curve holding true air-speed constant ####
         mechPower <-
-          .pow.curve(
+          .mechanical_power(
             bm = bm,
             # changes from previous J iteration
             ws = wingSpan[i],
             wa = wingArea[i],
             tas =  trueSpeed,
-            constants = constants
+            g = constants$g,
+            airDensity = constants$airDensity,
+            ipf = constants$ipf,
+            bdc = constants$bdc,
+            ppc = constants$ppc
           )
 
         # wing frequency
@@ -173,12 +181,16 @@
           ) * constants$speedRatio
 
         mechPowerDummy <-
-          .pow.curve(
+          .mechanical_power(
             bm = bmDummy,
             ws = wingSpan[i],
             wa = wingArea[i],
             tas = trueSpeedDummy,
-            constants = constants
+            g = constants$g,
+            airDensity = constants$airDensity,
+            ipf = constants$ipf,
+            bdc = constants$bdc,
+            ppc = constants$ppc
           )
 
         # wing frequency
@@ -250,12 +262,16 @@
       trueSpeed <- startMinSpeed * constants$speedRatio
 
       mechPower <-
-        .pow.curve(
+        .mechanical_power(
           bm = bm,
           ws = wingSpan[i],
           wa = wingArea[i],
           tas =  trueSpeed,
-          constants = constants
+          g = constants$g,
+          airDensity = constants$airDensity,
+          ipf = constants$ipf,
+          bdc = constants$bdc,
+          ppc = constants$ppc
         )
 
       wingFreq <-
@@ -279,12 +295,16 @@
       while (fm > 0.000001) {
         # mechanical power from power curve holding true air-speed constant
         mechPower <-
-          .pow.curve(
+          .mechanical_power(
             bm = bm,
             ws = wingSpan[i],
             wa = wingArea[i],
             tas =  trueSpeed,
-            constants = constants
+            g = constants$g,
+            airDensity = constants$airDensity,
+            ipf = constants$ipf,
+            bdc = constants$bdc,
+            ppc = constants$ppc
           )
         #cat("mech power within while", mechPower, sep = " ", "\n")
         # wing frequency
@@ -337,12 +357,16 @@
           ) * constants$speedRatio
 
         mechPowerDummy <-
-          .pow.curve(
+          .mechanical_power(
             bm = bmDummy,
             ws = wingSpan[i],
             wa = wingArea[i],
             tas = trueSpeedDummy,
-            constants = constants
+            g = constants$g,
+            airDensity = constants$airDensity,
+            ipf = constants$ipf,
+            bdc = constants$bdc,
+            ppc = constants$ppc
           )
 
         wingFreqDummy <-
@@ -366,7 +390,7 @@
         myofibrils <- myofibrils - (usedProtein * constants$phr)
         mm <- mitochondria + myofibrils
         airframeMass <- airframeMass - ((EFromProtein/constants$ped) * 360 * constants$phr)
-        cat("airframe mass", airframeMass, sep = " ", "\n")
+        #cat("airframe mass", airframeMass, sep = " ", "\n")
         #bm <- bm - (usedFat - usedFatEquiv) - (usedProtein * constants$phr) - (EFromProtein/constants$ped)
 
         bm <- airframeMass + mm + fm
@@ -393,7 +417,7 @@
       )
     } # closes for loop
   } else if (speed_control == 0 && protein_met == 0) {
-    for (variable in vector) {
+    for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
       fm <- fatMass[i]
@@ -415,12 +439,16 @@
       trueSpeed <- startMinSpeed * constants$speedRatio
 
       mechPower <-
-        .pow.curve(
+        .mechanical_power(
           bm = bm,
           ws = wingSpan[i],
           wa = wingArea[i],
           tas =  trueSpeed,
-          constants = constants
+          g = constants$g,
+          airDensity = constants$airDensity,
+          ipf = constants$ipf,
+          bdc = constants$bdc,
+          ppc = constants$ppc
         )
 
       wingFreq <-
@@ -441,7 +469,7 @@
       results$startMinSpeed[i] <- startMinSpeed
 
       j <- 1
-      while (fm > 0.0001) {
+      while (fm > 0.000001) {
         # hold ratio of minimum power speed and true airspeed constant
         # true start speed
         minSpeed <- .minpowspeed_cpp(
@@ -458,13 +486,17 @@
 
         # mechanical power from power curve holding true air-speed constant ####
         mechPower <-
-          .pow.curve(
+          .mechanical_power(
             bm = bm,
             # changes from previous J iteration
             ws = wingSpan[i],
             wa = wingArea[i],
             tas =  trueSpeed,
-            constants = constants
+            g = constants$g,
+            airDensity = constants$airDensity,
+            ipf = constants$ipf,
+            bdc = constants$bdc,
+            ppc = constants$ppc
           )
 
         # wing frequency
@@ -513,12 +545,16 @@
           ) * constants$speedRatio
 
         mechPowerDummy <-
-          .pow.curve(
+          .mechanical_power(
             bm = bmDummy,
             ws = wingSpan[i],
             wa = wingArea[i],
             tas = trueSpeedDummy,
-            constants = constants
+            g = constants$g,
+            airDensity = constants$airDensity,
+            ipf = constants$ipf,
+            bdc = constants$bdc,
+            ppc = constants$ppc
           )
 
         # wing frequency
@@ -543,7 +579,7 @@
         # adjustment of needed for myofibrils?
         #myofibrils <- myofibrils - (usedProtein * constants$phr)
         mm <- mitochondria + myofibrils
-        #bm <- bm - (usedFat - usedFatEquiv) - (usedProtein * constants$phr)
+
         bm <- bm - (usedFat - usedFatEquiv)
 
         # distance increment ###################################################
@@ -566,7 +602,7 @@
       )
     } # closes for loop (iterates over rows of species)
   } else if (speed_control == 0 && protein_met > 0) {
-    for (variable in vector) {
+    for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
       fm <- fatMass[i]
@@ -588,12 +624,16 @@
       trueSpeed <- startMinSpeed * constants$speedRatio
 
       mechPower <-
-        .pow.curve(
+        .mechanical_power(
           bm = bm,
           ws = wingSpan[i],
           wa = wingArea[i],
           tas =  trueSpeed,
-          constants = constants
+          g = constants$g,
+          airDensity = constants$airDensity,
+          ipf = constants$ipf,
+          bdc = constants$bdc,
+          ppc = constants$ppc
         )
 
       wingFreq <-
@@ -617,12 +657,16 @@
       while (fm > 0.000001) {
         # mechanical power from power curve holding true air-speed constant
         mechPower <-
-          .pow.curve(
+          .mechanical_power(
             bm = bm,
             ws = wingSpan[i],
             wa = wingArea[i],
             tas =  trueSpeed,
-            constants = constants
+            g = constants$g,
+            airDensity = constants$airDensity,
+            ipf = constants$ipf,
+            bdc = constants$bdc,
+            ppc = constants$ppc
           )
 
         # wing frequency
@@ -672,12 +716,16 @@
           ) * constants$speedRatio
 
         mechPowerDummy <-
-          .pow.curve(
+          .mechanical_power(
             bm = bmDummy,
             ws = wingSpan[i],
             wa = wingArea[i],
             tas = trueSpeedDummy,
-            constants = constants
+            g = constants$g,
+            airDensity = constants$airDensity,
+            ipf = constants$ipf,
+            bdc = constants$bdc,
+            ppc = constants$ppc
           )
 
         wingFreqDummy <-
@@ -694,14 +742,11 @@
         # removed by the energy density of dry protein
         usedFatEquiv <- (usedProtein * constants$ped) / constants$fed
 
-        # distance increment ###################################################
-        dist <- dist + trueSpeed * 360
-
         # adjust body components ###############################################
         fm <- fm - (usedFat - usedFatEquiv)
         myofibrils <- myofibrils - (usedProtein - constants$phr)
         mm <- mitochondria + myofibrils
-        bm <- bm - (usedFat - usedFatEquiv) - (usedProtein * constants$phr)
+        bm <- airframeMass + mm + fm
 
         # distance increment ###################################################
         dist <- dist + trueSpeed * 360
