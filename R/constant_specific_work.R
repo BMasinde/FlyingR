@@ -44,13 +44,6 @@
 
   taxon <- data$taxon
 
-  # get fractions to get frame mass
-  fatFraction <- fatMass/allMass
-
-  muscleFraction <- muscleMass/allMass
-
-  #airframeMass <- allMass - (fatMass + muscleMass) # airframe mass
-
 # time marching ################################################################
 
   # basal metabolic constants
@@ -120,7 +113,6 @@
       # return starting minimum power speed ####################################
       results$startMinSpeed[i] <- startMinSpeed
 
-      j <- 1
       while (fm > 0.000001) {
         # mechanical power from power curve holding true air-speed constant ####
         mechPower <-
@@ -146,19 +138,17 @@
                          constants)
 
         # chemical power #######################################################
-        chemPower <- (mechPower / constants$mce) +
-          .basal_metabolic_pow(
-            airframeMass, # doesn't change from previous J iteration
-            mm, # changes from previous J iteration
-            taxon[i],
-            alphaPasserines,
-            alphaNonPasserines,
-            deltaPasserines,
-            deltaNonPasserines
-          )
-
-        # increase chemical power by 10% to account for heart and respiratory
-        chemPower <- chemPower + (chemPower * 0.1)
+        chemPower <- constants$vcp * (mechPower + constants$mce * .basal_metabolic_pow(
+          airframeMass,
+          # doesn't change from previous J iteration
+          mm,
+          # changes from previous J iteration
+          taxon[i],
+          alphaPasserines,
+          alphaNonPasserines,
+          deltaPasserines,
+          deltaNonPasserines
+        )) / constants$mce
 
         # fat consumed in the interval?
         usedFat <- chemPower / constants$fed * 360
@@ -221,10 +211,6 @@
 
         # distance increment ###################################################
         dist <- dist + trueSpeed * 360
-
-        # increase counter
-        j <-  j + 1
-        #cat("current iteration", j, sep = " ", "\n")
       }
       results$distance[i] <- dist
       results$allUpMass[i] <- bm
@@ -291,7 +277,6 @@
       # return starting minimum power speed ####################################
       results$startMinSpeed[i] <- startMinSpeed
 
-      j <- 1
       while (fm > 0.000001) {
         # mechanical power from power curve holding true air-speed constant
         mechPower <-
@@ -315,19 +300,17 @@
                          constants)
 
         # chemical power #######################################################
-        chemPower <- (mechPower / constants$mce) +
-          .basal_metabolic_pow(
-            airframeMass, # doesn't change from previous J iteration
-            mm, # changes from previous J iteration
-            taxon[i],
-            alphaPasserines,
-            alphaNonPasserines,
-            deltaPasserines,
-            deltaNonPasserines
-          )
-
-        # increase chemPower by 10% respiratory
-        chemPower <- chemPower + (chemPower * 0.1)
+        chemPower <- constants$vcp * (mechPower + constants$mce * .basal_metabolic_pow(
+          airframeMass,
+          # doesn't change from previous J iteration
+          mm,
+          # changes from previous J iteration
+          taxon[i],
+          alphaPasserines,
+          alphaNonPasserines,
+          deltaPasserines,
+          deltaNonPasserines
+        )) / constants$mce
 
         #cat("chem power within while", chemPower, sep = " ", "\n")
 
@@ -397,11 +380,6 @@
 
         # distance increment ###################################################
         dist <- dist + trueSpeed * 360
-        #cat("distance", dist, sep = " ", "\n")
-
-        # increase counter
-        j <-  j + 1
-        #cat("iteration", j, sep = " ", "\n")
       }
       results$distance[i] <- dist
       results$allUpMass[i] <- bm
@@ -468,7 +446,6 @@
       # return starting minimum power speed ####################################
       results$startMinSpeed[i] <- startMinSpeed
 
-      j <- 1
       while (fm > 0.000001) {
         # hold ratio of minimum power speed and true airspeed constant
         # true start speed
@@ -508,21 +485,17 @@
                          constants)
 
         # chemical power #######################################################
-        chemPower <- (mechPower / constants$mce) +
-          .basal_metabolic_pow(
-            airframeMass,
-            # doesn't change from previous J iteration
-            mm,
-            # changes from previous J iteration
-            taxon[i],
-            alphaPasserines,
-            alphaNonPasserines,
-            deltaPasserines,
-            deltaNonPasserines
-          )
-
-        # increase chemical power by 10% to account for heart and respiratory
-        chemPower <- chemPower + (chemPower * 0.1)
+        chemPower <- constants$vcp * (mechPower + constants$mce * .basal_metabolic_pow(
+          airframeMass,
+          # doesn't change from previous J iteration
+          mm,
+          # changes from previous J iteration
+          taxon[i],
+          alphaPasserines,
+          alphaNonPasserines,
+          deltaPasserines,
+          deltaNonPasserines
+        )) / constants$mce
 
         # fat consumed in the interval?
         usedFat <- chemPower / constants$fed * 360
@@ -530,7 +503,6 @@
         #Reduce body composition by this consumed fat and determine what amount
         # of protein to consume to achieve specific power at start of flight
         bmDummy <- bm - usedFat
-        fmDummy <- fm - usedFat
 
         # because of this reduction minimum speed, mechanical power, and
         # wing frequency reduce
@@ -584,9 +556,6 @@
 
         # distance increment ###################################################
         dist <- dist + trueSpeed * 360
-
-        # increase counter
-        j <-  j + 1
       }
       results$distance[i] <- dist
       results$allUpMass[i] <- bm
@@ -653,7 +622,6 @@
       # return starting minimum power speed ####################################
       results$startMinSpeed[i] <- startMinSpeed
 
-      j <- 1
       while (fm > 0.000001) {
         # mechanical power from power curve holding true air-speed constant
         mechPower <-
@@ -677,19 +645,17 @@
                          constants)
 
         # chemical power #######################################################
-        chemPower <- (mechPower / constants$mce) +
-          .basal_metabolic_pow(
-            airframeMass = airframeMass, # doesn't change from previous J iteration
-            muscleMass = mm, # changes from previous J iteration
-            taxon = taxon[i],
-            alphaPasserines = alphaPasserines,
-            alphaNonPasserines = alphaNonPasserines,
-            deltaPasserines = deltaPasserines,
-            deltaNonPasserines = deltaNonPasserines
-          )
-
-        # increase chemPower by 10% respiratory
-        chemPower <- chemPower + (chemPower * 0.1)
+        chemPower <- constants$vcp * (mechPower + constants$mce * .basal_metabolic_pow(
+          airframeMass,
+          # doesn't change from previous J iteration
+          mm,
+          # changes from previous J iteration
+          taxon[i],
+          alphaPasserines,
+          alphaNonPasserines,
+          deltaPasserines,
+          deltaNonPasserines
+        )) / constants$mce
 
         # energy that should be attributed to protein
         EFromProtein <- chemPower * protein_met
@@ -751,7 +717,6 @@
         # distance increment ###################################################
         dist <- dist + trueSpeed * 360
         # increase counter
-        j <-  j + 1
       }
       results$distance[i] <- dist
       results$allUpMass[i] <- bm
