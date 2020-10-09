@@ -701,7 +701,7 @@
         # adjust body components ###############################################
         fm <- fm - (usedFat - usedFatEquiv)
         myofibrils <- myofibrils - usedMyofibrils
-        mm <- mitochondria + myofibrils - (usedMyofibrils - constants$phr)
+        mm <- mitochondria + myofibrils - (usedMyofibrils * constants$phr)
         airframeMass <- airframeMass - (totalEnergy * meetProtein / constants$ped)
         bm <- airframeMass + mm + fm
 
