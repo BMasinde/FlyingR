@@ -35,16 +35,7 @@
   wingSpan <- data$wingSpan
   wingArea <- data$wingArea
   muscleMass <- data$muscleMass
-
-  # id <- data$id not needed
-
-  #name <- data$name
-
   taxon <- data$taxon
-
-  # fractions
-  fatFraction <- fatMass / allMass
-  muscleFraction <- muscleMass / allMass
 
   # basal metabolic constants
   alphaPasserines <- constants$alpha[1]
@@ -97,27 +88,28 @@
           )
 
 
-        E <-
-          (mechPower / constants$mce) +
-          .basal_metabolic_pow(airframeMass, muscleMass[i], taxon[i],alphaPasserines,
-                                alphaNonPasserines,
-                               deltaPasserines,
-                               deltaNonPasserines)
-
-          # increase E by 10% to account for respiratory and heart
-          E <- E + (E * 0.1)
+        chemPower <- constants$vcp * (mechPower + constants$mce * .basal_metabolic_pow(
+          airframeMass,
+          # doesn't change from previous J iteration
+          muscleMass[i],
+          # changes from previous J iteration
+          taxon[i],
+          alphaPasserines,
+          alphaNonPasserines,
+          deltaPasserines,
+          deltaNonPasserines
+        )) / constants$mce
 
           # update body ########################################################
           #NEW
           changeAirframe <-
-            ifelse(protein_met == 0, 0, ((E * protein_met) / constants$ped) * 360 * constants$phr)
+            ifelse(protein_met == 0, 0, ((chemPower * protein_met) / constants$ped) * 360 * constants$phr)
           # protein has to be hydrated
 
 
           airframeMass <- airframeMass - changeAirframe
-          #cat("Airframe mass", airframeMass, sep = " ", "\n")
           changeMass <-
-            ifelse(protein_met == 0, (E / constants$fed) * 360, ((E - (E * protein_met)) / constants$fed) * 360)
+            ifelse(protein_met == 0, (chemPower / constants$fed) * 360, ((chemPower - (chemPower * protein_met)) / constants$fed) * 360)
           fm <- fm - changeMass
           bm <- airframeMass + fm + muscleMass[i]
 
@@ -171,24 +163,26 @@
           # chemical power
           # E <-
           #   (mechPower / constants$mce) + .basal.met2(constants, bm, fm, taxon[i])
-        E <-
-          (mechPower / constants$mce) +
-          .basal_metabolic_pow(airframeMass, muscleMass[i], taxon[i],alphaPasserines,
-                               alphaNonPasserines,
-                               deltaPasserines,
-                               deltaNonPasserines)
-
-          #increase E by 10% to account for respiratory and heart ##############
-          E <- E + (E * 0.1)
+        chemPower <- constants$vcp * (mechPower + constants$mce * .basal_metabolic_pow(
+          airframeMass,
+          # doesn't change from previous J iteration
+          muscleMass[i],
+          # changes from previous J iteration
+          taxon[i],
+          alphaPasserines,
+          alphaNonPasserines,
+          deltaPasserines,
+          deltaNonPasserines
+        )) / constants$mce
 
           # update body ########################################################
           #NEW
           changeAirframe <-
-            ifelse(protein_met == 0, 0, ((E * protein_met) / constants$ped) * 360 * constants$phr)
+            ifelse(protein_met == 0, 0, ((chemPower * protein_met) / constants$ped) * 360 * constants$phr)
           airframeMass <- airframeMass - changeAirframe
           #changeMass <- (E / constants$fed) * 360
           changeMass <-
-            ifelse(protein_met == 0, (E / constants$fed) * 360, ((E - (E * protein_met)) / constants$fed) * 360)
+            ifelse(protein_met == 0, (chemPower / constants$fed) * 360, ((chemPower - (chemPower * protein_met)) / constants$fed) * 360)
           fm <- fm - changeMass
           bm <- airframeMass + fm + muscleMass[i]
 
