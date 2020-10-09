@@ -156,7 +156,6 @@
         #Reduce body composition by this consumed fat and determine what amount
         # of protein to consume to achieve specific power at start of flight
         bmDummy <- bm - usedFat
-        fmDummy <- fm - usedFat
 
         # because of this reduction minimum speed, mechanical power, and
         # wing frequency reduce
@@ -190,25 +189,21 @@
                          wa = wingArea[i],
                          constants)
 
-        # amount of protein consumed that restores specific work to initial value
-        usedProtein <-
+        # amount of Myofibrils consumed that restores specific work to initial value
+        usedMyofibrils <-
           -(mechPowerDummy / (wingFreqDummy * specWorkStart)) + myofibrils
 
         # amount of fuel energy released is found by multiplying the mass of dry protein
-        # removed by the energy density of dry protein
+        # removed by the energy density of dry protein. Efficiency is involved in
+        # this conversion.
         usedFatEquiv <-
-          (usedProtein * constants$ped) / constants$fed
+          (usedMyofibrils * constants$ped * constants$mce) / constants$fed
 
         # update body measurements #############################################
         fm <- fm - (usedFat - usedFatEquiv)
-        #cat("current fat mass = ", fm, sep = " ", "\n")
-        # adjustment of needed for myofibrils?
-        myofibrils <- myofibrils - (usedProtein * constants$phr)
-        mm <- mitochondria + myofibrils
-
-        # have to subtract the fat equivalent and water lost in the process
-        bm <- bm - (usedFat - usedFatEquiv) - (usedProtein * constants$phr)
-
+        myofibrils <- myofibrils - usedMyofibrils
+        mm <- mitochondria + myofibrils - (usedMyofibrils * constants$phr)
+        bm <- airframeMass + mm + fm
         # distance increment ###################################################
         dist <- dist + trueSpeed * 360
       }
@@ -312,20 +307,13 @@
           deltaNonPasserines
         )) / constants$mce
 
-        #cat("chem power within while", chemPower, sep = " ", "\n")
-
-        # energy that should be attributed to protein
-        EFromProtein <- chemPower * protein_met
 
         # fat consumed in the interval?
-        #usedFat <- ((chemPower - EFromProtein)  / constants$fed) * 360
         usedFat <- (chemPower  / constants$fed) * 360
         #Reduce body composition by this consumed fat and determine what amount
         # of protein to consume to achieve specific power at start of flight
         bmDummy <- bm - usedFat
 
-
-        #cat("expected change in bm", bmDummy, sep = " ", "\n")
         # because of this reduction minimum speed, mechanical power, and
         # wing frequency reduce
 
@@ -359,25 +347,27 @@
                          constants)
 
         # amount of protein consumed that restores specific work to initial value
-        usedProtein <-
+        usedMyofibrils <-
           -(mechPowerDummy / (wingFreqDummy * specWorkStart)) + myofibrils
 
         # amount of fuel energy released is found by multiplying the mass of dry protein
         # removed by the energy density of dry protein
         usedFatEquiv <-
-          (usedProtein * constants$ped) / constants$fed
+          (usedMyofibrils * constants$ped * constants$mce) / constants$fed
+
+        # total energy produced in the interval
+        totalEnergy <- chemPower * 360 + usedMyofibrils * constants$ped
+        # % of protein energy remaining for minimum energy from protein to be met
+        # this will come from airframe mass.
+        meetProtein <-
+          protein_met - (usedMyofibrils * constants$ped * constants$mce) / totalEnergy
 
         # adjust body components ###############################################
         fm <- fm - (usedFat - usedFatEquiv)
-
-        myofibrils <- myofibrils - (usedProtein * constants$phr)
-        mm <- mitochondria + myofibrils
-        airframeMass <- airframeMass - ((EFromProtein/constants$ped) * 360 * constants$phr)
-        #cat("airframe mass", airframeMass, sep = " ", "\n")
-        #bm <- bm - (usedFat - usedFatEquiv) - (usedProtein * constants$phr) - (EFromProtein/constants$ped)
-
+        myofibrils <- myofibrils - usedMyofibrils
+        mm <- mitochondria + myofibrils - (usedMyofibrils * constants$phr)
+        airframeMass <- airframeMass - (totalEnergy * meetProtein / constants$ped)
         bm <- airframeMass + mm + fm
-
         # distance increment ###################################################
         dist <- dist + trueSpeed * 360
       }
@@ -537,22 +527,19 @@
                          constants)
 
         # amount of protein consumed that restores specific work to initial value
-        usedProtein <-
+        usedMyofibrils <-
           -(mechPowerDummy / (wingFreqDummy * specWorkStart)) + myofibrils
 
         # amount of fuel energy released is found by multiplying the mass of dry protein
         # removed by the energy density of dry protein
         usedFatEquiv <-
-          (usedProtein * constants$ped) / constants$fed
+          (usedMyofibrils * constants$ped * constants$mce) / constants$fed
 
         # update body measurements #############################################
         fm <- fm - (usedFat - usedFatEquiv)
-
-        # adjustment of needed for myofibrils?
-        #myofibrils <- myofibrils - (usedProtein * constants$phr)
-        mm <- mitochondria + myofibrils
-
-        bm <- bm - (usedFat - usedFatEquiv)
+        myofibrils <-  myofibrils - usedMyofibrils
+        mm <- mitochondria + myofibrils - (usedMyofibrils * constants$phr)
+        bm <- airframeMass + mm + fm
 
         # distance increment ###################################################
         dist <- dist + trueSpeed * 360
@@ -657,16 +644,12 @@
           deltaNonPasserines
         )) / constants$mce
 
-        # energy that should be attributed to protein
-        EFromProtein <- chemPower * protein_met
-
         # fat consumed in the interval?
-        usedFat <- (chemPower - EFromProtein)  / constants$fed * 360
+        usedFat <- chemPower / constants$fed * 360
 
         #Reduce body composition by this consumed fat and determine what amount
-        # of protein to consume to achieve specific power at start of flight
+        # of protein to consume to achieve specific work at start of flight
         bmDummy <- bm - usedFat
-        fmDummy <- fm - usedFat
 
         # because of this reduction minimum speed, mechanical power, and
         # wing frequency reduce
@@ -701,17 +684,25 @@
                          constants)
 
         # amount of protein consumed that restores specific work to initial value
-        usedProtein <-
+        usedMyofibrils <-
           -(mechPowerDummy / (wingFreqDummy * specWorkStart)) + myofibrils
 
         # amount of fuel energy released is found by multiplying the mass of dry protein
         # removed by the energy density of dry protein
-        usedFatEquiv <- (usedProtein * constants$ped) / constants$fed
+        usedFatEquiv <- (usedMyofibrils * constants$ped * constants$mce) / constants$fed
+
+        # total energy produced in the interval
+        totalEnergy <- chemPower * 360 + usedMyofibrils * constants$ped
+
+        # % protein energy remaining for minimum % energy from protein to be achieved
+        meetProtein <-
+          protein_met - (usedMyofibrils * constants$ped * constants$mce) / totalEnergy
 
         # adjust body components ###############################################
         fm <- fm - (usedFat - usedFatEquiv)
-        myofibrils <- myofibrils - (usedProtein - constants$phr)
-        mm <- mitochondria + myofibrils
+        myofibrils <- myofibrils - usedMyofibrils
+        mm <- mitochondria + myofibrils - (usedMyofibrils - constants$phr)
+        airframeMass <- airframeMass - (totalEnergy * meetProtein / constants$ped)
         bm <- airframeMass + mm + fm
 
         # distance increment ###################################################
