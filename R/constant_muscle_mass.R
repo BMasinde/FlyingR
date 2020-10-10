@@ -4,14 +4,14 @@
 # @param data Data as output from .colnames.match
 # @param constants
 # @param speed_control speed control as either
-# @param protein_met percentage of energy attributed to protein
+# @param min_energy_protein percentage of energy attributed to protein
 
 # Rules ########################################################################
 # variables are in camelCase except constants abrv
 # functions are in function_name
 # file name file.name.ext
 ################################################################################
-.constant.muscle.mass <- function(data, constants, speed_control, protein_met) {
+.constant.muscle.mass <- function(data, constants, speed_control, min_energy_protein) {
   if (missing(data) == TRUE) {
     stop("Missing data argument")
   }
@@ -54,7 +54,7 @@
     endMinSpeed = vector(length = n)
   )
 
-  if (speed_control == 1 && protein_met == 0) {
+  if (speed_control == 1 && min_energy_protein == 0) {
 
     for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
@@ -105,16 +105,16 @@
 
         # change in fat mass
         # changeMass <-
-        #   ifelse(protein_met == 0, (totalEnergy / constants$fed) , ((totalEnergy - (totalEnergy * protein_met)) / constants$fed))
+        #   ifelse(min_energy_protein == 0, (totalEnergy / constants$fed) , ((totalEnergy - (totalEnergy * min_energy_protein)) / constants$fed))
         changeMass <- (chemPower * 360) / constants$fed
 
         # change in airframe mass
         # changeAirframe <-
-        #   ifelse(protein_met == 0, 0, ((totalEnergy * protein_met) / constants$ped))
+        #   ifelse(min_energy_protein == 0, 0, ((totalEnergy * min_energy_protein) / constants$ped))
         # protein has to be hydrated
 
           # update body ########################################################
-        #airframeMass <- airframeMass - changeAirframe - (((totalEnergy * protein_met) / constants$ped) * constants$phr)
+        #airframeMass <- airframeMass - changeAirframe - (((totalEnergy * min_energy_protein) / constants$ped) * constants$phr)
 
           fm <- fm - changeMass
           bm <- airframeMass + fm + muscleMass[i]
@@ -134,7 +134,7 @@
       results$endMinSpeed[i] <- minSpeed[j - 1]
     }
 
-  } else if (speed_control == 1 && protein_met > 0) {
+  } else if (speed_control == 1 && min_energy_protein > 0) {
     for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
@@ -183,14 +183,14 @@
         totalEnergy <- chemPower * 360
 
         # change in fat mass
-        changeMass <- ((totalEnergy - (totalEnergy * protein_met)) / constants$fed)
+        changeMass <- ((totalEnergy - (totalEnergy * min_energy_protein)) / constants$fed)
 
         # change in airframe mass
-        changeAirframe <- (totalEnergy * protein_met) / constants$ped
+        changeAirframe <- (totalEnergy * min_energy_protein) / constants$ped
         # protein has to be hydrated
 
         # update body ########################################################
-        airframeMass <- airframeMass - changeAirframe - (((totalEnergy * protein_met) / constants$ped) * constants$phr)
+        airframeMass <- airframeMass - changeAirframe - (((totalEnergy * min_energy_protein) / constants$ped) * constants$phr)
 
         fm <- fm - changeMass
         bm <- airframeMass + fm + muscleMass[i]
@@ -209,7 +209,7 @@
       results$startMinSpeed[i] <- minSpeed[1]
       results$endMinSpeed[i] <- minSpeed[j - 1]
     }
-  } else if (speed_control == 0 && protein_met == 0) {
+  } else if (speed_control == 0 && min_energy_protein == 0) {
     for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
@@ -257,21 +257,21 @@
 
         # change in fat mass.
         # changeMass <-
-        #   ifelse(protein_met == 0,
+        #   ifelse(min_energy_protein == 0,
         #          (totalEnergy / constants$fed) ,
         #          ((totalEnergy - (
-        #            totalEnergy * protein_met
+        #            totalEnergy * min_energy_protein
         #          )) / constants$fed))
         changeMass <-  (chemPower * 360) / constants$fed
 
         # change in airframe mass
         # changeAirframe <-
-        #   ifelse(protein_met == 0, 0, ((totalEnergy * protein_met) / constants$ped))
+        #   ifelse(min_energy_protein == 0, 0, ((totalEnergy * min_energy_protein) / constants$ped))
 
         # update body ########################################################
         fm <- fm - changeMass
         # airframeMass <-
-        #   airframeMass - changeAirframe - (((totalEnergy * protein_met) / constants$ped) * constants$phr)
+        #   airframeMass - changeAirframe - (((totalEnergy * min_energy_protein) / constants$ped) * constants$phr)
         bm <- airframeMass + fm + muscleMass[i]
 
         # distance increment #################################################
@@ -288,7 +288,7 @@
       results$startMinSpeed[i] <- minSpeed[1]
       results$endMinSpeed[i] <- minSpeed[j - 1]
     }
-  }else if (speed_control == 0 && protein_met > 0) {
+  }else if (speed_control == 0 && min_energy_protein > 0) {
     for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
@@ -336,20 +336,20 @@
 
         # change in fat mass.
         changeMass <-
-          ifelse(protein_met == 0,
+          ifelse(min_energy_protein == 0,
                  (totalEnergy / constants$fed) ,
                  ((totalEnergy - (
-                   totalEnergy * protein_met
+                   totalEnergy * min_energy_protein
                  )) / constants$fed))
 
         # change in airframe mass
         changeAirframe <-
-          ifelse(protein_met == 0, 0, ((totalEnergy * protein_met) / constants$ped))
+          ifelse(min_energy_protein == 0, 0, ((totalEnergy * min_energy_protein) / constants$ped))
 
           # update body ########################################################
         fm <- fm - changeMass
         airframeMass <-
-          airframeMass - changeAirframe - (((totalEnergy * protein_met) / constants$ped) * constants$phr)
+          airframeMass - changeAirframe - (((totalEnergy * min_energy_protein) / constants$ped) * constants$phr)
         bm <- airframeMass + fm + muscleMass[i]
 
         # distance increment #################################################

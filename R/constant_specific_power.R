@@ -5,7 +5,7 @@
 # @param constants
 # @param speed_control speed control as either
 
-.constant.specific.power <- function(data, constants, speed_control, protein_met) {
+.constant.specific.power <- function(data, constants, speed_control, min_energy_protein) {
   if (missing(data) == TRUE) {
     stop("Missing data argument", call. = FALSE)
   }
@@ -59,7 +59,7 @@
     endMinSpeed = vector(length = n)
   )
 
-  if (speed_control == 1 && protein_met == 0) {
+  if (speed_control == 1 && min_energy_protein == 0) {
     for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
@@ -224,7 +224,7 @@
         bdc = constants$bdc
       )
     }
-  } else if (speed_control == 1 && protein_met > 0) {
+  } else if (speed_control == 1 && min_energy_protein > 0) {
       for (i in seq_len(nrow(data))) {
         # things to keep track of ################################################
         bm <- allMass[i]
@@ -310,7 +310,7 @@
           #cat("chem power within while", chemPower, sep = " ", "\n")
 
           # energy that should be attributed to protein
-          #EFromProtein <- chemPower * protein_met
+          #EFromProtein <- chemPower * min_energy_protein
           # fat consumed in the interval?
           usedFat <- (chemPower  / constants$fed) * 360
           #Reduce body composition by this consumed fat and determine what amount
@@ -348,7 +348,7 @@
           #totalEnergy <- usedFat * constants$fed * 360 + usedMyofibrils * constants$ped
           totalEnergy <- chemPower * 360 + usedMyofibrils * constants$ped
           meetProtein <-
-            protein_met - (usedMyofibrils * constants$ped * constants$mce) / totalEnergy
+            min_energy_protein - (usedMyofibrils * constants$ped * constants$mce) / totalEnergy
           #cat("met energy from protein",(usedMyofibrils * constants$ped * constants$mce) / totalEnergy, "and total energy", totalEnergy, sep = " ", "\n")
           #cat("protein energy remaining that should be met", meetProtein, sep = " ", "\n")
 
@@ -390,7 +390,7 @@
           bdc = constants$bdc
         )
       } # closes for loop
-  } else if (speed_control == 0 && protein_met == 0) {
+  } else if (speed_control == 0 && min_energy_protein == 0) {
     for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
@@ -545,7 +545,7 @@
         bdc = constants$bdc
       )
     } # closes for loop
-  } else if (speed_control == 0 && protein_met > 0) {
+  } else if (speed_control == 0 && min_energy_protein > 0) {
     for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
@@ -635,7 +635,7 @@
         )) / constants$mce
 
         # energy that should be attributed to protein
-        #EFromProtein <- chemPower * protein_met
+        #EFromProtein <- chemPower * min_energy_protein
         #cat("energy from used myofibrils", (usedMyofibrils * constants$ped)/(usedFat * constants$fed * 360 + usedMyofibrils * constants$ped), sep = " ", "\n")
         # fat consumed in the interval?
         usedFat <- (chemPower  / constants$fed) * 360
@@ -680,10 +680,10 @@
 
         totalEnergy <- chemPower * 360 + usedMyofibrils * constants$ped
         meetProtein <-
-          protein_met - (usedMyofibrils * constants$ped * constants$mce) / totalEnergy
+          min_energy_protein - (usedMyofibrils * constants$ped * constants$mce) / totalEnergy
 
         # adjust body components ###############################################
-        # aiframe mass should be adjusted to bring the protein energy to same as protein_met
+        # aiframe mass should be adjusted to bring the protein energy to same as min_energy_protein
         fm <- fm - (usedFat - usedFatEquiv)
         myofibrils <- myofibrils - usedMyofibrils
         mm <- mitochondria + myofibrils - (usedMyofibrils * constants$phr)

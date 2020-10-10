@@ -5,7 +5,7 @@
 # @param constants
 # @param speed_control speed control as either
 
-.constant.specific.work <- function(data, constants, speed_control, protein_met) {
+.constant.specific.work <- function(data, constants, speed_control, min_energy_protein) {
 
 # defensives ###################################################################
   if (missing(data) == TRUE) {
@@ -61,7 +61,7 @@
     endMinSpeed = vector(length = n)
   )
 
-  if (speed_control == 1 && protein_met == 0) {
+  if (speed_control == 1 && min_energy_protein == 0) {
     for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
@@ -220,7 +220,7 @@
         bdc = constants$bdc
       )
     }
-  }  else if (speed_control == 1 && protein_met > 0) {
+  }  else if (speed_control == 1 && min_energy_protein > 0) {
     for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
@@ -360,7 +360,7 @@
         # % of protein energy remaining for minimum energy from protein to be met
         # this will come from airframe mass.
         meetProtein <-
-          protein_met - (usedMyofibrils * constants$ped * constants$mce) / totalEnergy
+          min_energy_protein - (usedMyofibrils * constants$ped * constants$mce) / totalEnergy
 
         # adjust body components ###############################################
         fm <- fm - (usedFat - usedFatEquiv)
@@ -384,7 +384,7 @@
         bdc = constants$bdc
       )
     } # closes for loop
-  } else if (speed_control == 0 && protein_met == 0) {
+  } else if (speed_control == 0 && min_energy_protein == 0) {
     for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
@@ -557,7 +557,7 @@
         bdc = constants$bdc
       )
     } # closes for loop (iterates over rows of species)
-  } else if (speed_control == 0 && protein_met > 0) {
+  } else if (speed_control == 0 && min_energy_protein > 0) {
     for (i in seq_len(nrow(data))) {
       # things to keep track of ################################################
       bm <- allMass[i]
@@ -696,7 +696,7 @@
 
         # % protein energy remaining for minimum % energy from protein to be achieved
         meetProtein <-
-          protein_met - (usedMyofibrils * constants$ped * constants$mce) / totalEnergy
+          min_energy_protein - (usedMyofibrils * constants$ped * constants$mce) / totalEnergy
 
         # adjust body components ###############################################
         fm <- fm - (usedFat - usedFatEquiv)
@@ -722,6 +722,6 @@
         bdc = constants$bdc
       )
     }
-  } # closes conditioning speed_control and protein_met
+  } # closes conditioning speed_control and min_energy_protein
   return(results)
 }

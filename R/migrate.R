@@ -20,7 +20,7 @@
 #'        \emph{1} is used. \emph{0} is the alternative.
 #'        The former holds the true airspeed constant while the latter holds the
 #'        ratio of true airspeed and minimum power speed constant.
-#' @param protein_met Percentage of energy attributed to protein from metabolism.
+#' @param min_energy_protein Percentage of energy attributed to protein from metabolism.
 #'        Default value is 5 percent (0.05).
 #'
 #' @details The option *control takes the following arguments
@@ -64,14 +64,14 @@
 #' @usage migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
 #'                fill = TRUE, comment.char = "", ...,
 #'                data = NULL, settings = list(), method = "cmm",
-#'                speed_control = 1, protein_met = 0)
+#'                speed_control = 1, min_energy_protein = 0)
 #'
 
 
 migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                     fill = TRUE, comment.char = "", ...,
                     data = NULL, settings = list(), method = "cmm",
-                    speed_control = 1, protein_met = 0) {
+                    speed_control = 1, min_energy_protein = 0) {
 
   # both file and data not given throw an error
   if (missing(file) == TRUE & is.null(data) == TRUE) {
@@ -87,7 +87,7 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   }
 
   # min_protein < 0 or > 1 throw error
-  if (protein_met < 0 || protein_met > 1) {
+  if (min_energy_protein < 0 || min_energy_protein > 1) {
     stop("min_protein within [0,1] \n", call. = TRUE)
   }
 
@@ -121,13 +121,13 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
 
   if (method == "cmm") {
     simulation <-
-      .constant.muscle.mass(data, constants, speed_control, protein_met)
+      .constant.muscle.mass(data, constants, speed_control, min_energy_protein)
   } else if (method == "csw") {
     simulation <-
-      .constant.specific.work(data, constants, speed_control, protein_met)
+      .constant.specific.work(data, constants, speed_control, min_energy_protein)
   } else if (method == "csp") {
     simulation <-
-      .constant.specific.power(data, constants, speed_control, protein_met)
+      .constant.specific.power(data, constants, speed_control, min_energy_protein)
   }
 
   # aggregate dist from simulation to get range in Km
