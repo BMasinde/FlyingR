@@ -100,16 +100,21 @@
           deltaNonPasserines
         )) / constants$mce
 
+        # total energy produced in the interval
+        totalEnergy <- chemPower * 360
+
+        # change in fat mass
+        changeMass <-
+          ifelse(protein_met == 0, (totalEnergy / constants$fed) , ((totalEnergy - (totalEnergy * protein_met)) / constants$fed))
+
+        # change in airframe mass
+        changeAirframe <-
+          ifelse(protein_met == 0, 0, ((totalEnergy * protein_met) / constants$ped))
+        # protein has to be hydrated
+
           # update body ########################################################
-          #NEW
-          changeAirframe <-
-            ifelse(protein_met == 0, 0, ((chemPower * protein_met) / constants$ped) * 360 * constants$phr)
-          # protein has to be hydrated
+          airframeMass <- airframeMass - changeAirframe - (((totalEnergy * protein_met) / constants$ped) * constants$phr)
 
-
-          airframeMass <- airframeMass - changeAirframe
-          changeMass <-
-            ifelse(protein_met == 0, (chemPower / constants$fed) * 360, ((chemPower - (chemPower * protein_met)) / constants$fed) * 360)
           fm <- fm - changeMass
           bm <- airframeMass + fm + muscleMass[i]
 
@@ -135,7 +140,7 @@
       airframeMass <- allMass[i] - (fatMass[i] + muscleMass[i]) # airframe mass
       fm <- fatMass[i]
       dist <- 0
-      minSpeed <- vector(length = n)
+      minSpeed <- vector()
       trueSpeed <- 0
 
       j <- 1
@@ -158,11 +163,7 @@
                              vt = trueSpeed,
                              g = constants$g, airDensity = constants$airDensity, ipf = constants$ipf,
                              bdc = constants$bdc, ppc = constants$ppc)
-
-        #if (protein_met == 0) {
-          # chemical power
-          # E <-
-          #   (mechPower / constants$mce) + .basal.met2(constants, bm, fm, taxon[i])
+        # chemical power including 10% heart and respiration and metabolism.
         chemPower <- constants$vcp * (mechPower + constants$mce * .basal_metabolic_pow(
           airframeMass,
           # doesn't change from previous J iteration
@@ -175,22 +176,32 @@
           deltaNonPasserines
         )) / constants$mce
 
+        # total energy produced in the interval
+        totalEnergy <- chemPower * 360
+
+        # change in fat mass.
+        changeMass <-
+          ifelse(protein_met == 0,
+                 (totalEnergy / constants$fed) ,
+                 ((totalEnergy - (
+                   totalEnergy * protein_met
+                 )) / constants$fed))
+
+        # change in airframe mass
+        changeAirframe <-
+          ifelse(protein_met == 0, 0, ((totalEnergy * protein_met) / constants$ped))
+
           # update body ########################################################
-          #NEW
-          changeAirframe <-
-            ifelse(protein_met == 0, 0, ((chemPower * protein_met) / constants$ped) * 360 * constants$phr)
-          airframeMass <- airframeMass - changeAirframe
-          #changeMass <- (E / constants$fed) * 360
-          changeMass <-
-            ifelse(protein_met == 0, (chemPower / constants$fed) * 360, ((chemPower - (chemPower * protein_met)) / constants$fed) * 360)
-          fm <- fm - changeMass
+        fm <- fm - changeMass
+        airframeMass <-
+          airframeMass - changeAirframe - (((totalEnergy * protein_met) / constants$ped) * constants$phr)
           bm <- airframeMass + fm + muscleMass[i]
 
-          # distance increment #################################################
-          dist <- dist + trueSpeed * 360
+        # distance increment #################################################
+        dist <- dist + trueSpeed * 360
 
-          # increment counter
-          j <- j + 1
+        # increment counter
+        j <- j + 1
       }
       # store results ##########################################################
       results$distance[i] <- dist
