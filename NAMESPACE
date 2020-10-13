@@ -2,6 +2,7 @@
 
 export(flysim)
 export(migrate)
+export(stopover.mass.calculator)
 exportPattern("^[[:alpha:]]+")
 import(Rcpp)
 importFrom(Rcpp,evalCpp)
