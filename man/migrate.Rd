@@ -7,7 +7,7 @@
 migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                fill = TRUE, comment.char = "", ...,
                data = NULL, settings = list(), method = "cmm",
-               speed_control = 1, protein_met = 0)
+               speed_control = 1, min_energy_protein = 0)
 }
 \arguments{
 \item{file}{Path to file where data resides.}
@@ -38,7 +38,7 @@ default values from Pennycuick(2008) and Pennycuick(1998).}
 The former holds the true airspeed constant while the latter holds the
 ratio of true airspeed and minimum power speed constant.}
 
-\item{protein_met}{Percentage of energy attributed to protein from metabolism.
+\item{min_energy_protein}{Percentage of energy attributed to protein from metabolism.
 Default value is 5 percent (0.05).}
 }
 \value{
