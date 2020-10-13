@@ -359,19 +359,6 @@
           fm <- fm - (usedFat - usedFatEquiv)
           airframeMass <- airframeMass - (((totalEnergy * meetProtein) / constants$ped) * constants$phr)
           myofibrils <- myofibrils - usedMyofibrils
-          # newMechPower <- .mechanical_power(
-          #   bm = airframeMass + fm + myofibrils + mitochondria - (usedMyofibrils * constants$phr) ,
-          #   ws = wingSpan[i],
-          #   wa = wingArea[i],
-          #   tas = trueSpeedDummy,
-          #   g = constants$g,
-          #   airDensity = constants$airDensity,
-          #   ipf = constants$ipf,
-          #   bdc = constants$bdc,
-          #   ppc = constants$ppc
-          # )
-          # newMito <- -((newMechPower * constants$mipd * constants$muscDensity)/mitochondriaFractStart) + (myofibrils + mitochondria - (usedMyofibrils * constants$phr))
-          # mitochondria <-  mitochondria - newMito
           mm <- mitochondria + myofibrils - (usedMyofibrils * constants$phr)
           bm <- airframeMass + mm + fm
           # distance increment ###################################################
@@ -687,7 +674,7 @@
         fm <- fm - (usedFat - usedFatEquiv)
         myofibrils <- myofibrils - usedMyofibrils
         mm <- mitochondria + myofibrils - (usedMyofibrils * constants$phr)
-        airframeMass <- airframeMass - (((totalEnergy * meetProtein) / constants$ped)* constants$phr)
+        airframeMass <- airframeMass - (((totalEnergy * meetProtein) / constants$ped) * constants$phr)
         bm <- airframeMass + mm + fm
 
         # distance increment ###################################################
