@@ -57,6 +57,7 @@
 #'    \item remaining muscle mass (Kg)
 #'    \item minimum power speed at start of flight (m/s)
 #'    \item minimum power speed at end of flight (m/s)
+#'    \item taxon (order)
 #' }
 #'
 #' @import Rcpp
@@ -115,7 +116,8 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
     fatMass = vector(length = n),
     muscleMass = vector(length = n),
     startMinSpeed = vector(length = n),
-    endMinSpeed = vector(length = n)
+    endMinSpeed = vector(length = n),
+    taxon = vector(length = n)
   )
 
   # control constants using default vs supplied
@@ -143,6 +145,7 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   results$muscleMass <- simulation$muscleMass
   results$startMinSpeed <- simulation$startMinSpeed
   results$endMinSpeed <- simulation$endMinSpeed
+  results$taxon <- data$taxon
   # range as named vectors
   if (!is.null(data$name)) {
     #names(results$range) <- as.vector(data$name)

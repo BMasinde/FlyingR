@@ -53,6 +53,7 @@ S3 class object with range estimates based on methods defined and
    \item remaining muscle mass (Kg)
    \item minimum power speed at start of flight (m/s)
    \item minimum power speed at end of flight (m/s)
+   \item taxon (order)
 }
 }
 \description{
