@@ -7,7 +7,7 @@
 migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                fill = TRUE, comment.char = "", ...,
                data = NULL, settings = list(), method = "cmm",
-               speed_control = 1, min_energy_protein = 0)
+               speed_control = 1, min_energy_protein = 0.05)
 }
 \arguments{
 \item{file}{Path to file where data resides.}
@@ -31,49 +31,55 @@ migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
 \item{settings}{A list for re-defining constants. See details for these with
 default values from Pennycuick(2008) and Pennycuick(1998).}
 
-\item{method}{Methods for fuel management}
+\item{method}{Methods for protein energy consumption from muscle mass}
 
 \item{speed_control}{One of two speed control methods. By default
 \emph{1} is used. \emph{0} is the alternative.
 The former holds the true airspeed constant while the latter holds the
-ratio of true airspeed and minimum power speed constant.}
+ratio of true airspeed to the minimum power speed constant (V:Vmp constant).}
 
-\item{min_energy_protein}{Percentage of energy attributed to protein from metabolism.
-Default value is 5 percent (0.05).}
+\item{min_energy_protein}{Percentage of energy attributed to protein due to
+metabolism. Default value is 5 percent (0.05). If method  "csw" or "csp"
+is chosen, 2% -3% of the total energy is accounted for. The remainder
+would be attained from consuming protein in the airframe mass.}
 }
 \value{
 S3 class object with range estimates based on methods defined and
        settings
 \itemize{
-   \item data as a data frame
    \item range estimates (Km)
-   \item fuel
-   \item settings (named vector)
+   \item remaining body mass (Kg)
+   \item remaining fat mass (Kg)
+   \item remaining muscle mass (Kg)
+   \item minimum power speed at start of flight (m/s)
+   \item minimum power speed at end of flight (m/s)
 }
 }
 \description{
-Practical range estimation of birds using methods in Pennycuick (2008).
+Practical range estimation of birds using methods from Pennycuick (2008).
 }
 \details{
 The option *control takes the following arguments
 \itemize{
-   \item ppc: Profile power constant (8.4)
-   \item fed: Energy content of fuel from fat (3.9E+07)
-   \item ped: Energy content of protein (1.8E+07)
-   \item g: Accelaration due to gravity (9.81)
+   \item ppc: Profile power constant (8.4).
+   \item fed: Energy content of fuel from fat (3.9E+07).
+   \item ped: Energy content of protein (1.8E+07).
+   \item g: Accelaration due to gravity (9.81).
    \item mce: Mechanical conversion efficiency [0,1]. Efficiency at which
-   mechanical power is converted to chemical power. (0.23)
-   \item ipf: Induced power factor (1.2)
-   \item vcp: Ventilation and circulation power (1.1)
-   \item airDensity: Air density at cruising altitude (1.00)
-   \item bdc: Body drag coefficient (0.1)
-   \item alpha: Basal metabolism factors in passerines and non passerines (6.25, 3.79)
+   mechanical power is converted to chemical power (0.23).
+   \item ipf: Induced power factor (1.2).
+   \item vcp: Ventilation and circulation power (1.1).
+   \item airDensity: Air density at cruising altitude (1.00).
+   \item bdc: Body drag coefficient (0.1).
+   \item alpha: Basal metabolism factors in passerines and non passerines (6.25, 3.79).
    \item delta: Basal metabolism factors in passerines and non passerines (0.724, 0.723)
    alpha*bodyMass^delta.
-   \item mipd: Inverse power density of the mitochondria. (1.2E-06)
-   \item speedRatio: True air speed to minimum power speed ratio (1.2)
-   \item muscDensity: Density of the flight muscles. (1060)
-   \item phr: Protein hydration ratio. (2.2)
+   \item mipd: Inverse power density of the mitochondria (1.2E-06).
+   \item speedRatio: True air speed to minimum power speed ratio (1.2).
+   \item muscDensity: Density of the flight muscles (1060).
+   \item phr: Protein hydration ratio (2.2). Whenever protein is consumed from
+   the muscle mass some amount of water is lost in the process. This water
+   is estimated as the mass of dry protein time the phr.
 }
 }
 \examples{

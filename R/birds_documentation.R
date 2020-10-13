@@ -1,6 +1,6 @@
 #' Sample 28 birds
 #'
-#' Preset birds data, extracted from Flight program. Fat mass percentage
+#' Preset birds data, extracted from Flight Pennycuick(2008). Fat mass percentage
 #' generated randomly where zero.
 #'
 #' @format A data frame with 28 observations and 5 variables not counting the
@@ -8,8 +8,8 @@
 #'
 #' \describe{
 #'    \item{Scientific.name}{Name of bird species}
-#'    \item{Empty.mass}{Body mass in Kg. Includes fuel. All-up mass with crop
-#'    empty. Not to be confused with lean mass.}
+#'    \item{Empty.mass}{Body mass in Kg. Includes fuel (fat mass). In this case the crops
+#'    were empty but otherwise one should always use the all-up mass (body mass + crop)}
 #'    \item{Wing.span}{Length of wings spread out in metres}
 #'    \item{Fat.mass}{Mass of fat that is consumable as fuel in Kg}
 #'    \item{Order}{Order of the spicies (passerine vs non-passerine)}
