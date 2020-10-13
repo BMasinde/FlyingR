@@ -63,17 +63,17 @@
       "fed",
       "ped",
       "g",
-      "efficiency",
-      "inducedPowerFactor",
-      "ventCircPower",
+      "mce",
+      "ipf",
+      "vcp",
       "airDensity",
-      "bodyDragCoef",
+      "bdc",
       "alpha",
       "delta",
-      "invPower",
+      "mipd",
       "speedRatio",
       "muscDensity",
-      "protHydRatio"
+      "phr"
     )
 
     # match args to user provided
