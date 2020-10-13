@@ -611,6 +611,19 @@
 
       while (fm > 0.000001) {
         # mechanical power from power curve holding true air-speed constant
+        # hold ratio of minimum power speed and true airspeed constant
+        # true start speed
+        minSpeed <- .minpowspeed_cpp(
+          bm = bm, # bm changes after each J iteration
+          ws = wingSpan[i],
+          ipf = constants$ipf,
+          g = constants$g,
+          airDensity = constants$airDensity,
+          bdc = constants$bdc
+        )
+
+        # we want to hold ratio of minimum power speed and true speed constant
+        trueSpeed <- minSpeed * constants$speedRatio
         mechPower <-
           .mechanical_power(
             bm = bm,
