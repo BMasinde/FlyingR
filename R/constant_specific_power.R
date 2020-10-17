@@ -357,7 +357,7 @@
 
           # adjust body components ###############################################
           fm <- fm - (usedFat - usedFatEquiv)
-          airframeMass <- airframeMass - (((totalEnergy * meetProtein) / constants$ped) * constants$phr)
+          airframeMass <- airframeMass - (((totalEnergy * meetProtein) / constants$ped) * constants$phr) - ((totalEnergy * meetProtein)/ constants$ped)
           myofibrils <- myofibrils - usedMyofibrils
           mm <- mitochondria + myofibrils - (usedMyofibrils * constants$phr)
           bm <- airframeMass + mm + fm
@@ -674,7 +674,7 @@
         fm <- fm - (usedFat - usedFatEquiv)
         myofibrils <- myofibrils - usedMyofibrils
         mm <- mitochondria + myofibrils - (usedMyofibrils * constants$phr)
-        airframeMass <- airframeMass - (((totalEnergy * meetProtein) / constants$ped) * constants$phr)
+        airframeMass <- airframeMass - (((totalEnergy * meetProtein) / constants$ped) * constants$phr) - ((totalEnergy * meetProtein)/ constants$ped)
         bm <- airframeMass + mm + fm
 
         # distance increment ###################################################

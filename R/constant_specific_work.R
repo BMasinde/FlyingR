@@ -366,7 +366,7 @@
         fm <- fm - (usedFat - usedFatEquiv)
         myofibrils <- myofibrils - usedMyofibrils
         mm <- mitochondria + myofibrils - (usedMyofibrils * constants$phr)
-        airframeMass <- airframeMass - (((totalEnergy * meetProtein) / constants$ped) * constants$phr)
+        airframeMass <- airframeMass - (((totalEnergy * meetProtein) / constants$ped) * constants$phr) - ((totalEnergy * meetProtein)/ constants$ped)
         bm <- airframeMass + mm + fm
         # distance increment ###################################################
         dist <- dist + trueSpeed * 360
@@ -711,11 +711,13 @@
         meetProtein <-
           min_energy_protein - (usedMyofibrils * constants$ped * constants$mce) / totalEnergy
 
+        #cat("energy met", meetProtein, sep = " ", "\n")
+
         # adjust body components ###############################################
         fm <- fm - (usedFat - usedFatEquiv)
         myofibrils <- myofibrils - usedMyofibrils
         mm <- mitochondria + myofibrils - (usedMyofibrils * constants$phr)
-        airframeMass <- airframeMass - (((totalEnergy * meetProtein) / constants$ped) * constants$phr)
+        airframeMass <- airframeMass - (((totalEnergy * meetProtein) / constants$ped) * constants$phr) - ((totalEnergy * meetProtein)/ constants$ped)
         bm <- airframeMass + mm + fm
 
         # distance increment ###################################################
