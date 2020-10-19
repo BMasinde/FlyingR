@@ -113,6 +113,22 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
     stop("Observations with zero fat mass. Birds need fat mass to migrate \n")
   }
 
+  if (any(data$muscleMass == 0.00)) {
+    stop("Observations with zero muscle mass \n")
+  }
+
+  if (any(data$bodyMass == 0.00)) {
+    stop("Observations with zero body mass \n")
+  }
+
+  if (any(data$wingSpan == 0.00)) {
+    stop("Observations with zero wingspan \n")
+  }
+
+  if (any(data$wingArea == 0.00)) {
+    stop("Observations with zero wing area \n")
+  }
+
   n <- nrow(data)
   # object with results ########################################################
   results <- list(
