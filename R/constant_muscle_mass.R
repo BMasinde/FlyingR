@@ -220,7 +220,7 @@
       trueSpeed <- 0
 
       j <- 1
-      while (fm > 0.0001) {
+      while (fm > 0.000001) {
         # find speed ###########################################################
         minSpeed[j] <-
           .minpowspeed_cpp(bm = bm, ws = wingSpan[i], ipf = constants$ipf,
