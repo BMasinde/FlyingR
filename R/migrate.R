@@ -108,6 +108,11 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
     data <- .colnames.match(data)
   }
 
+  # if any fat mass 0 zero stop (needs fuel)
+  if (any(data$fatMass == 0.00)) {
+    stop("Observations with zero fat mass. Birds need fat mass to migrate \n")
+  }
+
   n <- nrow(data)
   # object with results ########################################################
   results <- list(
