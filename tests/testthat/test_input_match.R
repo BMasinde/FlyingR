@@ -37,8 +37,26 @@ test_that("Factor in ordo other 1 and 2 throws error", {
   expect_error(.colnames.match(data = bad_factor))
 })
 
-no_muscle_mass <- birds[1:6]
+no_muscle_mass <- birds[, 1:6]
 
-test_that("No muscle mass throws a warning", {
-  expect_warning(.colnames.match(data = no_muscle_mass))
+test_that("No muscle mass throws an error", {
+  expect_error(.colnames.match(data = no_muscle_mass), "missing column: muscleMass")
 })
+
+no_taxon <- birds[, -5]
+test_that("No taxon mass throws an error", {
+  expect_error(.colnames.match(data = no_taxon), "missing column: taxon")
+})
+
+no_fatMass <- birds[, -4]
+test_that("No fat  mass throws an error", {
+  expect_error(.colnames.match(data = no_fatMass), "missing column: fatMass")
+})
+
+no_ids <- birds[, -1]
+
+test_that("No fat  mass throws an error", {
+  expect_message(.colnames.match(data = no_ids), "Identifier column not found. Auto-gen")
+})
+
+

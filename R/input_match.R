@@ -57,12 +57,12 @@
 
     #  missing column
     if (sum(variables[[i]]) == 0) {
-      if (i != 1 & i != 2 & i != 8) {
+      if (i != 1 && i != 2) {
         stop(paste0("missing column: ", names(variables)[i], "\n",
                     sep = " "), call. = FALSE)
-      } else if(i == 8) {
-        warning("No column matching muscle mass \n", call. = FALSE)
-      }
+      }# else if(i == 8) {
+      #  warning("No column matching muscle mass \n", call. = FALSE)
+      #}
     }
   }
 
