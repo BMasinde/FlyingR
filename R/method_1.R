@@ -44,7 +44,7 @@
   diskArea <- 0.25 * pi * (wingSpan ^ 2)
 
   # flat-plate area
-  flatPlateArea <- 0.00813 * (bodyMass ^ 0.666) * constants$bdf
+  flatPlateArea <- 0.00813 * (bodyMass ^ 0.666) * constants$bdc
 
   # lift drag ratio at beginning of flight
   liftDragRatio <- (dFactor / ((constants$ipf ^ 0.5) * constants$vcp)) *
@@ -55,7 +55,7 @@
 
   # range in kilometres
   kmRange <-
-    ((constants$fatEnergy * constants$mce) / constants$g) * liftDragRatio *
+    ((constants$fed * constants$mce) / constants$g) * liftDragRatio *
     log(1 / (1 - fatFrac))/1000
 
   return(round(kmRange, 1))

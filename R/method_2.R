@@ -52,11 +52,11 @@
   diskArea <- 0.25 * pi * (wingSpan ^ 2)
 
   # flat-plate area
-  flatPlateAreaEnd <- 0.00813 * (bodyMassEnd ^ 0.666) * constants$bdf
+  flatPlateAreaEnd <- 0.00813 * (bodyMassEnd ^ 0.666) * constants$bdc
 
   # lift drag ratio at begining of flight
   liftDragEnd <-
-    dFactorEnd / (constants$ipf ^ 0.5 * constants$ventCircPower) * ((diskArea / flatPlateAreaEnd) ^ 0.5)
+    dFactorEnd / (constants$ipf ^ 0.5 * constants$vcp) * ((diskArea / flatPlateAreaEnd) ^ 0.5)
 
 
   ## lift:drag ratio start of flight ###########################################
@@ -77,13 +77,13 @@
   #                                metPowRatioStart, 2), .interpolate, table2)
 
   liftDragStart <-
-    (dFactorStart / ((constants$ipf ^ 0.5) * constants$ventCircPower)) *
+    (dFactorStart / ((constants$ipf ^ 0.5) * constants$vcp)) *
     (((diskArea / flatPlateAreaEnd) ^ 0.5) / ((bodyMass / bodyMassEnd) ^ 0.5))
 
 
   ## Range in km ###############################################################
   kmRange <-
-    ((constants$fatEnergy * constants$mce) / constants$g) *
+    ((constants$fed * constants$mce) / constants$g) *
     apply(cbind(liftDragStart, liftDragEnd), 1, mean) *
     log(1 / (1 - fatFrac)) / 1000
 
