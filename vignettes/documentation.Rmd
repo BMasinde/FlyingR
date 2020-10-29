@@ -63,7 +63,7 @@ The default settings are as follows:
   \end{tabular}
 \end{table}
 
-These setttings could be adjusted. For example, the defualt value fo the induced
+These settings could be adjusted. For example, the default value for the induced
 power factor is high, the recommended being 0.9. This can be adjusted as follows
 `settings = list(ipf =0.9)`. Basic knowledge of defining lists is required.
 
