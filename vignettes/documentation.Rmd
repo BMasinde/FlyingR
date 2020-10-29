@@ -20,6 +20,7 @@ tutorial focus is on the second approach (a time-marching approach).
 ## Basic usage with default settings.
 
 ```{r}
+data("birds", package = "flying")
 results <-
   flying::migrate(data = birds,
                   method = "cmm",
