@@ -1,4 +1,4 @@
-Package: flying
+Package: FlyingR
 Type: Package
 Title: Simulation of Bird Flight Range
 Version: 0.2.0

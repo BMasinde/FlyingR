@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# flying
+# FlyingR
 
 <!-- badges: start -->
 
@@ -33,8 +33,8 @@ devtools::install_github("BMasinde/flight")
 ### Time-Marching computation
 
 ``` r
-library(flying)
-#> Welcome to package flying
+library(FlyingR)
+#> Welcome to package FlyingR
 ## basic example code
 
 ## birds comes with the package
@@ -44,25 +44,25 @@ simulation <- migrate(data = birds,  method = "cmm", settings = list(airDensity 
 
 simulation$range
 #>           Anser anser  Hydrobates pelagicus   Pachyptila desolata 
-#>              3099.512              2711.612              3728.924 
+#>              3537.296              3060.701              4274.620 
 #>       Regulus regulus      Calidris canutus     Aegypius monachus 
-#>              1134.909              3845.427              3523.496 
+#>              1264.523              4464.400              3979.271 
 #>      Limosa lapponica           Anas crecca       Hirundo rustica 
-#>             11488.485              3406.054              2987.472 
+#>             16652.710              3981.401              3445.013 
 #>         Cygnus cygnus          Sylvia borin     Luscinia luscinia 
-#>              3097.141              2281.368              1892.490 
+#>              3489.445              2663.630              2162.845 
 #>       Corvus monedula         Anas penelope   Fregata magnificens 
-#>              2051.622              5206.999              9954.016 
+#>              2300.933              6436.829             11904.426 
 #>      Larus ridibundus      Diomedea exulans   Phalacrocorax carbo 
-#>              5359.893              5519.687              2613.821 
+#>              6211.954              6271.194              2948.927 
 #>       Gyps rueppellii   Torgos tracheliotus         Ardeotis kori 
-#>              6443.839              5800.438              3918.554 
+#>              7867.072              6901.371              4631.958 
 #>      Sturnus vulgaris     Fringilla coelebs      Carduelis spinus 
-#>              3603.239              2420.191              2262.704 
+#>              4390.668              2821.588              2625.428 
 #>     Turdus philomelos Calidris tenuirostris     Buteo swainsoni M 
-#>              2712.933              5689.756              5102.482 
+#>              3184.748              7060.782              5979.198 
 #>     Buteo swainsoni F 
-#>              6459.878
+#>              7868.848
 ```
 
 The function also returns the mechanical and chemical power during the

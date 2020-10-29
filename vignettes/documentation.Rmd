@@ -1,5 +1,5 @@
 ---
-title: "Predicting birds' flight range. A Tuturial."
+title: "FlyingR: Predicting birds' flight range. A Tuturial."
 author: "Brian Masinde"
 date: "`r Sys.Date()`"
 vignette: >
@@ -20,9 +20,9 @@ tutorial focus is on the second approach (a time-marching approach).
 ## Basic usage with default settings.
 
 ```{r}
-data("birds", package = "flying")
+data("birds", package = "FlyingR")
 results <-
-  flying::migrate(data = birds,
+  FlyingR::migrate(data = birds,
                   method = "cmm",
                   speed_control = 1,
                   min_energy_protein = 0.05)
@@ -69,7 +69,7 @@ power factor is high, the recommended being 0.9. This can be adjusted as follows
 
 ```{r}
 results <-
-  flying::migrate(data = birds,
+  FlyingR::migrate(data = birds,
                   method = "cmm",
                   settings = list(ipf = 0.9),
                   speed_control = 1,
@@ -82,7 +82,7 @@ specific power (`method = "csp"`).
 
 ```{r}
 results <-
-  flying::migrate(data = birds,
+  FlyingR::migrate(data = birds,
                   method = "csw",
                   settings = list(ipf = 0.9),
                   speed_control = 1,

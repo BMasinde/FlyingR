@@ -1,3 +1,3 @@
 library(testthat)
-library(flying)
-test_check("flying")
+library(FlyingR)
+test_check("FlyingR")

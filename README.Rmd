@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-# flying
+# FlyingR
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/flying)](https://cran.r-project.org/package=flying)
@@ -37,7 +37,7 @@ devtools::install_github("BMasinde/flight")
 
 ###  Time-Marching computation 
 ```{r example}
-library(flying)
+library(FlyingR)
 ## basic example code
 
 ## birds comes with the package
