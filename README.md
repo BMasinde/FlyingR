@@ -12,7 +12,7 @@ status](https://travis-ci.org/BMasinde/flight.svg?branch=master)](https://travis
 [![AppVeyor build
 status](https://ci.appveyor.com/api/projects/status/github/BMasinde/flight?branch=master&svg=true)](https://ci.appveyor.com/project/BMasinde/flight)
 [![Coveralls test
-coverage](https://coveralls.io/repos/github/BMasinde/flight/badge.svg)](https://coveralls.io/r/BMasinde/flight?branch=master)
+coverage](https://coveralls.io/repos/github/BMasinde/flight/badge.svg)](https://coveralls.io/github/BMasinde/flight?branch=master)
 <!-- badges: end -->
 
 The package provides methods for predicting flight range of birds based
@@ -25,7 +25,7 @@ Install the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("BMasinde/flight")
+devtools::install_github("BMasinde/FlyingR")
 ```
 
 ## Examples
