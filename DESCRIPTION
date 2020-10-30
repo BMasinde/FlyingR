@@ -28,6 +28,7 @@ RoxygenNote: 7.1.1
 Depends: R (>= 2.10)
 VignetteBuilder: knitr
 Collate: 
+    'FlyingR.R'
     'RcppExports.R'
     'birds_documentation.R'
     'constant_muscle_mass.R'
@@ -40,7 +41,6 @@ Collate:
     'lookup_table2.R'
     'misc_functions.R'
     'flight_simulation.R'
-    'flying.R'
     'migrate.R'
     'stopover_mass_calculator.R'
     'zzz.R'
