@@ -1,8 +1,8 @@
 ## Test environments
-* local OS X install, R 3.5.1
-* ubuntu 16.04.6 (on travis-ci), R 3.6.1
-* mac OS X 10.13.6 (on travis-ci), R 3.6.2
-* Windows Server 2012 R2 build 9600 (on AppVeyor), R 3.6.2 
+* local OS X install, R 4.0.2
+* ubuntu 16.04.6 (on travis-ci), R 4.0.2
+* mac OS X 10.13.6 (on travis-ci), R 4.0.3
+* Windows Server 2012 R2 build 9600 (on AppVeyor), R 4.0.3 
 
 ## R CMD check results
 
@@ -15,21 +15,23 @@
 
 0 errors | 0 warnings 
 
-One note
+1 note
 
-- In checking for non-standard things in the check directory: found the following
-files/directories: 'flying-Ex_x64.Rout' 'tests_i386' 'tests_x64' 'examples_i386'
-'examples_x64' 'flying_i386.Rout'. (I have no idea on how to solve this)
+Possibly mis-spelled words in DESCRIPTION:
+  Pennycuick (8:63, 9:9, 9:63, 11:72, 12:49, 12:71, 13:9, 13:52, 14:9) (Not 
+  a spelling mistake)
 
 * Ubuntu Linux 16.04 LTS, R-release, GCC
 
 0 errors | 0 warnings
 
-There were 2 notes
+2 notes
 
-- Possibly mis-spelled words in DESCRIPTION (false warning)
+- Possibly mis-spelled words in DESCRIPTION:
+  Pennycuick (8:63, 9:9, 9:63, 11:72, 12:49, 12:71, 13:9, 13:52, 14:9) (Not
+  mis-pelled)
 
-- Examples with CPU or elapsed time > 5s (5.058 s exactly)
+- Examples with CPU or elapsed time > 5s
 
 * Fedora Linux, R-devel, clang, gfortran
 
@@ -37,35 +39,12 @@ There were 2 notes
 
 There were two notes
 
-- Possibly mis-spelled words in DESCRIPTION (false warning)
-
-- Examples with CPU or elapsed time > 5s (5.002 s exactly)
-
+- Possibly mis-spelled words in DESCRIPTION:
+  Pennycuick (8:63, 9:9, 9:63, 11:72, 12:49, 12:71, 13:9, 13:52, 14:9) (Not mis-pelled)
+  
+  
 * Debian Linux, R-devel, GCC ASAN/UBSAN
 
 - PREPERROR- I suspsect this is not a problem with the package.
 
-* Oracle Solaris 10, x86, 32 bit, R-patched (experimental)
-
-- ERROR: * checking package dependencies ... ERROR
-Package required but not available: ‘kableExtra’
-
-Package suggested but not available: ‘testthat’
-
-The suggested packages are required for a complete check.
-Checking can be attempted without them by setting the environment
-variable _R_CHECK_FORCE_SUGGESTS_ to a false value.
-
-I suppose this error is not in my control.
-
-## Fixed from v 0.1.1 (Oracle Solaris 10)
-
-* minimum_power_speed.cpp:22:36: warning: ISO C++ says that these are ambiguous, even though the worst conversion for the first is better than the worst conversion for the second:
-
-*  total_mech_pow.cpp:23:55: warning: ISO C++ says that these are ambiguous, even though the worst conversion for the first is better than the worst conversion for the second:
-
-## Fixed from v 0.1.0 comments
-
-* Software names package names and API names in single quotes in DESCRIPTION
-
-* DOI, ISBN, arXiv added to references in DESCPRIPTION
+# Package name change prviously flying on CRAN now FlyingR
