@@ -5,8 +5,6 @@
 
 <!-- badges: start -->
 
-[![CRAN
-status](https://www.r-pkg.org/badges/version/flying)](https://cran.r-project.org/package=flying)
 [![Travis build
 status](https://travis-ci.org/BMasinde/flight.svg?branch=master)](https://travis-ci.org/BMasinde/flight)
 [![AppVeyor build
@@ -104,12 +102,12 @@ birds_range$range
 
 *birds* definitions pulled from Flight program in-built datasets and fat
 mass randomly generated where initially zero. In addition, by default
-muscle mass was derived as 0.17 fraction of the all-up mass. Users’s
-data should have columns named appropriately. The package looks for
-columns named *id, name or species.name*, *bodymass or allupmass*,
-*wingspan, ws*, *wingarea*, *ordo, order* (which is a factored column
-with levels 1 or 2 passerines and non-passerines respectively) *fatmass,
-fat.mass, fat\_mass* and lastly *muscle\_mass*.
+muscle mass was derived as 0.17 fraction of the all-up mass. User’s data
+should have columns named appropriately. The package looks for columns
+named *id, name or species.name*, *bodymass or allupmass*, *wingspan,
+ws*, *wingarea*, *ordo, order* (which is a factored column with levels 1
+or 2 passerines and non-passerines respectively) *fatmass, fat.mass,
+fat\_mass* and lastly *muscle\_mass*.
 
 ``` r
 birds

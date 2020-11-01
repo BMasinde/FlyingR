@@ -1,6 +1,6 @@
 #' @title Stopover mass calculator
 #' @description During stop-overs birds replenish fat mass. Using simplifications
-#'               from Lindstöm 1991. The implementation here is simplistic in that
+#'               from Lindström 1991. The implementation here is simplistic in that
 #'               muscle mass is not restored as theory and field experiments have
 #'               shown.
 #' @name stopover.mass.calculator

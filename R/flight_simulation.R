@@ -1,5 +1,5 @@
 #' @title Range Estimation
-#' @description  Practical range estimation of birds using methods in Pennycuik (1975)
+#' @description  Practical range estimation of birds using methods in Pennycuick (1975)
 #' Mechanics of Flight. These methods are based on Breguet equations.
 #'
 #' @author Brian Masinde
@@ -16,12 +16,12 @@
 #' @param data A data frame.
 #' @param settings A list for re-defining constants. See details.
 #'
-#' @details The option *settings takes the arguments (those particulary
+#' @details The option *settings takes the arguments (those particularly
 #' required by this function)
 #' \itemize{
 #'    \item ppc: Profile power constant
 #'    \item fed: Energy content of fuel from fat
-#'    \item g: Accelaration due to gravity
+#'    \item g: Acceleration due to gravity
 #'    \item mce: Mechanical conversion efficiency [0,1]
 #'    \item ipf: Induced power factor
 #'    \item vcp: Ventilation and circulation power

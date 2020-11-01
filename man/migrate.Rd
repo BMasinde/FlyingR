@@ -65,7 +65,7 @@ The option *control takes the following arguments
    \item ppc: Profile power constant (8.4).
    \item fed: Energy content of fuel from fat (3.9E+07).
    \item ped: Energy content of protein (1.8E+07).
-   \item g: Accelaration due to gravity (9.81).
+   \item g: Acceleration due to gravity (9.81).
    \item mce: Mechanical conversion efficiency [0,1]. Efficiency at which
    mechanical power is converted to chemical power (0.23).
    \item ipf: Induced power factor (1.2).

@@ -1,5 +1,5 @@
 ---
-title: "FlyingR: Predicting birds' flight range. A Tuturial."
+title: "FlyingR: Predicting birds' flight range. A Tutorial."
 author: "Brian Masinde"
 date: "`r Sys.Date()`"
 vignette: >
