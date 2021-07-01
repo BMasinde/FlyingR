@@ -13,6 +13,7 @@
 #'              non-passerines, and the mechanical conversion mce $\etta$.
 #'              Basal metabolism is assumed to be needed at all times irrespective
 #'              of what the bird is doing.
+#'              TEST
 
 
 .met.pow.ratio <- function(constants, m, ws, ordo) {
