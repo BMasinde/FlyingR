@@ -1,5 +1,5 @@
 
-# FlyingR 0.2
+# FlyingR 0.2.1
 
 * Name change from flying to FlyingR
 
