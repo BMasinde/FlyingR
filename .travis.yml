@@ -5,7 +5,7 @@ cache: packages
 warnings_are_errors: true
 os:
   - linux
-  - osx_image: xcode11.6
+  - xcode11.6
 environment:
   global:
     WARNINGS_ARE_ERRORS: 1
