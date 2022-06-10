@@ -6,7 +6,11 @@ warnings_are_errors: true
 os:
   - linux
   - osx
-    osx_image: xcode11.6
+  matrix:
+    include:
+      - osx_image: xcode11.6
+      - osx_image: xcode12.4
+      - osx_image: xcode13.3
 environment:
   global:
     WARNINGS_ARE_ERRORS: 1
