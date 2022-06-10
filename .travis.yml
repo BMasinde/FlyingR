@@ -16,7 +16,7 @@ matrix:
       - xvfb-run Rscript -e 'covr::coveralls(type = "all")'
   - r: release
     os: osx
-    osx_image: xcode9.2
+    osx_image: xcode12
     before_install:
       - brew update
       - brew cask reinstall xquartz
