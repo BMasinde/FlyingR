@@ -11,6 +11,8 @@ status](https://app.travis-ci.com/BMasinde/FlyingR.svg?branch=dev-0.2.1)](https:
 status](https://ci.appveyor.com/api/projects/status/github/BMasinde/flight?branch=master&svg=true)](https://ci.appveyor.com/project/BMasinde/flight)
 [![Coveralls test
 coverage](https://coveralls.io/repos/github/BMasinde/flight/badge.svg)](https://coveralls.io/github/BMasinde/flight?branch=master)
+[![R build
+status](https://github.com/BMasinde/FlyingR/workflows/R-CMD-check/badge.svg)](https://github.com/BMasinde/FlyingR/actions)
 <!-- badges: end -->
 
 The package provides methods for predicting flight range of birds based
