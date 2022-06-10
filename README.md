@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 [![Travis build
-status](https://app.travis-ci.com/BMasinde/FlyingR.svg?branch=dev-0.2.1)](https://travis-ci.com/BMasinde/FlyingR)
+status](https://app.travis-ci.com/BMasinde/FlyingR.svg?branch=dev-0.2.1)](https://app.travis-ci.com/BMasinde/FlyingR)
 [![AppVeyor build
 status](https://ci.appveyor.com/api/projects/status/github/BMasinde/flight?branch=master&svg=true)](https://ci.appveyor.com/project/BMasinde/flight)
 [![Coveralls test
