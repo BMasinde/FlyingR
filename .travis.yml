@@ -32,3 +32,5 @@ matrix:
 environment:
   global:
     WARNINGS_ARE_ERRORS: 1
+after_success:
+  - Rscript -e 'covr::coveralls(type = "all")'
