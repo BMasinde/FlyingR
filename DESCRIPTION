@@ -45,3 +45,5 @@ Collate:
     'stopover_mass_calculator.R'
     'zzz.R'
 LinkingTo: Rcpp
+URL: https://github.com/BMasinde/FlyingR
+BugReports: https://github.com/BMasinde/FlyingR/issues
