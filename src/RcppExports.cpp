@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // basal_metabolic_pow
 double basal_metabolic_pow(double airframeMass, double muscleMass, int taxon, double alphaPasserines, double alphaNonPasserines, double deltaPasserines, double deltaNonPasserines);
 RcppExport SEXP _FlyingR_basal_metabolic_pow(SEXP airframeMassSEXP, SEXP muscleMassSEXP, SEXP taxonSEXP, SEXP alphaPasserinesSEXP, SEXP alphaNonPasserinesSEXP, SEXP deltaPasserinesSEXP, SEXP deltaNonPasserinesSEXP) {
