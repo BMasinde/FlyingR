@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 # FlyingR
 
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.org/BMasinde/flight.svg?branch=master)](https://travis-ci.org/BMasinde/flight)
+[![Travis build status](https://travis-ci.com/BMasinde/flight.svg?branch=master)](https://travis-ci.com/BMasinde/flight)
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/BMasinde/flight?branch=master&svg=true)](https://ci.appveyor.com/project/BMasinde/flight)
 [![Coveralls test coverage](https://coveralls.io/repos/github/BMasinde/flight/badge.svg)](https://coveralls.io/github/BMasinde/flight?branch=master)
 <!-- badges: end -->
