@@ -26,7 +26,9 @@ migrate(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
 
 \item{...}{further arguments see read.csv}
 
-\item{data}{A data frame with required columns: body mass, fat mass, etc.}
+\item{data}{A data frame with required columns: body mass (Kg), fat mass (Kg), 
+muscle mass (Kg), wing span (m), wing area (m^2), order / taxon 
+(passerines = 1, non passerines = 2).}
 
 \item{settings}{A list for re-defining constants. See details for these with
 default values from Pennycuick(2008) and Pennycuick(1998).}

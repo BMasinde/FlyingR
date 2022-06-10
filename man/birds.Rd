@@ -14,7 +14,7 @@ A data frame with 28 observations and 5 variables not counting the
    were empty but otherwise one should always use the all-up mass (body mass + crop)}
    \item{Wing.span}{Length of wings spread out in meters}
    \item{Fat.mass}{Mass of fat that is consumable as fuel in Kg}
-   \item{Order}{Order of the species (passerine vs non-passerine)}
+   \item{Order}{Order of the species (passerine = 1 vs non-passerine = 2)}
    \item{Wing.area}{Area of both wing projected on a flat surface in meters
    squared}
    \item{Muscle.mass}{Mass in Kg. of flight muscles}
