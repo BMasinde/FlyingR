@@ -3,6 +3,8 @@
 language: R
 cache: packages
 warnings_are_errors: true
+r_packages:
+  - covr
 
 # using matrix argument for multiple os CI https://github.com/zappingseb/RTest/blob/master/.travis.yml
 matrix:
@@ -13,7 +15,7 @@ matrix:
       - xvfb-run R CMD check *tar.gz --as-cran
     after_success:
       - tar -C .. -xf $PKG_TARBALL
-      - xvfb-run Rscript -e 'covr::coveralls(type = "all")'
+      - xvfb-run Rscript -e 'covr::codecov(type=c("tests", "vignettes", "examples"))'
   - r: release
     os: osx
     osx_image: xcode12
@@ -33,4 +35,4 @@ environment:
   global:
     WARNINGS_ARE_ERRORS: 1
 after_success:
-  - Rscript -e 'covr::coveralls(type = "all")'
+  - Rscript -e 'covr::codecov(type=c("tests", "vignettes", "examples"))'
