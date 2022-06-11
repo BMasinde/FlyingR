@@ -36,9 +36,41 @@ Namespaces in Imports field not imported from:
   
 - Found the following files/directories:
   'lastMiKTeXException'
+ 
+* Ubuntu Linux 20.04.1 LTS, R-release, GCC
+
+0 errors | 0 warnings
+
+2 Notes
+
+- Found the following (possibly) invalid URLs:
+  URL: https://codecov.io/gh/BMasinde/FlyingR (moved to https://app.codecov.io/gh/BMasinde/FlyingR)
+  From: README.md
+  Status: 200
+  Message: OK
   
+- Namespaces in Imports field not imported from:
+  ‘kableExtra’ ‘knitr’ ‘rmarkdown’
+  All declared Imports should be used.
+  
+* Fedora Linux, R-devel, clang, gfortran
+
+0 errors | 0 warnings 
+
+2 Notes 
+
+- Found the following (possibly) invalid URLs:
+  URL: https://codecov.io/gh/BMasinde/FlyingR (moved to https://app.codecov.io/gh/BMasinde/FlyingR)
+  From: README.md
+  Status: 200
+  Message: OK
+  
+- Namespaces in Imports field not imported from:
+  ‘kableExtra’ ‘knitr’ ‘rmarkdown’
+  All declared Imports should be used.
+
 * Debian Linux, R-devel, GCC ASAN/UBSAN
 
 0 errors | 0 warnings | 0 notes
 
-# Package name change previously flying on CRAN now FlyingR
+# Update documentation update.
