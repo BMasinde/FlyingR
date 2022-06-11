@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/BMasinde/FlyingR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/BMasinde/FlyingR/actions/workflows/R-CMD-check.yaml)
 [![AppVeyor build
 status](https://ci.appveyor.com/api/projects/status/github/BMasinde/FlyingR?branch=dev-0.2.1&svg=true)](https://ci.appveyor.com/project/BMasinde/FlyingR)
 [![codecov](https://codecov.io/gh/BMasinde/FlyingR/branch/dev-0.2.1/graph/badge.svg)](https://codecov.io/gh/BMasinde/FlyingR)
@@ -12,7 +13,7 @@ status](https://ci.appveyor.com/api/projects/status/github/BMasinde/FlyingR?bran
 
 The package provides methods for predicting flight range of birds based
 on their physiological characteristics. This is an R implementation of
-Flight program provided by Pennycuick.
+Flight program provided by Pennycuick
 
 ## Installation
 
