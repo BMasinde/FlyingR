@@ -5,8 +5,6 @@
 
 <!-- badges: start -->
 
-[![Travis build
-status](https://app.travis-ci.com/BMasinde/FlyingR.svg?branch=dev-0.2.1)](https://app.travis-ci.com/BMasinde/FlyingR)
 [![R build
 status](https://github.com/BMasinde/FlyingR/workflows/R-CMD-check/badge.svg)](https://github.com/BMasinde/FlyingR/actions)
 [![AppVeyor build
