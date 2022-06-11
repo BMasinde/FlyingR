@@ -5,8 +5,6 @@
 
 <!-- badges: start -->
 
-[![R build
-status](https://github.com/BMasinde/FlyingR/workflows/R-CMD-check/badge.svg)](https://github.com/BMasinde/FlyingR/actions)
 [![AppVeyor build
 status](https://ci.appveyor.com/api/projects/status/github/BMasinde/FlyingR?branch=dev-0.2.1&svg=true)](https://ci.appveyor.com/project/BMasinde/FlyingR)
 [![codecov](https://codecov.io/gh/BMasinde/FlyingR/branch/dev-0.2.1/graph/badge.svg)](https://codecov.io/gh/BMasinde/FlyingR)
