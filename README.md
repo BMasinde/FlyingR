@@ -13,7 +13,7 @@ status](https://ci.appveyor.com/api/projects/status/github/BMasinde/FlyingR?bran
 
 The package provides methods for predicting flight range of birds based
 on their physiological characteristics. This is an R implementation of
-Flight program provided by Pennycuick
+Flight program provided by Pennycuick.
 
 ## Installation
 
