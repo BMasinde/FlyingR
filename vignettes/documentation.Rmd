@@ -1,11 +1,9 @@
 ---
-title: "FlyingR: Predicting birds' flight range. A Tutorial."
+title: 'FlyingR: Predicting birds'' flight range. A Tutorial.'
 author: "Brian Masinde"
 date: "`r Sys.Date()`"
-vignette: >
-  %\VignetteIndexEntry{documentation}
-  %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown}
+vignette: |
+  %\VignetteIndexEntry{documentation} %\VignetteEncoding{UTF-8} %\VignetteEngine{knitr::rmarkdown}
 citation_package: natbib
 bibliography: references.bib
 ---
