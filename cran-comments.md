@@ -23,13 +23,8 @@ Namespaces in Imports field not imported from:
 
 0 errors | 0 warnings 
 
-3 notes
-- Found the following (possibly) invalid URLs:
-  URL: https://codecov.io/gh/BMasinde/FlyingR (moved to https://app.codecov.io/gh/BMasinde/FlyingR)
-  From: README.md
-  Status: 200
-  Message: OK
-  
+2 notes
+
 - Namespaces in Imports field not imported from:
   'kableExtra' 'knitr' 'rmarkdown'
   All declared Imports should be used
@@ -41,13 +36,7 @@ Namespaces in Imports field not imported from:
 
 0 errors | 0 warnings
 
-2 Notes
-
-- Found the following (possibly) invalid URLs:
-  URL: https://codecov.io/gh/BMasinde/FlyingR (moved to https://app.codecov.io/gh/BMasinde/FlyingR)
-  From: README.md
-  Status: 200
-  Message: OK
+1 Note
   
 - Namespaces in Imports field not imported from:
   ‘kableExtra’ ‘knitr’ ‘rmarkdown’
@@ -57,13 +46,7 @@ Namespaces in Imports field not imported from:
 
 0 errors | 0 warnings 
 
-2 Notes 
-
-- Found the following (possibly) invalid URLs:
-  URL: https://codecov.io/gh/BMasinde/FlyingR (moved to https://app.codecov.io/gh/BMasinde/FlyingR)
-  From: README.md
-  Status: 200
-  Message: OK
+1 Note 
   
 - Namespaces in Imports field not imported from:
   ‘kableExtra’ ‘knitr’ ‘rmarkdown’
