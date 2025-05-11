@@ -76,6 +76,11 @@
 #'                speed_control = 1, min_energy_protein = 0.05)
 #'
 
+## DEBUGGING MIGRATE
+
+#data <- readxl::read_excel(path = "/Users/masinde/Downloads/MOTFLA.xlsx")
+
+
 
 migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                     fill = TRUE, comment.char = "", ...,
@@ -119,7 +124,11 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
     stop("Observations with zero muscle mass \n")
   }
 
-  if (any(data$bodyMass == 0.00)) {
+  #if (any(data$bodyMass == 0.00)) {             ### WARNING: Unknown or uninitialised column: `bodyMass`. 
+  #  stop("Observations with zero body mass \n")
+  #}
+  
+  if (any(data$allMass == 0.00)) {             ### WARNING: Unknown or uninitialised column: `bodyMass`. 
     stop("Observations with zero body mass \n")
   }
 
