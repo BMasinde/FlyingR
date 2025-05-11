@@ -4,6 +4,9 @@
 # @param data
 # @return data returns columns as a list data
 
+# MOTFLA data ------ DELETE AFTER DEBUGGING
+#data <- readxl::read_excel(path = "/Users/masinde/Downloads/MOTFLA.xlsx")
+
 .colnames.match <- function(data) {
   # data should be a dataframe
   if (is.data.frame(data) == FALSE) {
@@ -73,11 +76,23 @@
   }
 
   # non unique species names in data add a suffix of ID
-  if (sum(duplicated(data$name)) != 0) {
-    dups <- duplicated(data$name)
+  #if (sum(duplicated(data$name)) != 0) { ### NEEDS FIXING data$name DOES NOT EXIST YET
+  #  dups <- duplicated(data$name)
+  #  for (i in 1:length(dups)) {
+  #    if (dups[i] == TRUE) {
+  #      data$name[i] <- paste(data$name[i], i, sep = "_")
+  #    }
+  #  }
+  #}
+  
+  
+  # get column index of the column rep name/species name
+       col_name_id <- which(variables$name == TRUE)
+  if (sum(duplicated(data[, col_name_id])) != 0) { 
+    dups <- duplicated(data[, col_name_id])
     for (i in 1:length(dups)) {
       if (dups[i] == TRUE) {
-        data$name[i] <- paste(data$name[i], i, sep = "_")
+        data[i, col_name_id] <- paste(data[i, col_name_id], i, sep = "_")
       }
     }
   }
