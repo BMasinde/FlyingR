@@ -119,7 +119,8 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
     stop("Observations with zero muscle mass \n")
   }
 
-  if (any(data$bodyMass == 0.00)) {
+  # FIX Issue: # 26  ### WARNING: Unknown or uninitialised column: `bodyMass`.
+  if (any(data$allMass == 0.00)) {             
     stop("Observations with zero body mass \n")
   }
 
