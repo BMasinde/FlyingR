@@ -4,6 +4,7 @@
 # @param data
 # @return data returns columns as a list data
 
+
 .colnames.match <- function(data) {
   # data should be a dataframe
   if (is.data.frame(data) == FALSE) {
@@ -72,12 +73,15 @@
     data$ID <- 1:nrow(data)
   }
 
+  # ADDRESS Issue: # 25: Function ".colnames.match()" warning message: "Unknown or uninitialised column: name. "
   # non unique species names in data add a suffix of ID
-  if (sum(duplicated(data$name)) != 0) {
-    dups <- duplicated(data$name)
+  # get column index of the column rep name/species name
+  col_name_id <- which(variables$name == TRUE)
+  if (sum(duplicated(data[, col_name_id])) != 0) { 
+    dups <- duplicated(data[, col_name_id])
     for (i in 1:length(dups)) {
       if (dups[i] == TRUE) {
-        data$name[i] <- paste(data$name[i], i, sep = "_")
+        data[i, col_name_id] <- paste(data[i, col_name_id], i, sep = "_")
       }
     }
   }
