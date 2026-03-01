@@ -44,7 +44,7 @@ previous time-interval's distance. And this process iterates until fat mass is
 depleted giving the maximum possible range under the time-marching computation. 
 
 
-## 
+## Stop-over mass calculator
 Birds migrate long distances between breeding and wintering grounds. In the 
 majority of cases, it is not possible to cover these distances at a go, and 
 therefore, stops are required to rest, feed, and restore both fat and protein 

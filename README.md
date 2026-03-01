@@ -24,9 +24,80 @@ Install the development version from [GitHub](https://github.com/) with:
 devtools::install_github("BMasinde/FlyingR")
 ```
 
+## Time-Marching computation
+
+In brief, the time-marching computation computes the flight range of
+birds in short time intervals (6-minutes). Within this time period
+chemical and mechanical powers are held constant during which fat and
+protein are consumed to sustain flight. Because of the reduction in
+weight, the chemical and mechanical powers are recalculated for the next
+time period and the distance flown is incremented to previous
+time-interval’s distance. And this process iterates until fat mass is
+depleted giving the maximum possible range under the time-marching
+computation.
+
+## Stop-over mass calculator
+
+Birds migrate long distances between breeding and wintering grounds. In
+the majority of cases, it is not possible to cover these distances at a
+go, and therefore, stops are required to rest, feed, and restore both
+fat and protein Lindström and Piersma 1993; Klaassen 1996; Kaiser 1999;
+Schwilch et al. 2002; Pennycuick 2008). However, research on stopovers
+(e.g., Lindström 1991; Lindström and Piersma 1993)  
+focuses on fuel (fat mass) restoration. As such, the stopover mass
+calculator used in the package FlyingR, is based on maximum fuel
+deposition rates (FDR), given by Lindström (1991), separately for
+passerines and non-passerines (Equations , , and ). This is not an
+optimal solution as it does not account for protein restoration. In
+addition, there are reservations about using lean body mass; body mass
+minus fat mass (Pennycuick 2008).
+
+``` math
+
+    FDR_{max; \ passerines} = 2.22 \times lean \ body \ mass^{-0.27}
+    \label{fdr passerines}
+```
+
+``` math
+
+    FDR_{max; \ non-passerines} = 2.80 \times lean \ body \ mass^{-0.27}
+    \label{fdr nonpasserines}
+```
+
+``` math
+
+    fat \ mass \ gained = lean \ body \ mass \times \frac{FDR_{max}}{100} \times duration
+    \label{fatmassgained}
+```
+
 ## Examples
 
-### Time-Marching computation
+### Examples 1: Garden Warbler and Lesser Whitethroat
+
+These two passerine species are trans-Saharan migrants. Lesser
+whitethroats winter in the Sahel zone of eastern and north-eastern
+Africa , while garden warblers spend winter further, i.e., in southern
+Africa . Data on the Garden Warbler and Lesser Whitethroat are obtained
+from various bird ringing stations situated along their SE European
+flyway leading from Europe towards African winter quarters. This is
+split into four regions: Southern Baltic, Eastern Mediterranean,
+Northern Mediterranean and North Eastern Africa. These data include the
+1-st year individuals (immatures): 1,044 garden warblers and 848 lesser
+whitethroats, and span the years 2000 to 2006. The sample contains the
+following variables: station code, ring number, age, body mass, fat
+score, wing and tail measurements. The fat score is used to derive fat
+fraction and subsequently fat mass by the procedure described by . Body
+mass and fat mass are converted from grams to kilograms. The wing
+measurements do not equal the required wingspan as these are measured
+differently (i.e., the wingspan is measured from tip to tip of wings,
+particularly the primary feathers, in metres). Other missing variables
+are the wing area and muscle mass. provide estimates for the wingspan
+and wing area for several species. For the Garden Warbler, the wingspan
+and wing area are 0.223 (m) and 0.0093 ($`m^2`$), respectively. While
+for the Lesser Whitethroat, these are 0.185 (m) and 0.0073 ($`m^2`$).
+Muscle mass estimates are obtained by using the muscle fraction of 0.17
+as recommended by . Figure presents the flight range distribution of
+these two species in kilometres for each region separately.
 
 ``` r
 library(FlyingR)
@@ -168,3 +239,29 @@ birds
 #> 27   0.1317500
 #> 28   0.1802000
 ```
+
+## References
+
+Lindström Å, Piersma T (1993). “Mass changes in migrating birds: the
+evidence for fat and protein storage re-examined.” Ibis, 135(1), 70–78.
+<doi:10.1111/j.1474-919X.1993>. tb02811.x
+
+Klaassen M (1996). “Metabolic constraints on long-distance migration in
+birds.” Journal of Experimental Biology, 199(1), 57–64.
+<doi:10.1242/jeb.199.1.57>.
+
+Kaiser A (1999). “Stopover strategies in birds: a review of methods for
+estimating stopover length.” Bird Study, 46(sup1), S299–S308.
+<doi:10.1080/00063659909477257>.
+
+Schwilch R, Grattarola A, Spina F, Jenni L (2002). “Protein loss during
+long-distance migra- tory flight in passerine birds: adaptation and
+constraint.” Journal of Experimental Biology, 205(5), 687–695.
+<doi:10.1242/jeb.205.5.687>.
+
+Pennycuick CJ (2008). MODELLING THE FLYING BIRD, volume 5. First edition
+edition. Elsevier, New Jersey.
+
+Lindström Å, Piersma T (1993). “Mass changes in migrating birds: the
+evidence for fat and protein storage re-examined.” Ibis, 135(1), 70–78.
+<doi:10.1111/j.1474-919X.1993>. tb02811.x.
