@@ -74,9 +74,9 @@ $$
 
 ### Examples 1: Garden Warbler and Lesser Whitethroat
 These two passerine species are trans-Saharan migrants. Lesser whitethroats winter 
-in the Sahel zone of eastern and north-eastern Africa \citep{pearson1992migration}, 
+in the Sahel zone of eastern and north-eastern Africa (Pearson and Lack 1992), 
 while garden warblers spend winter further, i.e., in southern Africa 
-\citep[][]{shirihai2001sylvia}. Data on the Garden Warbler and Lesser 
+(Shirihai, Gargallo, and Helbig 2001). Data on the Garden Warbler and Lesser 
 Whitethroat are obtained from various bird ringing stations situated along their 
 SE European flyway leading from Europe towards African winter quarters. This is 
 split into four regions: Southern Baltic, Eastern Mediterranean,
@@ -85,16 +85,16 @@ individuals (immatures): 1,044 garden warblers and 848 lesser whitethroats, and
 span the years 2000 to 2006. The sample contains the following variables: station 
 code, ring number, age, body mass, fat score, wing and tail measurements. The fat 
 score is used to derive fat fraction and subsequently fat mass by the procedure 
-described by \citet{ozarowska2015contrasting}. Body mass and fat mass are converted 
+described by Ożarowska (2015). Body mass and fat mass are converted 
 from grams to kilograms. The wing measurements do not equal the required wingspan 
 as these are measured differently (i.e., the wingspan is measured from tip to tip 
 of wings, particularly the primary feathers, in metres). Other missing variables 
-are the wing area and muscle mass. \citet{bruderer2001flight} provide estimates 
+are the wing area and muscle mass. Bruderer and Boldt (2001) provide estimates 
 for the wingspan and wing area for several species. For the Garden Warbler, the 
 wingspan and wing area are 0.223 (m) and 0.0093 ($m^2$), respectively. While for 
 the Lesser Whitethroat, these are 0.185 (m) and 0.0073 ($m^2$). Muscle mass 
 estimates are obtained by using the muscle fraction of 0.17 as recommended by 
-\citet{penny08}. Figure \ref{results_range} presents the flight range distribution 
+ Pennycuick (2008). Figure \ref{results_range} presents the flight range distribution 
 of these two species in kilometres for each region separately. 
 
 ```{r example}
@@ -155,4 +155,19 @@ Elsevier, New Jersey.
 Lindström Å, Piersma T (1993). “Mass changes in migrating birds: the evidence for fat
 and protein storage re-examined.” Ibis, 135(1), 70–78. doi:10.1111/j.1474-919X.1993.
 tb02811.x.
+
+Pearson DJ, Lack PC (1992). “Migration patterns and habitat use by passerine and
+near-passerine migrant birds in eastern Africa.” Ibis, 134(s1), 89–98. doi:10.1111/j.
+1474-919X.1992.tb04738.x.
+
+Shirihai H, Gargallo G, Helbig AJ (2001). SYLVIA WARBLERS: IDENTIFICATION, TAX-
+ONOMY AND PHYLOGENY OF THE GENUS SYLVIA. Christopher Helm Publishers
+Ltd.
+
+Ożarowska A (2015). “Contrasting fattening strategies in related migratory species: the
+blackcap, garden warbler, common whitethroat and lesser whitethroat.” Annales Zoologici
+Fennici, 52(1–2), 115–127. doi:10.5735/086.052.0210.
+
+Bruderer B, Boldt A (2001). “Flight characteristics of birds: I. Radar measurements of
+speeds.” Ibis, 143(2), 178–204. doi:10.1111/j.1474-919X.2001.tb04475.x.
 
