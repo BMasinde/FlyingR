@@ -18,13 +18,13 @@ LazyData: true
 Imports: 
     utils,
     Rcpp (>= 1.0.2),
+Suggests: 
+    testthat,
+    covr,
     knitr,
     kableExtra,
     rmarkdown
-Suggests: 
-    testthat,
-    covr
-RoxygenNote: 7.2.0
+RoxygenNote: 7.3.2
 Depends: R (>= 2.10)
 VignetteBuilder: knitr
 Collate: 
@@ -35,12 +35,15 @@ Collate:
     'constant_specific_power.R'
     'constant_specific_work.R'
     'control.R'
+    'curlew_sandpiper.R'
     'method_2.R'
     'method_1.R'
     'input_match.R'
     'lookup_table2.R'
     'misc_functions.R'
     'flight_simulation.R'
+    'garden_wablers.R'
+    'lesser_whitethroats.R'
     'migrate.R'
     'stopover_mass_calculator.R'
     'zzz.R'
