@@ -19,4 +19,7 @@
 #'
 #' }
 #'
+#' @docType data
+#' @keywords datasets
+#' @name garden_wablers
 "garden_wablers"

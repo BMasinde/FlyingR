@@ -18,5 +18,7 @@
 #'    \item{taxon}{Order of the species (passerine = 1 vs non-passerine = 2)}
 #'
 #' }
-#'
-"lesser whitethroats"
+#' @docType  data
+#' @keywords datasets
+#' @name lesser_whitethroats
+"lesser_whitethroats"
