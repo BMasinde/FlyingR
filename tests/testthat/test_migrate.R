@@ -17,7 +17,7 @@ test_that("speed control is binary", {
 
 birds[5, 4] <- 0
 test_that("zero fat mass throws error in migrate", {
-  expect_error(migtate(
+  expect_warning(migtate(
     data = data,
     method = "cmm",
     speed_control = 0,
