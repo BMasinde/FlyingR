@@ -81,7 +81,28 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
                     fill = TRUE, comment.char = "", ...,
                     data = NULL, settings = list(), method = "cmm",
                     speed_control = 1, min_energy_protein = 0.05) {
-
+  
+  # DEBUGGING INPUTS ###########################################################
+    #data <- birds
+    
+    #data[2, 4] <-  0.0
+    
+    # input match
+    #data <- .colnames.match(data)
+    
+    #method = "cmm"
+    
+    #speed_control = 1
+    
+    #min_energy_protein = 0.05
+    
+    #settings = list(airDensity = 0.905)
+    
+    #constants <- .control(settings)
+  
+  # END OF DEBUGG ##############################################################
+  
+  
   # both file and data not given throw an error
   if (missing(file) == TRUE & is.null(data) == TRUE) {
     stop("Data not found \n", call. = TRUE)
@@ -109,10 +130,16 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
   } else {
     data <- .colnames.match(data)
   }
-
+ 
+  # Issue # Fix: Zero fat mass should not throw error but a warning 
   # if any fat mass 0 zero stop (needs fuel)
-  if (any(data$fatMass == 0.00)) {
-    stop("Observations with zero fat mass. Birds need fat mass to migrate \n")
+  #if (any(data$fatMass == 0.00)) {
+  #  warning("Observations with zero fat mass. Birds need fat mass to migrate.
+  #          Flight range by default is zero \n")
+  #}
+  
+  if (any(!is.na(data$fatMass) & abs(data$fatMass) == 0)) {
+    warning("Observations with zero fat mass. Birds need fat mass to migrate. Flight range by default is zero.")
   }
 
   if (any(data$muscleMass == 0.00)) {
@@ -143,33 +170,59 @@ migrate <- function(file, header = TRUE, sep = ",", quote = "\"", dec = ".",
     endMinSpeed = vector(length = n),
     taxon = vector(length = n)
   )
-
+  
   # control constants using default vs supplied
   if (missing(settings) == TRUE) {
     constants <- .control()
   } else {
     constants <- .control(settings)
   }
-
-  if (method == "cmm") {
-    simulation <-
-      .constant.muscle.mass(data, constants, speed_control, min_energy_protein)
-  } else if (method == "csw") {
-    simulation <-
-      .constant.specific.work(data, constants, speed_control, min_energy_protein)
-  } else if (method == "csp") {
-    simulation <-
-      .constant.specific.power(data, constants, speed_control, min_energy_protein)
+  
+  
+  # Check if there are any observations with zero fatMass
+  #if (any(data$Fat)) {
+    
+  #}
+  
+  
+  
+  zero_idx <- abs(data$fatMass) == 0
+  
+  # Only compute for valid rows
+  if (any(!zero_idx)) {
+    
+    valid_data <- data[!zero_idx, ]
+    
+    if (method == "cmm") {
+      simulation <-
+        .constant.muscle.mass(valid_data, constants, speed_control, min_energy_protein)
+    } else if (method == "csw") {
+      simulation <-
+        .constant.specific.work(valid_data, constants, speed_control, min_energy_protein)
+    } else if (method == "csp") {
+      simulation <-
+        .constant.specific.power(valid_data, constants, speed_control, min_energy_protein)
+    }
+    
+    # aggregate dist from simulation to get range in Km
+    results$range[!zero_idx] <- sapply(simulation$distance, function(x) sum(x) / 1000)
+    results$bodyMass[!zero_idx] <- simulation$allUpMass
+    results$fatMass[!zero_idx] <- round(simulation$fatMass,2)
+    results$muscleMass[!zero_idx] <- simulation$muscleMass
+    results$startMinSpeed[!zero_idx] <- simulation$startMinSpeed
+    results$endMinSpeed[!zero_idx] <- simulation$endMinSpeed
+    results$taxon[!zero_idx] <- data$taxon[!zero_idx]
   }
 
-  # aggregate dist from simulation to get range in Km
-  results$range <- sapply(simulation$distance, function(x) sum(x) / 1000)
-  results$bodyMass <- simulation$allUpMass
-  results$fatMass <- round(simulation$fatMass,2)
-  results$muscleMass <- simulation$muscleMass
-  results$startMinSpeed <- simulation$startMinSpeed
-  results$endMinSpeed <- simulation$endMinSpeed
-  results$taxon <- data$taxon
+    # output for cases of zero fatmass
+  results$range[zero_idx] <- rep(0, sum(zero_idx))
+  results$bodyMass[zero_idx] <- data$allMass[zero_idx]
+  results$fatMass[zero_idx] <- data$fatMass[zero_idx]
+  results$muscleMass[zero_idx] <- data$muscleMass[zero_idx]
+  results$startMinSpeed[zero_idx] <- rep(NA ,sum(zero_idx))
+  results$endMinSpeed[zero_idx] <- rep(NA ,sum(zero_idx))
+  results$taxon[zero_idx] <- data$taxon[zero_idx]
+  
   # range as named vectors
   if (!is.null(data$name)) {
     #names(results$range) <- as.vector(data$name)
