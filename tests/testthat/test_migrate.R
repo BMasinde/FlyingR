@@ -32,10 +32,15 @@ test_that("zero fat mass throws warning in migrate", {
 )
 })
 
-birds[5, 2] <- 0
+#birds[5, 2] <- 0
 test_that("zero body mass throws error in migrate", {
+  
+  # Creating fresh copy of data
+  test_data <- birds
+  test_data[5, 2] <- 0
+  
   expect_error(migrate(
-    data = birds_data,
+    data = test_data,
     method = "cmm",
     speed_control = 0,
     min_energy_protein = 0.05
@@ -44,8 +49,13 @@ test_that("zero body mass throws error in migrate", {
 })
 
 
-birds[5, 3] <- 0
+#birds[5, 3] <- 0
 test_that("zero wingspan throws error in migrate", {
+  
+  # Creating fresh copy of data
+  test_data <- birds
+  test_data[5, 3] <- 0
+  
   expect_error(migrate(
     data = birds_data,
     method = "cmm",
@@ -55,8 +65,13 @@ test_that("zero wingspan throws error in migrate", {
   )
 })
 
-birds[5, 6] <- 0
+#birds[5, 6] <- 0
 test_that("zero wing area throws error in migrate", {
+  
+  # Creating fresh copy of data
+  test_data <- birds
+  test_data[5, 6] <- 0
+  
   expect_error(migrate(
     data = birds_data,
     method = "cmm",
@@ -66,8 +81,13 @@ test_that("zero wing area throws error in migrate", {
   )
 })
 
-birds[5, 7] <- 0
+#birds[5, 7] <- 0
 test_that("zero muscle mass throws error in migrate", {
+  
+  # Creating fresh copy of data
+  test_data <- birds
+  test_data[5, 7] <- 0
+  
   expect_error(migrate(
     data = birds_data,
     method = "cmm",
