@@ -70,6 +70,14 @@ minus fat mass (Pennycuick 2008).
     \label{fatmassgained}
 ```
 
+## Expected variables in datasets
+
+The package looks for columns named *id, name or species.name*,
+*bodymass or allupmass*, *wingspan, ws*, *wingarea*, *ordo, order*
+(which is a factored column with levels 1 or 2 passerines and
+non-passerines respectively) *fatmass, fat.mass, fat_mass* and lastly
+*muscle_mass*.
+
 ## Examples
 
 ### Examples 1: Garden Warbler and Lesser Whitethroat
@@ -103,8 +111,254 @@ distribution of these two species in kilometres for each region
 separately.
 
 ``` r
-library(FlyingR)
-#> Welcome to package FlyingR
+# ------------------------------------------------------------------------------
+# A generic function 
+# migration function each species at different regions.
+# Function returns a list (each species migrated by region)
+# ------------------------------------------------------------------------------
+
+region_migrate <- function(data) {
+ 
+  # we need dplyr for filter function
+  # we need FlyingR for migration
+  require(dplyr)
+  require(FlyingR)
+  
+  # number of regions in dataset
+  regions <- unique(data$Region)
+    
+  # regions data in a list
+  region_data <- list()
+  
+  
+  for (i in 1:length(regions)) {
+    
+    # filter data by region
+    filter_data_region <-data %>% filter(Region == regions[i])
+    
+    # migrate filter data
+    user_settings <- list(ipf = 0.9)
+    results <- migrate(data = filter_data_region[, 3:9], method = "csw",
+                          speed_control = 0, 
+                          settings = user_settings,
+                          min_energy_protein = 0.05)
+    
+    region_data[[i]] <- cbind(filter_data_region, "range" = as.vector(results$range))
+    
+  }
+  
+  # return region data as a list
+  return(region_data)
+  
+}
+```
+
+``` r
+# ------------------------------------------------------------------------------
+# migrating sylvia borin
+# ------------------------------------------------------------------------------
+data("garden_wablers")
+wablers_migration <- region_migrate(data = garden_wablers)
+#> Loading required package: dplyr
+#> 
+#> Attaching package: 'dplyr'
+#> The following object is masked from 'package:testthat':
+#> 
+#>     matches
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+```
+
+``` r
+# ------------------------------------------------------------------------------
+# migrating Lesser Whitethroats (sylvia curruca)
+# ------------------------------------------------------------------------------
+data("lesser_whitethroats")
+whitethroats_migration <- region_migrate(data = lesser_whitethroats)
+```
+
+``` r
+# ------------------------------------------------------------------------------
+# migration list to one dataframe for Garden Wablers(sylvia_borin) 
+# ------------------------------------------------------------------------------
+wablers_results <- data.frame()
+
+for (i in 1:length(wablers_migration)) {
+  
+  wablers_results <- rbind(wablers_results, wablers_migration[[i]])
+}
+
+cat("number of rows sylvia borin:", nrow(wablers_results), sep = " ")
+#> number of rows sylvia borin: 119
+```
+
+``` r
+# ------------------------------------------------------------------------------
+# migration list to one dataframe for Lesser Whitethroats
+# ------------------------------------------------------------------------------
+
+whitethroats_results <- data.frame()
+
+for (i in 1:length(whitethroats_migration)) {
+  
+  whitethroats_results <- rbind(whitethroats_results, whitethroats_migration[[i]])
+}
+
+cat("number of rows in sylvia curruca:", nrow(whitethroats_results), sep = " ")
+#> number of rows in sylvia curruca: 84
+```
+
+``` r
+# ------------------------------------------------------------------------------
+# order of region
+# rename the regions for clarity
+# ------------------------------------------------------------------------------
+
+wablers_results$Region <- factor(wablers_results$Region,
+                               levels = c("S Balt", "N Med",
+                                          "E Med"), ordered = TRUE)
+
+levels(wablers_results$Region) <- c("S Baltic", "N Medit", 
+                           "E Medit")
+
+whitethroats_results$Region <- factor(whitethroats_results$Region,
+                                 levels = c("S Balt", "N Med",
+                                          "E Med", "NE Afr"), ordered = TRUE)
+
+levels(whitethroats_results$Region) <- c("S Baltic", "N Medit", 
+                           "E Medit", "NE Africa")
+```
+
+``` r
+# ------------------------------------------------------------------------------
+# both plots in one
+# combine the data sets first
+# ------------------------------------------------------------------------------
+
+results <- rbind(wablers_results, whitethroats_results, deparse.level = 0)
+
+# make sure it sums up
+nrow(wablers_results) + nrow(whitethroats_results) == nrow(results)
+#> [1] TRUE
+```
+
+``` r
+# ------------------------------------------------------------------------------
+# new combined plot
+# ------------------------------------------------------------------------------
+require(ggplot2)
+#> Loading required package: ggplot2
+results_combined_plot <- ggplot(results, aes(x = Region, y = range, 
+                                             colour = species)) +
+  geom_boxplot() +
+  #ggtitle("Sylvia curruca flight range by region") +
+  theme_bw()+
+  labs(y = "Range")+
+  ylim(500, 4500)
+
+results_combined_plot
+```
+
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+
+### Examples 2: Curlew Sandpiper
+
+The Curlew Sandpiper is a small wader, breeding in Arctic Siberia and
+wintering in Africa (Cramp and Simmons 1983). A sample of 12 individuals
+was observed over five days in laboratory conditions (in total a sample
+of 60 observations) at the University of Gdańsk. Initially, all these
+individuals had no subcutaneous fat depots (fat score equal to 0)
+(Meissner 2009). Birds were fed ad-libitum with mealworm larvae Tenebrio
+molitor. To determine the maximum body mass gain sandpipers were weighed
+every day in the morning. The data set consists of body mass, fat mass,
+constant wingspan (0.44 m) and wing area (0.018 m2). Body mass and fat
+mass are converted from grams to kilograms. On day one, the fat fraction
+is assumed to be 0.05 according to the observations of closely related
+species - the Red Knot Calidris canutus (Piersma, Bruinzeel, Drent,
+Kersten, Van der Meer, and Wiersma 1996). On day 2 the fat fraction
+increases on average to 0.23, day 3 – 0.34, day 4 – 0.40 and day 5 –
+0.44. Data collected in subsequent days were used to calculate the
+potential flight range of the studied individuals each day (Figure 4).
+On these data, the constant muscle mass migration simulation is used.
+The results return a named vector, if the bird identifier is not unique,
+the id suffix is added after an underscore. The results also return the
+speed at start and end of migration. All these estimates may be used in
+the analyses of inter-individual variation of potential flight range
+with increasing fat fraction in migrating birds.
+
+``` r
+data("curlew_sandpiper")
+```
+
+``` r
+# needed data for migration columns 2:9
+
+curlew_range <-
+    migrate(
+        data = curlew_sandpiper[, 2:9],
+        method = "cmm",
+        speed_control = 0,
+        min_energy_protein = 0.05,
+        settings = list(ipf = 0.9)
+    )
+
+
+# Addin computed range to the dataset
+curlew_results <- curlew_sandpiper[, 1:2]
+curlew_results$range <- as.vector(curlew_range$range)
+```
+
+## Visualize the results
+
+``` r
+# migrate curlew sandpiper
+require(ggplot2)
+require(dplyr)
+
+curlew_plot <- ggplot(data = curlew_results)+
+  geom_point(aes(x = day, y = range, color = name))+
+  theme_bw(base_size = 10)+
+  ggtitle("")+
+  scale_color_discrete(name = "Individual")+
+    xlab("Day")+
+    ylab("Range (km)")
+
+curlew_plot
+```
+
+### Examples 3: Various bird species data migration
+
+Data *birds* is a preset birds data, extracted from Flight
+Pennycuick(2008). Fat mass percentage generated randomly where zero. In
+addition, by default muscle mass was derived as 0.17 fraction of the
+all-up mass.
+
+## The data
+
+``` r
+head(birds)
+#>        Scientific.name Empty.mass Wing.span Fat.mass Order Wing.area
+#> 1          Anser anser    3.77000     1.600  0.84641     2   0.33100
+#> 2 Hydrobates pelagicus    0.02580     0.355  0.00591     2   0.01610
+#> 3  Pachyptila desolata    0.15500     0.637  0.03886     2   0.04710
+#> 4      Regulus regulus    0.00542     0.156  0.00112     1   0.00525
+#> 5     Calidris canutus    0.12700     0.538  0.03500     2   0.03320
+#> 6    Aegypius monachus    9.90000     3.040  2.02565     2   1.40000
+#>   Muscle.mass
+#> 1   0.6409000
+#> 2   0.0043860
+#> 3   0.0263500
+#> 4   0.0009214
+#> 5   0.0215900
+#> 6   1.6829999
+```
+
+``` r
+require(FlyingR)
 ## basic example code
 
 ## birds comes with the package
@@ -170,79 +424,6 @@ birds_range$range
 #>                6994.8
 ```
 
-## The data
-
-*birds* definitions pulled from Flight program in-built datasets and fat
-mass randomly generated where initially zero. In addition, by default
-muscle mass was derived as 0.17 fraction of the all-up mass. User’s data
-should have columns named appropriately. The package looks for columns
-named *id, name or species.name*, *bodymass or allupmass*, *wingspan,
-ws*, *wingarea*, *ordo, order* (which is a factored column with levels 1
-or 2 passerines and non-passerines respectively) *fatmass, fat.mass,
-fat_mass* and lastly *muscle_mass*.
-
-``` r
-birds
-#>          Scientific.name Empty.mass Wing.span Fat.mass Order Wing.area
-#> 1            Anser anser    3.77000     1.600  0.84641     2   0.33100
-#> 2   Hydrobates pelagicus    0.02580     0.355  0.00591     2   0.01610
-#> 3    Pachyptila desolata    0.15500     0.637  0.03886     2   0.04710
-#> 4        Regulus regulus    0.00542     0.156  0.00112     1   0.00525
-#> 5       Calidris canutus    0.12700     0.538  0.03500     2   0.03320
-#> 6      Aegypius monachus    9.90000     3.040  2.02565     2   1.40000
-#> 7       Limosa lapponica    0.36700     0.748  0.20112     2   0.05680
-#> 8            Anas crecca    0.23500     0.582  0.06562     2   0.04580
-#> 9        Hirundo rustica    0.01900     0.318  0.00570     1   0.01320
-#> 10         Cygnus cygnus   12.50000     2.560  2.50000     2   0.75600
-#> 11          Sylvia borin    0.02200     0.240  0.00660     1   0.01100
-#> 12     Luscinia luscinia    0.02700     0.263  0.00675     1   0.01300
-#> 13       Corvus monedula    0.18100     0.600  0.03620     1   0.06180
-#> 14         Anas penelope    0.77000     0.822  0.28607     2   0.08290
-#> 15   Fregata magnificens    1.67000     2.140  0.55799     2   0.37200
-#> 16      Larus ridibundus    0.28500     0.967  0.07881     2   0.09920
-#> 17      Diomedea exulans    9.57000     3.060  2.12836     2   0.64400
-#> 18   Phalacrocorax carbo    2.56000     1.350  0.50768     2   0.22400
-#> 19       Gyps rueppellii    7.30000     2.500  2.52588     2   0.89200
-#> 20   Torgos tracheliotus    6.60000     2.640  2.01454     2   1.03000
-#> 21         Ardeotis kori   11.90000     2.470  3.45889     2   1.06000
-#> 22      Sturnus vulgaris    0.08190     0.384  0.02973     1   0.02530
-#> 23     Fringilla coelebs    0.02300     0.264  0.00690     1   0.01310
-#> 24      Carduelis spinus    0.01120     0.212  0.00336     1   0.00785
-#> 25     Turdus philomelos    0.07160     0.361  0.02148     1   0.02250
-#> 26 Calidris tenuirostris    0.23300     0.587  0.08970     2   0.03960
-#> 27     Buteo swainsoni M    0.77500     1.250  0.22248     2   0.21000
-#> 28     Buteo swainsoni F    1.06000     1.330  0.37117     2   0.24000
-#>    Muscle.mass
-#> 1    0.6409000
-#> 2    0.0043860
-#> 3    0.0263500
-#> 4    0.0009214
-#> 5    0.0215900
-#> 6    1.6829999
-#> 7    0.0623900
-#> 8    0.0399500
-#> 9    0.0032300
-#> 10   2.1250000
-#> 11   0.0037400
-#> 12   0.0045900
-#> 13   0.0307700
-#> 14   0.1309000
-#> 15   0.2839000
-#> 16   0.0484500
-#> 17   1.6268999
-#> 18   0.4352000
-#> 19   1.2410000
-#> 20   1.1220000
-#> 21   2.0229999
-#> 22   0.0139230
-#> 23   0.0039100
-#> 24   0.0019040
-#> 25   0.0121720
-#> 26   0.0396100
-#> 27   0.1317500
-#> 28   0.1802000
-```
-
 ## References
 
 Lindström Å, Piersma T (1993). “Mass changes in migrating birds: the
@@ -285,3 +466,17 @@ lesser whitethroat.” Annales Zoologici Fennici, 52(1–2), 115–127.
 Bruderer B, Boldt A (2001). “Flight characteristics of birds: I. Radar
 measurements of speeds.” Ibis, 143(2), 178–204.
 <doi:10.1111/j.1474-919X.2001.tb04475.x>.
+
+Cramp S, Simmons K (1983). HANDBOOK OF THE BIRDS OF EUROPE, THE MIDDLE
+EAST AND NORTH AFRICA. THE BIRDS OF THE WESTERN PALEARCTIC: 3. WADERS TO
+GULLS. Oxford University Press.
+
+Meissner W (2009). “A classification scheme for scoring subcutaneous fat
+depots of shore- birds.” Journal of Field Ornithology, 80(3), 289–296.
+<doi:10.1111/j.1557-9263.2009>. 00232.x.
+
+Piersma T, Bruinzeel L, Drent R, Kersten M, Van der Meer J, Wiersma P
+(1996). “Vari- ability in basal metabolic rate of a long-distance
+migrant shorebird (red knot, Calidris canutus) reflects shifts in organ
+sizes.” Physiological Zoology, 69(1), 191–217. doi:
+10.1086/physzool.69.1.30164207
