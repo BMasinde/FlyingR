@@ -1,10 +1,10 @@
 ## Test environments
-* local macOS 12.4, R 4.2.0
-* macOS 11.6.6 (on github), R  4.2.0 
-* ubuntu (devel) 20.04.4 (on github), R 4.2.0
-* ubuntu (release) 20.04.4 (on github), R 4.2.0
-* Windows Server 2022 10.0.20348 (on github), R 4.2.0
-* Windows Server 2012 R2 x64 (build 9600) (on AppVeyor), R 4.2.0
+* local macOS 26.3, R 4.4.1
+* macOS 15.7.4 (on github), R 4.5.2
+* ubuntu (devel) 24.04.3 (on github), R Under Development
+* ubuntu (release) 24.04.3 (on github), R 4.5.2
+* Ubuntu (oldrel-1) 24.04.3 (on github), R 4.4.3
+* Windows Server 2022 10.0.20348 (on github), R 4.5.2
 
 ## R CMD check results
 
@@ -16,41 +16,29 @@ unable to verify current time
 
 ## rhub check
 
-* Windows Server 2022, R-devel
-
-0 errors | 0 warnings 
-
-2 notes
-
-- Namespaces in Imports field not imported from:
-  'kableExtra' 'knitr' 'rmarkdown'
-  All declared Imports should be used
-  
-- Found the following files/directories:
-  'lastMiKTeXException'
- 
-* Ubuntu Linux 20.04.1 LTS, R-release, GCC
-
-0 errors | 0 warnings
-
-1 Note
-  
-- Namespaces in Imports field not imported from:
-  ‘kableExtra’ ‘knitr’ ‘rmarkdown’
-  All declared Imports should be used.
-  
-* Fedora Linux, R-devel, clang, gfortran
-
-0 errors | 0 warnings 
-
-1 Note 
-  
-- Namespaces in Imports field not imported from:
-  ‘kableExtra’ ‘knitr’ ‘rmarkdown’
-  All declared Imports should be used.
-
-* Debian Linux, R-devel, GCC ASAN/UBSAN
+* Windows Server 2025 10.0.26100, R-devel
 
 0 errors | 0 warnings | 0 notes
 
-# Update documentation update.
+ 
+* Ubuntu Linux 24.04.3, R-devel
+
+0 errors | 0 warnings | 0 notes
+
+  
+* macOS 15.7.4, R-devel
+
+0 errors | 0 warnings | 0 notes
+
+
+## Aditional Notes.
+This is a version update. The following changes were made:
+* Added more examples in documentaion.
+* Added two more real-world datasets collected by ornithologists from 
+University of Gdańsk
+* Corrected typos in test cases.
+* Improvements: Zero fat mass in dataset no longer throws an error; throws a 
+warning instead and assigns flight range of zero.
+
+
+
