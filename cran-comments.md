@@ -12,10 +12,7 @@
 
 1 note
 
-Namespaces in Imports field not imported from:
-    'kableExtra' 'knitr' 'rmarkdown'
-    All declared Imports should be used.
-
+unable to verify current time
 
 ## rhub check
 
