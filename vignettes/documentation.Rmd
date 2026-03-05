@@ -101,5 +101,248 @@ results$endMinSpeed
 
 \newpage 
 
+# Examples with real-world data
+## Examples 1: Garden Warbler and Lesser Whitethroat
+
+These two passerine species are trans-Saharan migrants. Lesser whitethroats winter 
+in the Sahel zone of eastern and north-eastern Africa \citep{pearson1992migration}, 
+while garden warblers spend winter further, i.e., in southern Africa 
+\citep[][]{shirihai2001sylvia}. Data on the Garden Warbler and Lesser Whitethroat 
+are obtained from various bird ringing stations situated along their SE European 
+flyway leading from Europe towards African winter quarters. This is split into 
+four regions: Southern Baltic, Eastern Mediterranean, Northern Mediterranean and
+North Eastern Africa.These data include the 1-st year individuals (immatures): 
+1,044 garden warblers and 848 lesser whitethroats, and span the years 2000 to 2006.
+The sample contains the following variables: station code, ring number, age, 
+body mass, fat score, wing and tail measurements. The fat score is used to derive 
+fat fraction and subsequently fat mass by the procedure described by 
+\citet{ozarowska2015contrasting}. Body mass and fat mass are converted from grams 
+to kilograms. The wing measurements do not equal the required wingspan as these are
+measured differently (i.e., the wingspan is measured from tip to tip of wings, 
+particularly the primary feathers, in metres). Other missing variables are the
+wing area and muscle mass.\citet{bruderer2001flight} provide estimates for the 
+wingspan and wing area for several species. For the Garden Warbler, the wingspan 
+and wing area are 0.223 (m) and 0.0093  ($m^2$), respectively. While for the 
+Lesser Whitethroat, these are 0.185 (m) and 0.0073 ($m^2$). Muscle mass estimates 
+are obtained by using the muscle fraction of 0.17 as recommended by \citet{penny08}. 
+Figure \ref{results_range} presents the flight range distribution of these two species 
+in kilometres for each region separately. 
+
+```{r}
+# ------------------------------------------------------------------------------
+# A generic function 
+# migration function each species at different regions.
+# Function returns a list (each species migrated by region)
+# ------------------------------------------------------------------------------
+
+region_migrate <- function(data) {
+ 
+  # we need dplyr for filter function
+  # we need FlyingR for migration
+  require(dplyr)
+  require(FlyingR)
+  
+  # number of regions in dataset
+  regions <- unique(data$Region)
+    
+  # regions data in a list
+  region_data <- list()
+  
+  
+  for (i in 1:length(regions)) {
+    
+    # filter data by region
+    filter_data_region <-data %>% filter(Region == regions[i])
+    
+    # migrate filter data
+    user_settings <- list(ipf = 0.9)
+    results <- FlyingR::migrate(data = filter_data_region[, 3:9], method = "csw",
+                          speed_control = 0, 
+                          settings = user_settings,
+                          min_energy_protein = 0.05)
+    
+    region_data[[i]] <- cbind(filter_data_region, "range" = as.vector(results$range))
+    
+  }
+  
+  # return region data as a list
+  return(region_data)
+  
+}
+
+
+```
+
+
+
+```{r}
+# ------------------------------------------------------------------------------
+# migrating sylvia borin
+# ------------------------------------------------------------------------------
+data("garden_wablers")
+wablers_migration <- region_migrate(data = garden_wablers)
+
+```
+
+
+```{r}
+# ------------------------------------------------------------------------------
+# migrating Lesser Whitethroats (sylvia curruca)
+# ------------------------------------------------------------------------------
+data("lesser_whitethroats")
+whitethroats_migration <- region_migrate(data = lesser_whitethroats)
+
+```
+
+```{r}
+# ------------------------------------------------------------------------------
+# migration list to one dataframe for Garden Wablers(sylvia_borin) 
+# ------------------------------------------------------------------------------
+wablers_results <- data.frame()
+
+for (i in 1:length(wablers_migration)) {
+  
+  wablers_results <- rbind(wablers_results, wablers_migration[[i]])
+}
+
+cat("number of rows sylvia borin:", nrow(wablers_results), sep = " ")
+```
+
+```{r}
+# ------------------------------------------------------------------------------
+# migration list to one dataframe for Lesser Whitethroats
+# ------------------------------------------------------------------------------
+
+whitethroats_results <- data.frame()
+
+for (i in 1:length(whitethroats_migration)) {
+  
+  whitethroats_results <- rbind(whitethroats_results, whitethroats_migration[[i]])
+}
+
+cat("number of rows in sylvia curruca:", nrow(whitethroats_results), sep = " ")
+```
+
+```{r}
+# ------------------------------------------------------------------------------
+# order of region
+# rename the regions for clarity
+# ------------------------------------------------------------------------------
+
+wablers_results$Region <- factor(wablers_results$Region,
+                               levels = c("S Balt", "N Med",
+                                          "E Med"), ordered = TRUE)
+
+levels(wablers_results$Region) <- c("S Baltic", "N Medit", 
+                           "E Medit")
+
+whitethroats_results$Region <- factor(whitethroats_results$Region,
+                                 levels = c("S Balt", "N Med",
+                                          "E Med", "NE Afr"), ordered = TRUE)
+
+levels(whitethroats_results$Region) <- c("S Baltic", "N Medit", 
+                           "E Medit", "NE Africa")
+```
+
+```{r}
+# ------------------------------------------------------------------------------
+# both plots in one
+# combine the data sets first
+# ------------------------------------------------------------------------------
+
+results <- rbind(wablers_results, whitethroats_results, deparse.level = 0)
+
+# make sure it sums up
+nrow(wablers_results) + nrow(whitethroats_results) == nrow(results)
+
+```
+
+```{r}
+# ------------------------------------------------------------------------------
+# new combined plot
+# ------------------------------------------------------------------------------
+require(ggplot2)
+results_combined_plot <- ggplot(results, aes(x = Region, y = range, 
+                                             colour = species)) +
+  geom_boxplot() +
+  #ggtitle("Sylvia curruca flight range by region") +
+  theme_bw()+
+  labs(y = "Range")+
+  ylim(500, 4500)
+
+results_combined_plot
+```
+
+Based on these results the two species clearly differ in their potential flight 
+ranges and therefore show species-specific migration strategy, when travelling 
+along the same SE flyway, as was described in the original paper based on Flight 
+\citep{ozarowska2015contrasting}.
+
+
+## Examples 2: Curlew Sandpiper
+These two passerine species are trans-Saharan migrants. Lesser whitethroats 
+winter in the Sahel zone of eastern and north-eastern Africa 
+\citep{pearson1992migration}, while garden warblers spend winter further, i.e., 
+in southern Africa \citep[][]{shirihai2001sylvia}. Data on the Garden Warbler 
+and Lesser Whitethroat are obtained from various bird ringing stations situated 
+along their SE European flyway leading from Europe towards African winter quarters. 
+This is split into four regions: Southern Baltic, Eastern Mediterranean,
+Northern Mediterranean and North Eastern Africa. These data include the 1-st year 
+individuals (immatures): 1,044 garden warblers and 848 lesser whitethroats, and 
+span the years 2000 to 2006. The sample contains the following variables: station 
+code, ring number,age, body mass, fat score, wing and tail measurements. The fat score 
+is used to derive fat fraction and subsequently fat mass by the procedure described 
+by \citet{ozarowska2015contrasting}. Body mass and fat mass are converted
+from grams to kilograms. The wing measurements do not equal the required wingspan 
+as these are measured differently (i.e., the wingspan is measured from tip to tip 
+of wings, particularly the primary feathers, in metres). Other missing variables 
+are the wing area and muscle mass. \citet{bruderer2001flight} provide estimates 
+for the wingspan and wing area for several species. For the Garden Warbler, the 
+wingspan and wing area are 0.223 (m) and 0.0093 ($m^2$), respectively. While for 
+the Lesser Whitethroat, these are 0.185 (m) and 0.0073 ($m^2$). Muscle mass estimates 
+are obtained by using the muscle fraction of 0.17 as recommended by \citet{penny08}. 
+Figure below presents the flight range distribution of these two 
+species in Kilometres for each region separately.
+
+```{r}
+data("curlew_sandpiper")
+```
+
+
+```{r}
+# needed data for migration columns 2:9
+
+curlew_range <-
+    FlyingR::migrate(
+        data = curlew_sandpiper[, 2:9],
+        method = "cmm",
+        speed_control = 0,
+        min_energy_protein = 0.05,
+        settings = list(ipf = 0.9)
+    )
+
+
+# Addin computed range to the dataset
+curlew_results <- curlew_sandpiper[, 1:2]
+curlew_results$range <- as.vector(curlew_range$range)
+
+```
+
+## Visualize the results
+```{r, message=FALSE}
+# migrate curlew sandpiper
+require(ggplot2)
+require(dplyr)
+
+curlew_plot <- ggplot(data = curlew_results)+
+  geom_point(aes(x = day, y = range, color = name))+
+  theme_bw(base_size = 10)+
+  ggtitle("")+
+  scale_color_discrete(name = "Individual")+
+    xlab("Day")+
+    ylab("Range (km)")
+
+curlew_plot
+```
 
 # References
