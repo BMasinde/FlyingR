@@ -265,6 +265,11 @@ results_combined_plot
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
 
+Based on these results the two species clearly differ in their potential
+flight ranges and therefore show species-specific migration strategy,
+when travelling along the same SE flyway, as was described in the
+original paper based on Flight (Ożarowska 2015).
+
 ### Examples 2: Curlew Sandpiper
 
 The Curlew Sandpiper is a small wader, breeding in Arctic Siberia and

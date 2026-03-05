@@ -104,6 +104,8 @@ estimates are obtained by using the muscle fraction of 0.17 as recommended by
  Pennycuick (2008). Figure \ref{results_range} presents the flight range distribution 
 of these two species in kilometres for each region separately. 
 
+
+
 ```{r}
 # ------------------------------------------------------------------------------
 # A generic function 
@@ -249,6 +251,10 @@ results_combined_plot <- ggplot(results, aes(x = Region, y = range,
 results_combined_plot
 ```
 
+Based on these results the two species clearly differ in their potential flight 
+ranges and therefore show species-specific migration strategy, when travelling 
+along the same SE flyway, as was described in the original paper based on Flight 
+(Ożarowska 2015).
 
 ### Examples 2: Curlew Sandpiper
 The Curlew Sandpiper is a small wader, breeding in Arctic Siberia and wintering in Africa
