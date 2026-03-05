@@ -330,6 +330,8 @@ curlew_plot <- ggplot(data = curlew_results)+
 curlew_plot
 ```
 
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+
 ### Examples 3: Various bird species data migration
 
 Data *birds* is a preset birds data, extracted from Flight

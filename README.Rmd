@@ -274,7 +274,7 @@ data("curlew_sandpiper")
 ```
 
 
-```{r, eval=FALSE}
+```{r}
 # needed data for migration columns 2:9
 
 curlew_range <-
@@ -297,7 +297,7 @@ curlew_results$range <- as.vector(curlew_range$range)
 
 
 ## Visualize the results
-```{r, eval=FALSE}
+```{r, message=FALSE}
 # migrate curlew sandpiper
 require(ggplot2)
 require(dplyr)
