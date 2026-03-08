@@ -33,7 +33,7 @@ unable to verify current time
 
 ## Aditional Notes.
 This is a version update. The following changes were made:
-* Added more examples in documentaion.
+* Added more examples in documentation.
 * Added two more real-world datasets collected by ornithologists from 
 University of Gdańsk
 * Corrected typos in test cases.
