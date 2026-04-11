@@ -17,6 +17,15 @@ Flight program provided by Pennycuick.
 
 ## Installation
 
+Install from CRAN with:
+
+``` r
+# use install.packages() function
+# or the graphical user interface in RStudio
+
+install.packages("FlyingR)
+```
+
 Install the development version from [GitHub](https://github.com/) with:
 
 ``` r
